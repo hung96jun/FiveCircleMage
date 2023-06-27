@@ -23,6 +23,7 @@ public class FiveCircleMage : ModuleRules
             "Niagara",
             "UMG",
             "NavigationSystem",
+            "EnhancedInput",
         });
 
         PublicIncludePaths.Add(ModuleDirectory);

@@ -47,8 +47,9 @@ AC_Mage::AC_Mage()
         CameraArm->SetupAttachment(RootComponent);
         Camera->SetupAttachment(CameraArm);
 
-        CameraArm->TargetArmLength = 450.0f;
-        CameraArm->SocketOffset.Z = 270.0f;
+        CameraArm->TargetArmLength = 1000.0f;
+        CameraArm->SocketOffset.X = 400.0f;
+        CameraArm->SocketOffset.Z = 1000.0f;
         Camera->AddRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
         CameraArm->bUsePawnControlRotation = true;
         CameraArm->bInheritPitch = true;
@@ -63,6 +64,7 @@ void AC_Mage::BeginPlay()
 {
 	Super::BeginPlay();
 
+    //UnitStatus = FUnitStatus(10.0f, 500.0f);
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -108,12 +110,16 @@ void AC_Mage::OnAssembleElement()
 #pragma region Bind Axis Function
 void AC_Mage::ForwardMove(const FInputActionInstance& Instance)
 {
-    CLog::Print(L"ForwardMove");
+    FVector value = Instance.GetValue().Get<FVector>();
+
+    AddMovementInput(FORWARD * UnitStatus.GetCurMoveSpeed(), value.X);
 }
 
 void AC_Mage::RightMove(const FInputActionInstance& Instance)
 {
-    CLog::Print(L"RightMove");
+    FVector value = Instance.GetValue().Get<FVector>();
+
+    AddMovementInput(RIGHT * UnitStatus.GetCurMoveSpeed(), value.X);
 }
 #pragma endregion 
 

@@ -13,6 +13,16 @@ class USpringArmComponent;
 
 struct FInputActionInstance;
 
+USTRUCT(BlueprintType)
+struct FUnitDirection
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	FVector ForwardVector;
+	FVector RightVector;
+};
+
 UCLASS()
 class FIVECIRCLEMAGE_API AC_Mage : public AC_Unit
 {
@@ -27,6 +37,13 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, UInputAction*> InputActions;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		FUnitDirection UnitDirection;
+
+private:
+	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);
+	const FVector RIGHT = FVector(0.0f, 1.0f, 0.0f);
 
 public:
 	AC_Mage();
@@ -56,4 +73,5 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 private:
 	void AddInputAction(FString Key, FString Path);
+
 };

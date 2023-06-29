@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Global.h"
 #include "Enums/C_UnitType.h"
+#include "GenericTeamAgentInterface.h"
 #include "C_Unit.generated.h"
 
 USTRUCT(BlueprintType)
@@ -37,16 +38,20 @@ public:
 
 	const bool IsDeath() { return CurHP < 0.0f; }
 
-private:
+protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float OriginHP;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float OriginMoveSpeed;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float CurHP;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float CurMoveSpeed;
 };
 
 UCLASS()
-class FIVECIRCLEMAGE_API AC_Unit : public ACharacter
+class FIVECIRCLEMAGE_API AC_Unit : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -54,7 +59,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "State")
 		EUnitForceType UnitType;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "State")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "State")
 		FUnitStatus UnitStatus;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "State")
@@ -73,4 +78,13 @@ public:
 
 	virtual void GetDmg(const float Dmg, const EUnitState Type);
 	virtual void Death() {}
+
+	virtual FGenericTeamId GetGenericTeamId() const final
+	{
+		return GenericTeamID;
+	}
+
+protected:
+	FGenericTeamId GenericTeamID;
+
 };

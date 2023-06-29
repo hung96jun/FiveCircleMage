@@ -9,7 +9,7 @@ AC_Unit::AC_Unit()
 void AC_Unit::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void AC_Unit::Tick(float DeltaTime)

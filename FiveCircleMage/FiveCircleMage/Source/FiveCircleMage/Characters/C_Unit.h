@@ -3,9 +3,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Global.h"
+#include "Components/CapsuleComponent.h"
 #include "Enums/C_UnitType.h"
 #include "GenericTeamAgentInterface.h"
 #include "C_Unit.generated.h"
+
+
+class UCapsuleComponent;
 
 USTRUCT(BlueprintType)
 struct FUnitStatus

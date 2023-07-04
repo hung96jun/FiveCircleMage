@@ -2,7 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Characters/C_Unit.h"
+#include <queue>
+#include "Enums/C_CastingElement.h"
+
 #include "C_Mage.generated.h"
+
+using namespace std;
 
 /**
  * 
@@ -25,6 +30,138 @@ public:
 	FVector RightVector;
 };
 
+//-------------------------------[struct FCastingStack]-------------------------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct FCastingStack
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	///////////////////////////////////////////////////////////
+	// Code: void BeginCasting()
+	// Desc: Begin to cast element and return able to insert
+	///////////////////////////////////////////////////////////
+	bool BeginCasting(ECastingElement Element)
+	{
+		InputedElement = Element;
+		
+		if (CheckInserting() == false)
+		{
+			BreakCasting();
+			return false;
+		}
+
+		return true;
+	}
+
+	///////////////////////////////////////////////////////////
+	// Code: void EndCasting()
+	// Desc: End casting
+	///////////////////////////////////////////////////////////
+	void EndCasting()
+	{
+		ClearCastingStack();
+	}
+
+	///////////////////////////////////////////////////////////
+	// Code: void GetUnsortedCastingStack(OUT vector<ECastingElement>* UICasctingStack)
+	// Desc: Substitute stacked element values to UICasingStack
+	///////////////////////////////////////////////////////////
+	void GetUnsortedCastingStack(OUT vector<ECastingElement>* UICastingStack) { *UICastingStack = UnsortedCastingStack; }
+
+	const bool& OnCasting() { return bOnCasting; }
+
+private:
+	///////////////////////////////////////////////////////////
+	// Code: void BreakCasting()
+	// Desc: When get damage while casting, apeared breaking casting
+	///////////////////////////////////////////////////////////
+	void BreakCasting()
+	{
+
+		ClearCastingStack();
+	}
+
+	///////////////////////////////////////////////////////////
+	// Code: void InsertElement()
+	// Desc: Insert element data to stacks
+	///////////////////////////////////////////////////////////
+	void InsertElement()
+	{
+		int32 ElementNum = CAST(int32, InputedElement);
+
+		SortedCastingStack.push(ElementNum);
+		UnsortedCastingStack[StackIndex] = InputedElement;
+		CastingLog[ElementNum]++;
+
+		StackIndex++;
+	}
+
+	///////////////////////////////////////////////////////////
+	// Code: void ClearCastingStack()
+	// Desc: Clear Casting stacks
+	///////////////////////////////////////////////////////////
+	void ClearCastingStack()
+	{
+		int32 iter = SortedCastingStack.size();
+		
+		for (int i = 0; i < iter; i++)
+		{
+			SortedCastingStack.pop();
+			UnsortedCastingStack[i] = ECastingElement::None;
+		}
+
+		for (int i = 1; i < CastingLog.size(); i++)
+			CastingLog[i] = 0;
+
+		StackIndex = 0;
+	}
+
+	///////////////////////////////////////////////////////////
+	// Code: void CheckInserting()
+	// Desc: Check to be able inserting current inputed element
+	///////////////////////////////////////////////////////////
+	bool CheckInserting()
+	{
+		switch (InputedElement)
+		{
+		case ECastingElement::Fire:
+			if (CastingLog[CAST(int32, ECastingElement::Ice)] > 0)
+				return false;
+			break;
+
+		case ECastingElement::Ice:
+			if (CastingLog[CAST(int32, ECastingElement::Fire)] > 0)
+				return false;
+			break;
+
+		case ECastingElement::Light:
+			if (CastingLog[CAST(int32, ECastingElement::Dark)] > 0)
+				return false;
+			break;
+
+		case ECastingElement::Dark:
+			if (CastingLog[CAST(int32, ECastingElement::Ice)] > 0)
+				return false;
+			break;
+		}
+
+		return true;
+	}
+
+private:
+	priority_queue<int32> SortedCastingStack;
+	vector<ECastingElement> UnsortedCastingStack;
+	vector<int32> CastingLog;
+
+	ECastingElement InputedElement;
+	int32 StackIndex = 0;
+
+	bool bOnCasting = false;
+};
+
+
+//-------------------------------[class AC_Mage]-------------------------------------------------------------------------------------------------------------------
 UCLASS()
 class FIVECIRCLEMAGE_API AC_Mage : public AC_Unit
 {
@@ -76,7 +213,23 @@ protected:
 	void ForwardMove(const FInputActionInstance& Instance);
 	void RightMove(const FInputActionInstance& Instance);
 	///////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////
+	// Casting Magic Skill Func
+	///////////////////////////////////////////////////////////////////////////
+	void OnElementPanel(const FInputActionInstance& Instance);
+	void OpenElementPanel();
+	void CloseElementPanel();
+
+	void GetCastingStack(OUT vector<ECastingElement>* UICastingStack);
+	void Casting();
+	///////////////////////////////////////////////////////////////////////////
+
+
+
 private:
 	void AddInputAction(FString Key, FString Path);
 
+private:
+	FCastingStack CastingStack;
 };

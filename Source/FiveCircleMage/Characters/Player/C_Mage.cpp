@@ -29,6 +29,9 @@ AC_Mage::AC_Mage()
 
         path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_RightMove.IA_RightMove'";
         AddInputAction(L"RightMove", path);
+
+        path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_OnElementPanel.IA_OnElementPanel'";
+        AddInputAction(L"OnElementPanel", path);
     }
 
     {
@@ -96,6 +99,8 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     input->BindAction(InputActions.FindRef(L"Dash"), ETriggerEvent::Triggered, this, &AC_Mage::OnDash);
     input->BindAction(InputActions.FindRef(L"MagicCast"), ETriggerEvent::Triggered, this, &AC_Mage::OnMagicCast);
     input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
+
+    input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
 }
 
 #pragma region Bind Action Function
@@ -149,6 +154,61 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 }
 #pragma endregion 
 
+#pragma region Casting Magic Skill Func
+///////////////////////////////////////////////////////////
+// Code: void OnElementPanel()
+// Desc: Manage input key about element panel
+//////////////////////////////////////////////////////////
+void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
+{
+    bool bCheck = Instance.GetValue().Get<bool>();
+
+    if (bCheck == true)
+        OpenElementPanel();
+    else
+        CloseElementPanel();
+}
+
+///////////////////////////////////////////////////////////
+// Code: void OpenElementPanel()
+// Desc: Open element panel
+//////////////////////////////////////////////////////////
+void AC_Mage::OpenElementPanel()
+{
+    
+}
+
+///////////////////////////////////////////////////////////
+// Code: void CloseElementPanel()
+// Desc: Close element panel and insert element to stacks
+//////////////////////////////////////////////////////////
+void AC_Mage::CloseElementPanel()
+{
+    ECastingElement InputedElement;
+
+    // 여기에 선택된 원소 판별 필요
+
+    CastingStack.BeginCasting(InputedElement);
+}
+
+///////////////////////////////////////////////////////////
+// Code: void GetCastingStack()
+// Desc: Return casting stack data for aligning stack on UI
+//////////////////////////////////////////////////////////
+void AC_Mage::GetCastingStack(OUT vector<ECastingElement>* UICastingStack)
+{
+    CastingStack.GetUnsortedCastingStack(UICastingStack);
+}
+
+///////////////////////////////////////////////////////////
+// Code: void Casting()
+// Desc: Casting magic skill
+//////////////////////////////////////////////////////////
+void AC_Mage::Casting()
+{
+}
+#pragma endregion 
+
 void AC_Mage::AddInputAction(FString Key, FString Path)
 {
     UInputAction* inputAction = nullptr;
@@ -163,7 +223,6 @@ void AC_Mage::AddInputAction(FString Key, FString Path)
 
         InputActions.Add(pair);
     }
-
     else
     {
         FString error = L"Mage class : AddInputAction function - " + Key + L" InputAction Value is nullptr";

@@ -13,6 +13,8 @@ class USpringArmComponent;
 
 struct FInputActionInstance;
 
+class UC_DamageComponent;
+
 USTRUCT(BlueprintType)
 struct FUnitDirection
 {
@@ -40,6 +42,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		FUnitDirection UnitDirection;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UC_DamageComponent* DamageComponent;
 
 private:
 	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);

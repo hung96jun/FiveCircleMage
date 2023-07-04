@@ -5,6 +5,10 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 
+
+#include "Components/C_DamageComponent.h"
+
+
 AC_Mage::AC_Mage()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -58,6 +62,10 @@ AC_Mage::AC_Mage()
         CameraArm->bDoCollisionTest = true;
         bUseControllerRotationYaw = true;
     }
+
+    {
+        DamageComponent = CreateDefaultSubobject<UC_DamageComponent>("TestComp");
+    }
 }
 
 void AC_Mage::BeginPlay()
@@ -94,11 +102,29 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AC_Mage::OnDash()
 {
     CLog::Print(L"OnDash");
+
+    FDebuffInfo debuff;
+
+    debuff.DebuffType = EUnitState::Burn;
+    debuff.Value = 10.0f;
+    debuff.Interval = 0.5f;
+    debuff.Time = 3.0f;
+
+    DamageComponent->SetDebuff(this, debuff);
 }
 
 void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
+
+    FDebuffInfo debuff;
+
+    debuff.DebuffType = EUnitState::Slow;
+    debuff.Value = 10.0f;
+    debuff.Interval = 0.5f;
+    debuff.Time = 3.0f;
+
+    DamageComponent->SetDebuff(this, debuff);
 }
 
 void AC_Mage::OnAssembleElement()

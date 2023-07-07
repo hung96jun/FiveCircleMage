@@ -4,6 +4,7 @@
 #include "Characters/C_Unit.h"
 #include <queue>
 #include "Enums/C_CastingElement.h"
+#include "UI/C_ElementPanel.h"
 
 #include "C_Mage.generated.h"
 
@@ -50,6 +51,10 @@ public:
 			BreakCasting();
 			return false;
 		}
+		else
+		{
+			InsertElement();
+		}
 
 		return true;
 	}
@@ -78,7 +83,6 @@ private:
 	///////////////////////////////////////////////////////////
 	void BreakCasting()
 	{
-
 		ClearCastingStack();
 	}
 
@@ -115,6 +119,7 @@ private:
 			CastingLog[i] = 0;
 
 		StackIndex = 0;
+		InputedElement = ECastingElement::None;
 	}
 
 	///////////////////////////////////////////////////////////
@@ -183,6 +188,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		UC_DamageComponent* DamageComponent;
 
+	//------------------------------------------------------------------
+	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TSubclassOf<UUserWidget> WidgetClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UUserWidget* ElementPanel;*/
+	//------------------------------------------------------------------
+
 private:
 	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);
 	const FVector RIGHT = FVector(0.0f, 1.0f, 0.0f);
@@ -224,8 +237,6 @@ protected:
 	void GetCastingStack(OUT vector<ECastingElement>* UICastingStack);
 	void Casting();
 	///////////////////////////////////////////////////////////////////////////
-
-
 
 private:
 	void AddInputAction(FString Key, FString Path);

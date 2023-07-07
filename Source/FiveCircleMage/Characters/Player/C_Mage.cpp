@@ -5,9 +5,7 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 
-
 #include "Components/C_DamageComponent.h"
-
 
 AC_Mage::AC_Mage()
 {
@@ -69,6 +67,15 @@ AC_Mage::AC_Mage()
     {
         DamageComponent = CreateDefaultSubobject<UC_DamageComponent>("TestComp");
     }
+
+    /*ElementPanel = CreateWidget<UUserWidget>(this, WidgetClass);
+    if (ElementPanel != nullptr)
+    {
+        ElementPanel->AddToViewport();
+        ElementPanel->SetVisibility(ESlateVisibility::Hidden);
+    }*/
+
+    //ElementPanel = GetController()->GetElementPanel();
 }
 
 void AC_Mage::BeginPlay()
@@ -175,7 +182,7 @@ void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
 //////////////////////////////////////////////////////////
 void AC_Mage::OpenElementPanel()
 {
-    
+    //ElementPanel->ShowPanel();
 }
 
 ///////////////////////////////////////////////////////////
@@ -184,11 +191,19 @@ void AC_Mage::OpenElementPanel()
 //////////////////////////////////////////////////////////
 void AC_Mage::CloseElementPanel()
 {
-    ECastingElement InputedElement;
+    ECastingElement InputedElement = ECastingElement::None;
 
     // 여기에 선택된 원소 판별 필요
+    //ElementPanel->HidePanel(InputedElement);
 
-    CastingStack.BeginCasting(InputedElement);
+    if (CastingStack.BeginCasting(InputedElement))
+    {
+        // Casting animation execute
+    }
+    else
+    {
+        // Casting break animation execute
+    }
 }
 
 ///////////////////////////////////////////////////////////
@@ -206,6 +221,7 @@ void AC_Mage::GetCastingStack(OUT vector<ECastingElement>* UICastingStack)
 //////////////////////////////////////////////////////////
 void AC_Mage::Casting()
 {
+
 }
 #pragma endregion 
 

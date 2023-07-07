@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Characters/C_Unit.h"
+#include "Enums/C_Direction.h"
 #include "C_Mage.generated.h"
 
 /**
@@ -56,6 +57,12 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
+	EDirectionState GetDirectionState() { return DirectionState; }
+
+	bool GetIsDash() { return IsDash; }
+
+	void EndDash() { IsDash = false; }
+
 protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Bind Action Function
@@ -74,4 +81,8 @@ protected:
 private:
 	void AddInputAction(FString Key, FString Path);
 
+private:
+	EDirectionState DirectionState = EDirectionState::Forward;
+
+	bool IsDash = false;
 };

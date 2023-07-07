@@ -70,6 +70,8 @@ void AC_Mage::BeginPlay()
 void AC_Mage::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    DirectionState = EDirectionState::None;
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -93,7 +95,24 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 #pragma region Bind Action Function
 void AC_Mage::OnDash()
 {
+    if (IsDash) return;
+
     CLog::Print(L"OnDash");
+
+    FVector velocity = GetVelocity();
+    if (velocity == FVector::ZeroVector)
+        velocity = FVector(1.0f, 0, 0);
+
+    velocity.Z = 0.0f;
+    velocity.Normalize();
+
+    float power = 2000.0f;
+    velocity *= power;
+    velocity.Z = 100.0f;
+
+    LaunchCharacter(velocity, true, false);
+
+    IsDash = true;
 }
 
 void AC_Mage::OnMagicCast()
@@ -112,6 +131,15 @@ void AC_Mage::ForwardMove(const FInputActionInstance& Instance)
 {
     FVector value = Instance.GetValue().Get<FVector>();
 
+    if (value.X > 0)
+        DirectionState = EDirectionState::Forward;
+    else
+        DirectionState = EDirectionState::Back;
+
+    CLog::Print(static_cast<float>(value.X));
+
+    if (IsDash) return;
+
     AddMovementInput(FORWARD * UnitStatus.GetCurMoveSpeed(), value.X);
 }
 
@@ -119,9 +147,35 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 {
     FVector value = Instance.GetValue().Get<FVector>();
 
+    if (DirectionState == EDirectionState::Forward)
+    {
+        if (value.X > 0)
+            DirectionState = EDirectionState::Forward_Right;
+        else if (value.X < 0)
+            DirectionState = EDirectionState::Forward_Left;
+    }
+
+    else if (DirectionState == EDirectionState::Back)
+    {
+        if (value.X > 0)
+            DirectionState = EDirectionState::Back_Right;
+        else if (value.X < 0)
+            DirectionState = EDirectionState::Back_Left;
+    }
+
+    else if (DirectionState == EDirectionState::None)
+    {
+        if (value.X > 0)
+            DirectionState = EDirectionState::Right;
+        else if (value.X < 0)
+            DirectionState = EDirectionState::Left;
+    }
+
+    if (IsDash) return;
+
     AddMovementInput(RIGHT * UnitStatus.GetCurMoveSpeed(), value.X);
 }
-#pragma endregion 
+#pragma endregion  
 
 void AC_Mage::AddInputAction(FString Key, FString Path)
 {

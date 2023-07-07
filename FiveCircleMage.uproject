@@ -7,7 +7,13 @@
 		{
 			"Name": "FiveCircleMage",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"CoreUObject",
+				"AIModule",
+				"UMG",
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [

@@ -13,6 +13,8 @@ class USpringArmComponent;
 
 struct FInputActionInstance;
 
+class UC_DamageComponent;
+
 USTRUCT(BlueprintType)
 struct FUnitDirection
 {
@@ -41,6 +43,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		FUnitDirection UnitDirection;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UC_DamageComponent* DamageComponent;
+
 private:
 	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);
 	const FVector RIGHT = FVector(0.0f, 1.0f, 0.0f);
@@ -56,13 +61,16 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
+	float GetMaxHealth() { return float(100); }
+	float GetCurHealth() { return float(10); }
+
 protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Bind Action Function
 	///////////////////////////////////////////////////////////////////////////
 	void OnDash();
 	void OnMagicCast();
-	void OnAssembleElement();
+	void OnAssembleElement(const FInputActionInstance& Instance);
 	///////////////////////////////////////////////////////////////////////////
 
 	///////////////////////////////////////////////////////////////////////////

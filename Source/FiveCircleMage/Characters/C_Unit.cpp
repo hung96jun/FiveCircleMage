@@ -24,21 +24,6 @@ void AC_Unit::GetDmg(const float Dmg, const EUnitState Type)
 	
 }
 
-void AC_Unit::SetDebuffHandle(const int Index, FTimerHandle& Handle, const float Time)
-{
-	/*if (DebuffHandle[Index].IsActive() == true)
-		ClearDebuffTimerHandle(Index, true);
-
-	DebuffHandle[Index].SetDebuffTimerHandle(Handle);
-
-	FTimerHandle timerHandle;
-	FTimerDelegate timerDel;
-	timerDel.BindUFunction(this, "ClearDebuffTimerHandle", Index, false);
-
-	GetWorld()->GetTimerManager().SetTimer(timerHandle, timerDel, Time, false);
-	DebuffHandle[Index].SetActive(true);*/
-}
-
 void AC_Unit::SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info)
 {
 	ClearDebuffTimerHandle(Index);
@@ -64,4 +49,16 @@ void AC_Unit::ClearDebuffTimerHandle(const int Index)
 	DebuffHandle[Index].SetActive(false);
 
 	CLog::Print(FString::FromInt(Index) + L"_Debuff Clear", 3.0f, FColor::Yellow);
+}
+
+void AC_Unit::DecreaseMoveSpeed(float Percent)
+{
+	UnitStatus.DecreaseMoveSpeed(Percent);
+	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
+}
+
+void AC_Unit::ResetMoveSpeed()
+{
+	UnitStatus.ResetMoveSpeed();
+	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
 }

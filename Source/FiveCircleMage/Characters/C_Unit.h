@@ -89,9 +89,11 @@ public:
 	virtual void GetDmg(const float Dmg, const EUnitState Type);
 	virtual void Death() {}
 
-	void SetDebuffHandle(const int Index, FTimerHandle& Handle, const float Time);
 	void SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info);
 	const bool IsDebuffActive(const int Index) { return DebuffHandle[Index].IsActive(); }
+
+	void DecreaseMoveSpeed(float Percent);
+	void ResetMoveSpeed();
 
 	virtual FGenericTeamId GetGenericTeamId() const final
 	{
@@ -101,4 +103,6 @@ public:
 protected:
 	FGenericTeamId GenericTeamID;
 	FDebuffHandle DebuffHandle[CAST(int, EUnitState::Size)];
+
+	bool bAttacking = false;
 };

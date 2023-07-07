@@ -23,7 +23,6 @@ void UC_DamageComponent::GiveDmg(AActor* Target, const float Dmg, const EUnitSta
 	{
 		unitTarget->GetDmg(Dmg, Type);
 	}
-
 }
 
 void UC_DamageComponent::SetDebuff(AC_Unit* Target, const FDebuffInfo Information)
@@ -74,7 +73,7 @@ void UC_DamageComponent::GiveSlow(AC_Unit* Target, const FDebuffInfo Information
 	if (bDecrease == true)
 	{
 		//Target->SetUnitState(Information.DebuffType);
-		//Target->DecreaseMoveSpeed(Information.Value);
+		Target->DecreaseMoveSpeed(Information.Value);
 
 		CLog::Print(L"Decrease speed", 10.0f, FColor::Red);
 	}
@@ -82,7 +81,7 @@ void UC_DamageComponent::GiveSlow(AC_Unit* Target, const FDebuffInfo Information
 	else
 	{
 		//Target->SetUnitState(EUnitState::None);
-		//Target->ResetMoveSpeed();
+		Target->ResetMoveSpeed();
 
 		CLog::Print(L"Reset speed", 10.0f, FColor::Red);
 	}
@@ -93,7 +92,6 @@ void UC_DamageComponent::GiveStun(AC_Unit* Target, const FDebuffInfo Information
 	if (bStun == false)
 	{
 		CLog::Print(L"OnPossess", 10.0f, FColor::Red);
-		//Target->SetUnitState(Information.DebuffType);
 	}
 
 	else

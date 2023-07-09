@@ -5,14 +5,10 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 
-
-#include "Components/C_DamageComponent.h"
-
-
 AC_Mage::AC_Mage()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	FString path = L"";
+    PrimaryActorTick.bCanEverTick = true;
+    FString path = L"";
 
     {
         path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_AssemblingElement.IA_AssemblingElement'";
@@ -29,6 +25,9 @@ AC_Mage::AC_Mage()
 
         path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_RightMove.IA_RightMove'";
         AddInputAction(L"RightMove", path);
+
+        path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_OnElementPanel.IA_OnElementPanel'";
+        AddInputAction(L"OnElementPanel", path);
     }
 
     {
@@ -63,23 +62,38 @@ AC_Mage::AC_Mage()
         bUseControllerRotationYaw = true;
     }
 
+    /*ElementPanel = CreateWidget<UUserWidget>(this, WidgetClass);
+    if (ElementPanel != nullptr)
     {
-        DamageComponent = CreateDefaultSubobject<UC_DamageComponent>("TestComp");
-    }
+        ElementPanel->AddToViewport();
+        ElementPanel->SetVisibility(ESlateVisibility::Hidden);
+    }*/
+
+    //ElementPanel = GetController()->GetElementPanel();
 }
 
 void AC_Mage::BeginPlay()
 {
-	Super::BeginPlay();
-
-    //UnitStatus = FUnitStatus(10.0f, 500.0f);
+    Super::BeginPlay();
 
     GenericTeamID = 1;
 }
 
 void AC_Mage::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
+
+    DirectionState = EDirectionState::None;
+
+    {
+        FVector location = GetActorLocation();
+        FVector dest = MouseLocation;
+        dest.Z = location.Z;
+
+        FRotator rot = (dest - location).Rotation();
+        SetActorRotation(rot);
+        //LookDirection = dest - location;
+    }
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -98,38 +112,48 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     input->BindAction(InputActions.FindRef(L"Dash"), ETriggerEvent::Triggered, this, &AC_Mage::OnDash);
     input->BindAction(InputActions.FindRef(L"MagicCast"), ETriggerEvent::Triggered, this, &AC_Mage::OnMagicCast);
     input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
+
+    input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
 }
 
 #pragma region Bind Action Function
 void AC_Mage::OnDash()
 {
+    if (IsDash) return;
+
     CLog::Print(L"OnDash");
 
-    FDebuffInfo debuff;
+    FVector velocity = GetVelocity();
+    if (velocity == FVector::ZeroVector)
+        velocity = FVector(1.0f, 0, 0);
 
-    debuff.DebuffType = EUnitState::Burn;
-    debuff.Value = 10.0f;
-    debuff.Interval = 0.5f;
-    debuff.Time = 3.0f;
+    velocity.Z = 0.0f;
+    velocity.Normalize();
 
-    DamageComponent->SetDebuff(this, debuff);
+    float power = 2000.0f;
+    velocity *= power;
+    velocity.Z = 100.0f;
+
+    LaunchCharacter(velocity, true, false);
+
+    IsDash = true;
 }
 
 void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
 
-    FDebuffInfo debuff;
+    //FDebuffInfo debuff;
 
-    debuff.DebuffType = EUnitState::Slow;
-    debuff.Value = 0.5f;
-    debuff.Interval = 2.9f;
-    debuff.Time = 3.0f;
+    //debuff.DebuffType = EUnitState::Slow;
+    //debuff.Value = 10.0f;
+    //debuff.Interval = 0.5f;
+    //debuff.Time = 3.0f;
 
-    DamageComponent->SetDebuff(this, debuff);
+    //DamageComponent->SetDebuff(this, debuff);
 }
 
-void AC_Mage::OnAssembleElement(const FInputActionInstance& Instance)
+void AC_Mage::OnAssembleElement()
 {
     CLog::Print(L"OnAssembleElement");
 }
@@ -140,6 +164,15 @@ void AC_Mage::ForwardMove(const FInputActionInstance& Instance)
 {
     FVector value = Instance.GetValue().Get<FVector>();
 
+    if (value.X > 0)
+        DirectionState = EDirectionState::Forward;
+    else
+        DirectionState = EDirectionState::Back;
+
+    CLog::Print(static_cast<float>(value.X));
+
+    if (IsDash) return;
+
     AddMovementInput(FORWARD * UnitStatus.GetCurMoveSpeed(), value.X);
 }
 
@@ -147,7 +180,97 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 {
     FVector value = Instance.GetValue().Get<FVector>();
 
+    if (DirectionState == EDirectionState::Forward)
+    {
+        if (value.X > 0)
+            DirectionState = EDirectionState::Forward_Right;
+        else if (value.X < 0)
+            DirectionState = EDirectionState::Forward_Left;
+    }
+
+    else if (DirectionState == EDirectionState::Back)
+    {
+        if (value.X > 0)
+            DirectionState = EDirectionState::Back_Right;
+        else if (value.X < 0)
+            DirectionState = EDirectionState::Back_Left;
+    }
+
+    else if (DirectionState == EDirectionState::None)
+    {
+        if (value.X > 0)
+            DirectionState = EDirectionState::Right;
+        else if (value.X < 0)
+            DirectionState = EDirectionState::Left;
+    }
+
+    if (IsDash) return;
+
     AddMovementInput(RIGHT * UnitStatus.GetCurMoveSpeed(), value.X);
+}
+#pragma endregion 
+
+#pragma region Casting Magic Skill Func
+///////////////////////////////////////////////////////////
+// Code: void OnElementPanel()
+// Desc: Manage input key about element panel
+//////////////////////////////////////////////////////////
+void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
+{
+    bool bCheck = Instance.GetValue().Get<bool>();
+
+    if (bCheck == true)
+        OpenElementPanel();
+    else
+        CloseElementPanel();
+}
+
+///////////////////////////////////////////////////////////
+// Code: void OpenElementPanel()
+// Desc: Open element panel
+//////////////////////////////////////////////////////////
+void AC_Mage::OpenElementPanel()
+{
+    //ElementPanel->ShowPanel();
+}
+
+///////////////////////////////////////////////////////////
+// Code: void CloseElementPanel()
+// Desc: Close element panel and insert element to stacks
+//////////////////////////////////////////////////////////
+void AC_Mage::CloseElementPanel()
+{
+    ECastingElement InputedElement = ECastingElement::None;
+
+    // 여기에 선택된 원소 판별 필요
+    //ElementPanel->HidePanel(InputedElement);
+
+    if (CastingStack.BeginCasting(InputedElement))
+    {
+        // Casting animation execute
+    }
+    else
+    {
+        // Casting break animation execute
+    }
+}
+
+///////////////////////////////////////////////////////////
+// Code: void GetCastingStack()
+// Desc: Return casting stack data for aligning stack on UI
+//////////////////////////////////////////////////////////
+void AC_Mage::GetCastingStack(OUT TArray<ECastingElement>* UICastingStack)
+{
+    CastingStack.GetUnsortedCastingStack(UICastingStack);
+}
+
+///////////////////////////////////////////////////////////
+// Code: void Casting()
+// Desc: Casting magic skill
+//////////////////////////////////////////////////////////
+void AC_Mage::Casting()
+{
+
 }
 #pragma endregion 
 
@@ -165,7 +288,6 @@ void AC_Mage::AddInputAction(FString Key, FString Path)
 
         InputActions.Add(pair);
     }
-
     else
     {
         FString error = L"Mage class : AddInputAction function - " + Key + L" InputAction Value is nullptr";

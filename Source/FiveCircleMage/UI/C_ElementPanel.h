@@ -40,6 +40,8 @@ public:
 
 	void SetWindowSize(FVector2D WindowSize);
 
+	const bool& IsActive() { return bIsActive; }
+
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;

@@ -4,14 +4,14 @@
 #include "Characters/C_Unit.h"
 #include <queue>
 #include "Enums/C_CastingElement.h"
+#include "Enums/C_Direction.h"
 #include "UI/C_ElementPanel.h"
-
 #include "C_Mage.generated.h"
 
 using namespace std;
 
 /**
- * 
+ *
  */
 class UInputAction;
 class UCameraComponent;
@@ -38,6 +38,16 @@ struct FCastingStack
 	GENERATED_USTRUCT_BODY()
 
 public:
+	FCastingStack()
+	{
+		UnsortedCastingStack.SetNum(5);
+		CastingLog.SetNum(5);
+		SortedCastingStack;
+		InputedElement = ECastingElement::None;
+		StackIndex = 0;
+		bOnCasting = false;
+	}
+
 	///////////////////////////////////////////////////////////
 	// Code: void BeginCasting()
 	// Desc: Begin to cast element and return able to insert
@@ -45,7 +55,7 @@ public:
 	bool BeginCasting(ECastingElement Element)
 	{
 		InputedElement = Element;
-		
+
 		if (CheckInserting() == false)
 		{
 			BreakCasting();
@@ -72,7 +82,7 @@ public:
 	// Code: void GetUnsortedCastingStack(OUT vector<ECastingElement>* UICasctingStack)
 	// Desc: Substitute stacked element values to UICasingStack
 	///////////////////////////////////////////////////////////
-	void GetUnsortedCastingStack(OUT vector<ECastingElement>* UICastingStack) { *UICastingStack = UnsortedCastingStack; }
+	void GetUnsortedCastingStack(OUT TArray<ECastingElement>*& UICastingStack) { *UICastingStack = UnsortedCastingStack; }
 
 	const bool& OnCasting() { return bOnCasting; }
 
@@ -83,6 +93,7 @@ private:
 	///////////////////////////////////////////////////////////
 	void BreakCasting()
 	{
+		CLog::Print(FString("Casting break!!!"), 2.0f, FColor::Red);
 		ClearCastingStack();
 	}
 
@@ -92,6 +103,12 @@ private:
 	///////////////////////////////////////////////////////////
 	void InsertElement()
 	{
+		if (SortedCastingStack.size() >= 5)
+		{
+			// Msg "I can't stack anymore"
+			return;
+		}
+
 		int32 ElementNum = CAST(int32, InputedElement);
 
 		SortedCastingStack.push(ElementNum);
@@ -108,18 +125,19 @@ private:
 	void ClearCastingStack()
 	{
 		int32 iter = SortedCastingStack.size();
-		
+
 		for (int i = 0; i < iter; i++)
 		{
 			SortedCastingStack.pop();
 			UnsortedCastingStack[i] = ECastingElement::None;
 		}
 
-		for (int i = 1; i < CastingLog.size(); i++)
+		for (int i = 1; i < CastingLog.Num(); i++)
 			CastingLog[i] = 0;
 
 		StackIndex = 0;
 		InputedElement = ECastingElement::None;
+		bOnCasting = false;
 	}
 
 	///////////////////////////////////////////////////////////
@@ -146,7 +164,7 @@ private:
 			break;
 
 		case ECastingElement::Dark:
-			if (CastingLog[CAST(int32, ECastingElement::Ice)] > 0)
+			if (CastingLog[CAST(int32, ECastingElement::Light)] > 0)
 				return false;
 			break;
 		}
@@ -156,8 +174,8 @@ private:
 
 private:
 	priority_queue<int32> SortedCastingStack;
-	vector<ECastingElement> UnsortedCastingStack;
-	vector<int32> CastingLog;
+	TArray<ECastingElement> UnsortedCastingStack;
+	TArray<int32> CastingLog;
 
 	ECastingElement InputedElement;
 	int32 StackIndex = 0;
@@ -185,9 +203,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		FUnitDirection UnitDirection;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		UC_DamageComponent* DamageComponent;
-
 	//------------------------------------------------------------------
 	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TSubclassOf<UUserWidget> WidgetClass;
@@ -211,6 +226,15 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
+	EDirectionState GetDirectionState() { return DirectionState; }
+
+	bool GetIsDash() { return IsDash; }
+	void EndDash() { IsDash = false; }
+
+	void SetMouseLocation(const FVector Value) { MouseLocation = Value; }
+	//const FVector GetMouseLocation() const { return MouseLocation; }
+	const FVector GetLookDirection() const { return LookDirection; }
+
 protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Bind Action Function
@@ -230,11 +254,15 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
+public:
+	void SetElementPanel(UC_ElementPanel* Panel);
+
+protected:
 	void OnElementPanel(const FInputActionInstance& Instance);
 	void OpenElementPanel();
 	void CloseElementPanel();
 
-	void GetCastingStack(OUT vector<ECastingElement>* UICastingStack);
+	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
 	void Casting();
 	///////////////////////////////////////////////////////////////////////////
 
@@ -243,4 +271,15 @@ private:
 
 private:
 	FCastingStack CastingStack;
+	EDirectionState DirectionState = EDirectionState::Forward;
+
+	UC_ElementPanel* ElementPanel = nullptr;
+
+	bool IsDash = false;
+
+	/**
+	* Traced mouse position
+	*/
+	FVector MouseLocation = FVector::ZeroVector;
+	FVector LookDirection = FVector::ZeroVector;
 };

@@ -9,16 +9,16 @@ FString UC_CastingElement::EnumToString(const ECastingElement Value)
 {
 	switch (Value)
 	{
-	case ECastingElement::Fire: 
+	case ECastingElement::Fire:
 		return FString(L"Fire");
 		break;
-	case ECastingElement::Ice: 
+	case ECastingElement::Ice:
 		return FString(L"Ice");
 		break;
-	case ECastingElement::Light: 
+	case ECastingElement::Light:
 		return FString(L"Light");
 		break;
-	case ECastingElement::Dark: 
+	case ECastingElement::Dark:
 		return FString(L"Dark");
 		break;
 	default:

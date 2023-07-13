@@ -5,13 +5,15 @@
 #include "C_PlayerController.generated.h"
 
 /**
- * 
+ *
  */
 class UInputMappingContext;
 class UInputAction;
+class ACameraManager;
 
 class UUserWidget;
 class UC_ElementPanel;
+class AC_Mage;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_PlayerController : public APlayerController
@@ -19,6 +21,9 @@ class FIVECIRCLEMAGE_API AC_PlayerController : public APlayerController
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		APlayerCameraManager* CameraManager;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TSoftObjectPtr<UInputMappingContext> InputContext;
 
@@ -42,9 +47,14 @@ public:
 
 	virtual void SetupInputComponent() override;
 
+protected:
+	virtual void OnPossess(APawn* aPawn) override;
+
 private:
 	void PushViewportSize();
 
 private:
+	AC_Mage* Character = nullptr;
+
 	bool bIsFirstTick = true;
 };

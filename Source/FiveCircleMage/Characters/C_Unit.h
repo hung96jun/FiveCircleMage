@@ -3,8 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Global.h"
+#include "Utilities/Defines.h"
 #include "Components/CapsuleComponent.h"
 #include "Enums/C_UnitType.h"
+#include "Structs/C_DebuffInfo.h"
 #include "GenericTeamAgentInterface.h"
 #include "C_Unit.generated.h"
 
@@ -69,6 +71,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "State")
 		EUnitState UnitState;
 
+private:
+	UFUNCTION()
+		void ClearDebuffTimerHandle(const int Index);
+
 public:
 	AC_Unit();
 
@@ -83,6 +89,12 @@ public:
 	virtual void GetDmg(const float Dmg, const EUnitState Type);
 	virtual void Death() {}
 
+	void SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info);
+	const bool IsDebuffActive(const int Index) { return DebuffHandle[Index].IsActive(); }
+
+	void DecreaseMoveSpeed(float Percent);
+	void ResetMoveSpeed();
+
 	virtual FGenericTeamId GetGenericTeamId() const final
 	{
 		return GenericTeamID;
@@ -90,5 +102,7 @@ public:
 
 protected:
 	FGenericTeamId GenericTeamID;
+	FDebuffHandle DebuffHandle[CAST(int, EUnitState::Size)];
 
+	bool bAttacking = false;
 };

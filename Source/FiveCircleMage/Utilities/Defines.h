@@ -8,3 +8,5 @@
 
 #define CheckFalse(p){ if(p == false) return;}
 #define CheckFalseResult(p, result){ if(p == false) return result; }
+
+#define CAST(Type, Var) static_cast<Type>(Var)

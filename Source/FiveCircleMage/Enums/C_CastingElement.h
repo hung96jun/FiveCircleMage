@@ -5,17 +5,17 @@
 #include "C_CastingElement.generated.h"
 
 /**
- * 
+ *
  */
 
 UENUM(BlueprintType)
 enum class ECastingElement : uint8
 {
-	None,
-	Fire,
-	Ice,
-	Light,
-	Dark,
+	None = 0,
+	Fire = 1,
+	Ice = 2,
+	Light = 3,
+	Dark = 4,
 };
 
 UCLASS()

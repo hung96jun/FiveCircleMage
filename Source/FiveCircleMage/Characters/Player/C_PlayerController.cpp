@@ -1,15 +1,32 @@
 #include "Characters/Player/C_PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "Global.h"
+
+#include "Components/C_UIComponent.h"
+#include "UI/C_ElementPanel.h"
+#include "UI/C_MainMenu.h"
+#include "UI/C_OptionMenu.h"
+#include "Characters/Player/C_Mage.h"
 
 AC_PlayerController::AC_PlayerController()
 {
+    FString path = "";
+
+    path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_PauseGame.IA_PauseGame'";
+    AddInputAction(L"MainMenu", path);
+
+    UIComponent = CreateDefaultSubobject<UC_UIComponent>("UIComponent");
 }
 
 void AC_PlayerController::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
+
+    CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
     if (ULocalPlayer* localPlayer = Cast<ULocalPlayer>(Player))
     {
@@ -21,15 +38,97 @@ void AC_PlayerController::BeginPlay()
             }
         }
     }
+
+    /**/
+    bShowMouseCursor = true;
+    bEnableClickEvents = true;
+    bEnableMouseOverEvents = true;
 }
 
 void AC_PlayerController::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
+    if (bIsFirstTick)
+    {
+        PushViewportSize();
+    }
+
+    // Ground mouse trace
+    {
+        FVector start, end, direction;
+        float distance = 2000.0f;
+        DeprojectMousePositionToWorld(start, direction);
+        end = start + (direction * distance);
+        
+        TArray<AActor*> ignores;
+        ignores.Add(Character);
+
+        FHitResult result;
+
+        bool bTrace = UKismetSystemLibrary::LineTraceSingle
+        (
+            GetWorld(), start, end, ETraceTypeQuery::TraceTypeQuery1,
+            false, ignores, EDrawDebugTrace::ForOneFrame, result, true
+        );
+
+        if (bTrace == true)
+        {
+            Character->SetMouseLocation(result.Location);
+        }
+    }
 }
 
 void AC_PlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
+
+    UEnhancedInputComponent* input = Cast<UEnhancedInputComponent>(InputComponent);
+    input->BindAction(InputActions.FindRef(L"MainMenu"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffMainMenu);
+}
+
+void AC_PlayerController::OnPossess(APawn* aPawn)
+{
+    Super::OnPossess(aPawn);
+
+    Character = Cast<AC_Mage>(aPawn);
+}
+
+void AC_PlayerController::PushViewportSize()
+{
+    FVector2D windowSize = CAST(FVector2D, GEngine->GameViewport->Viewport->GetSizeXY());
+
+    //ElementPanel->SetWindowSize(windowSize);
+}
+
+void AC_PlayerController::AddInputAction(FString Key, FString Path)
+{
+    UInputAction* inputAction = nullptr;
+
+    CHelpers::GetAsset(&inputAction, Path);
+
+    if (inputAction != nullptr)
+    {
+        TPair<FString, UInputAction*> pair;
+        pair.Key = Key;
+        pair.Value = inputAction;
+
+        InputActions.Add(pair);
+    }
+    else
+    {
+        FString error = L"Mage class : AddInputAction function - " + Key + L" InputAction Value is nullptr";
+        CLog::Print(error, 1000.0f, FColor::Red);
+    }
+}
+
+void AC_PlayerController::OnOffMainMenu()
+{
+    UC_MainMenu* MainMenu = nullptr;
+    
+    MainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
+
+    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
+
+    MainMenu->OnOffMenu();
 }

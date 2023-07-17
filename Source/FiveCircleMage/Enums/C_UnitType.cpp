@@ -21,6 +21,16 @@ FString UC_UnitType::EnumToString(const EUnitForceType  Value)
 	return FString("Error");
 }
 
+EUnitForceType UC_UnitType::StringToEnum(const FString Value)
+{
+	if (Value == L"Player")
+		return EUnitForceType::Player;
+	else if (Value == L"Monster")
+		return EUnitForceType::Monster;
+
+	return EUnitForceType::None;
+}
+
 uint8 UC_UnitType::StringToInt(const FString Value)
 {
 	if (Value == L"Player")
@@ -28,30 +38,24 @@ uint8 UC_UnitType::StringToInt(const FString Value)
 	else if (Value == L"Monster")
 		return 2;
 
-	else if (Value == L"Normal")
-		return 4;
-	else if (Value == L"Slow")
-		return 5;
-	else if (Value == L"Burn")
-		return 6;
-	else if (Value == L"Stun")
-		return 7;
-	
 	return 0;
 }
 
-FString UC_UnitType::EnumToString(const EUnitState Value)
+UC_UnitState::UC_UnitState()
+{
+}
+
+FString UC_UnitState::EnumToString(const EUnitState Value)
 {
 	switch (Value)
 	{
 	case EUnitState::Normal:
 		return FString(L"Normal");
 		break;
-
-	case EUnitState::Slow: 
+	case EUnitState::Slow:
 		return FString(L"Slow");
 		break;
-	case EUnitState::Burn: 
+	case EUnitState::Burn:
 		return FString(L"Burn");
 		break;
 	case EUnitState::Stun:
@@ -60,4 +64,28 @@ FString UC_UnitType::EnumToString(const EUnitState Value)
 	}
 
 	return FString(L"None");
+}
+
+EUnitState UC_UnitState::StringToEnum(const FString Value)
+{
+	if (Value == L"Slow")
+		return EUnitState::Slow;
+	else if (Value == L"Burn")
+		return EUnitState::Burn;
+	else if (Value == L"Stun")
+		return EUnitState::Stun;
+
+	return EUnitState::Normal;
+}
+
+uint8 UC_UnitState::StringToInt(const FString Value)
+{
+	if (Value == L"Slow")
+		return 1;
+	else if (Value == L"Burn")
+		return 2;
+	else if (Value == L"Stun")
+		return 3;
+
+	return 0;
 }

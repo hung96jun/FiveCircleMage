@@ -25,6 +25,7 @@ void UC_PlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	MoveSpeed = Character->GetVelocity().Size();
 
 	Direction = UKismetAnimationLibrary::CalculateDirection(Character->GetVelocity(), Character->GetActorRotation());
+	Direction -= Character->GetActorRotation().Yaw;
 
 	DirectionState = Character->GetDirectionState();
 

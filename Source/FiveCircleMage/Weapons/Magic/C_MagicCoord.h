@@ -1,21 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Weapons/Magic/C_MagicSkill.h"
-#include "C_MagicMissile.generated.h"
+#include "C_MagicCoord.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class FIVECIRCLEMAGE_API AC_MagicMissile : public AC_MagicSkill
+class FIVECIRCLEMAGE_API AC_MagicCoord : public AC_MagicSkill
 {
 	GENERATED_BODY()
 	
 public:
-	AC_MagicMissile();
+	AC_MagicCoord();
 
 protected:
 	virtual void BeginPlay() override;
@@ -23,14 +18,19 @@ protected:
 	UFUNCTION()
 		void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+		void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+
 public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) override;
 
-private:
-	void Move(float DeltaTime);
+	void SetDelayTime(float Time) { OriginDelayTime = DelayTime; }
 
 private:
-	FVector MoveDirection;
+	TArray<AC_Unit*> Targets;
+	float OriginDelayTime;
+	float DelayTime;
 };

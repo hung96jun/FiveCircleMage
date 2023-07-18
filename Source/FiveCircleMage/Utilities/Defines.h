@@ -10,3 +10,6 @@
 #define CheckFalseResult(p, result){ if(p == false) return result; }
 
 #define CAST(Type, Var) static_cast<Type>(Var)
+
+#define MAIN_PARTICLE 0
+#define END_PARTICLE 1

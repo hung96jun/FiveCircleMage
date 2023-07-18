@@ -19,10 +19,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCapsuleComponent* Collision = nullptr;
 
-protected:
-	UFUNCTION()
-		void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 public:
 	AC_MagicSkill();
 
@@ -31,15 +27,23 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void SetMagic(UParticleSystem* CopyParticle, FVector3d CollisionScale, float Dmg, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
-	void SetCollisionSize(FVector3d CollisionSize);
-	void PlayParticle();
+	void SetMagic(UParticleSystem* CopyMainParticle, UParticleSystem* CopyEndParticle, float Dmg, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
+	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
+
+	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) {};
+	
+	void PlayParticle(int32 ParticleType = MAIN_PARTICLE);
 
 protected:
+	void SetCastingRotation(FRotator Rotation);
+	
+protected:
+	float OriginDuration;
+	float Duration;
 	float MoveSpeed;
-	FVector MoveDirection;
 
-	UParticleSystem* Particle;
+	UParticleSystem* MainParticle = nullptr;
+	UParticleSystem* EndParticle = nullptr;
 
 	EUnitState State;
 };

@@ -13,3 +13,4 @@
 
 #define MAIN_PARTICLE 0
 #define END_PARTICLE 1
+#define SUB_PARTICLE 2

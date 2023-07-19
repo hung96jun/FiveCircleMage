@@ -15,13 +15,9 @@ void AC_MagicCoord::BeginPlay()
 
 void AC_MagicCoord::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor == nullptr) return;
-	if (OtherActor == this) return;
-	if (OtherActor == OwnerActor) return;
+	AC_Unit* otherUnit;
 
-	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
-
-	if (otherUnit->GetForceType() == OwnerActor->GetForceType()) return;
+	if (IsOtherActor(OtherActor, otherUnit) == false) return;
 
 	if (DelayTime < 0.0f) return;
 
@@ -30,12 +26,9 @@ void AC_MagicCoord::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 
 void AC_MagicCoord::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor == nullptr) return;
-	if (OtherActor == this) return;
-	if (OtherActor == OwnerActor) return;
-	
-	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
-	if (otherUnit->GetForceType() == OwnerActor->GetForceType()) return;
+	AC_Unit* otherUnit;
+
+	if (IsOtherActor(OtherActor, otherUnit) == false) return;
 
 	Targets.Remove(otherUnit);
 }
@@ -60,7 +53,7 @@ void AC_MagicCoord::Tick(float DeltaTime)
 		}
 
 		Targets.Empty();
-		Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ActiveCollision(false);
 
 		if (EndParticle != nullptr)
 			PlayParticle(END_PARTICLE);
@@ -78,7 +71,7 @@ void AC_MagicCoord::BeginCasting(FVector CasterPosition, FVector TargetPosition,
 
 	SetActorLocation(TargetPosition);
 
-	Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ActiveCollision(true);
 
 	PlayParticle(MAIN_PARTICLE);
 

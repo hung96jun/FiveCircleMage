@@ -14,16 +14,12 @@ void AC_MagicMissile::BeginPlay()
 
 void AC_MagicMissile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor == nullptr) return;
-	if (OtherActor == this) return;
-	if (OtherActor == OwnerActor) return;
-
-	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
-
-	if (otherUnit->GetForceType() == OwnerActor->GetForceType()) return;
+	if (IsOtherActor(OtherActor) == false) return;
 
 	DamageComp->GiveDmg(OtherActor, Damage, State);
 	bActive = false;
+
+	ActiveCollision(false);
 
 	if (EndParticle != nullptr)
 		PlayParticle(END_PARTICLE);
@@ -51,6 +47,8 @@ void AC_MagicMissile::BeginCasting(FVector CasterPosition, FVector TargetPositio
 	MoveDirection = (TargetPosition - CasterPosition).GetSafeNormal();
 
 	PlayParticle(MAIN_PARTICLE);
+
+	ActiveCollision(true);
 }
 
 void AC_MagicMissile::Move(float DeltaTime)

@@ -68,3 +68,29 @@ void AC_MagicSkill::SetCastingRotation(FRotator Rotation)
 
 	SetActorRotation(TmpRotation);
 }
+
+bool AC_MagicSkill::IsOtherActor(AActor* OtherActor)
+{
+	if (OtherActor == nullptr) return false;
+	if (OtherActor == this) return false;
+	if (OtherActor == OwnerActor) return false;
+
+	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
+
+	if (otherUnit->GetForceType() == OwnerActor->GetForceType()) return false;
+
+	return true;
+}
+
+bool AC_MagicSkill::IsOtherActor(AActor* OtherActor, AC_Unit*& CastedOtherActor)
+{
+	if (OtherActor == nullptr) return false;
+	if (OtherActor == this) return false;
+	if (OtherActor == OwnerActor) return false;
+
+	CastedOtherActor = Cast<AC_Unit>(OtherActor);
+
+	if (CastedOtherActor->GetForceType() == OwnerActor->GetForceType()) return false;
+
+	return true;
+}

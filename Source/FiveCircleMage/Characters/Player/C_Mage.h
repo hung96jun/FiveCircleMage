@@ -39,8 +39,12 @@ struct FCastingStack
 public:
 	FCastingStack()
 	{
-		UnsortedCastingStack.Reserve(5);
-		CastingLog.Reserve(5);
+		UnsortedCastingStack.SetNum(5);
+		CastingLog.SetNum(5);
+		SortedCastingStack;
+		InputedElement = ECastingElement::None;
+		StackIndex = 0;
+		bOnCasting = false;
 	}
 	///////////////////////////////////////////////////////////
 	// Code: void BeginCasting()
@@ -96,6 +100,12 @@ private:
 	///////////////////////////////////////////////////////////
 	void InsertElement()
 	{
+		if (SortedCastingStack.size() >= 5)
+		{
+			// Msg "I can't stack anymore"
+			return;
+		}
+
 		int32 ElementNum = CAST(int32, InputedElement);
 
 		SortedCastingStack.push(ElementNum);
@@ -124,6 +134,7 @@ private:
 
 		StackIndex = 0;
 		InputedElement = ECastingElement::None;
+		bOnCasting = false;
 	}
 
 	///////////////////////////////////////////////////////////
@@ -195,7 +206,11 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UUserWidget* ElementPanel;*/
-		//------------------------------------------------------------------
+	//------------------------------------------------------------------
+
+protected:
+	UFUNCTION()
+		void EndDash();
 
 private:
 	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);
@@ -211,11 +226,23 @@ public:
 	virtual void Tick(float DeltaTime) final;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
+	virtual void GetDmg(const float Dmg, const EUnitState Type) override;
 
 	EDirectionState GetDirectionState() { return DirectionState; }
 
-	bool GetIsDash() { return IsDash; }
-	void EndDash() { IsDash = false; }
+	const bool GetIsDash() { return IsDash; }
+	
+	void ResetCastingBreak() { bCastingBreak = false; }
+	void ResetCasting() { bCasting = false; }
+	void ResetOnFire() { bOnFire = false; }
+
+	const bool IsCasting() const { return bCasting; }
+	const bool IsCastingBreak() const { return bCastingBreak; }
+	const bool IsOnFire() const { return bOnFire; }
+
+	void SetMouseLocation(const FVector Value) { MouseLocation = Value; }
+	//const FVector GetMouseLocation() const { return MouseLocation; }
+	const FVector GetLookDirection() const { return LookDirection; }
 
 protected:
 	///////////////////////////////////////////////////////////////////////////
@@ -231,11 +258,15 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	void ForwardMove(const FInputActionInstance& Instance);
 	void RightMove(const FInputActionInstance& Instance);
-	///////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////`
 
 	///////////////////////////////////////////////////////////////////////////
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
+//public:
+//	void SetElementPanel(UC_ElementPanel* Panel);
+
+protected:
 	void OnElementPanel(const FInputActionInstance& Instance);
 	void OpenElementPanel();
 	void CloseElementPanel();
@@ -243,6 +274,11 @@ protected:
 	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
 	void Casting();
 	///////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION()
+	void TestFunction1(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	UFUNCTION()
+	void TestFunction2(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
 	void AddInputAction(FString Key, FString Path);
@@ -252,4 +288,15 @@ private:
 	EDirectionState DirectionState = EDirectionState::Forward;
 
 	bool IsDash = false;
+	bool bCasting = false;
+	bool bCastingBreak = false;
+	bool bOnFire = false;
+
+	/**
+	* Traced mouse position
+	*/
+	FVector MouseLocation = FVector::ZeroVector;
+	FVector LookDirection = FVector::ZeroVector;
+
+	FTimerDelegate DashDelegate;
 };

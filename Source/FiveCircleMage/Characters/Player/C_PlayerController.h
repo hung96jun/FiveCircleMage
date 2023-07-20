@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Structs/C_DebuffInfo.h"
 #include "C_PlayerController.generated.h"
 
 /**
@@ -9,9 +10,13 @@
  */
 class UInputMappingContext;
 class UInputAction;
-
 class UUserWidget;
+class APlayerCameraManager;
+
 class UC_ElementPanel;
+class UC_PlayerHUD;
+class AC_Mage;
+class UC_UIComponent;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_PlayerController : public APlayerController
@@ -20,16 +25,16 @@ class FIVECIRCLEMAGE_API AC_PlayerController : public APlayerController
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		APlayerCameraManager* CameraManager;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TSoftObjectPtr<UInputMappingContext> InputContext;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, UInputAction*> InputActions;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TSubclassOf<UUserWidget> WidgetClass;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UC_ElementPanel* ElementPanel;
+		UC_UIComponent* UIComponent;
 
 public:
 	AC_PlayerController();
@@ -42,9 +47,26 @@ public:
 
 	virtual void SetupInputComponent() override;
 
-private:
-	void PushViewportSize();
+protected:
+	virtual void OnPossess(APawn* aPawn) override;
+
+	///////////////////////////////////////////////////////////////////////////
+	// Key Bind Functions
+	///////////////////////////////////////////////////////////////////////////
+ 	void OnOffElementPanel(const FInputActionInstance& Instance);
+
+	void OnOffMainMenu();
+	///////////////////////////////////////////////////////////////////////////
 
 private:
+	void PushViewportSize();
+	void AddInputAction(FString Key, FString Path);
+
+	void OpenElementPanel();
+	void CloseElementPanel();
+
+private:
+	AC_Mage* Character = nullptr;
+
 	bool bIsFirstTick = true;
 };

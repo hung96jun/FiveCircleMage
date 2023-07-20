@@ -29,7 +29,7 @@ public:
 	FTimerHandle& GetDebuffTimerHandle() { return DebuffTimerHandle; }
 	FTimerHandle& GetFinishTimerHandle() { return DebuffFinTimerHandle; }
 	
-	const bool IsActive() { return bDebuffActive; }
+	const bool& IsActive() { return bDebuffActive; }
 	void SetActive(const bool Value) { bDebuffActive = Value; }
 
 private:

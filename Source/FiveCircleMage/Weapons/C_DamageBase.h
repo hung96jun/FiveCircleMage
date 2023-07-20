@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/C_DamageComponent.h"
+#include "Characters/C_Unit.h"
 #include "C_DamageBase.generated.h"
 
 class UC_DamageComponent;
@@ -55,9 +57,12 @@ public:
 	void SetActive(const bool Value) { bActive = Value; }
 	const bool IsActive() { return bActive; }
 
+	void SetOwnerActor(AC_Unit* Actor) { OwnerActor = Actor; }
+
 protected:
 	void Spawn(const FVector Location, const FRotator Rotation = FRotator::ZeroRotator) {}
 	
 protected:
 	bool bActive = false;
+	AC_Unit* OwnerActor = nullptr;
 };

@@ -27,9 +27,9 @@ private:
 public:	
 	UC_DamageComponent();
 
-	void GiveDmg(AActor* Target, const float Dmg, const EUnitState Type);
+	void GiveDmg(AActor* Target, const float Dmg, const EUnitState Type = EUnitState::Normal);
+	void GiveHeal(AActor* Target, const float Amount);
 	void SetTeamID(int ID) { TeamID = ID; }
-	void SetDamage(float Value) { Damage = Value; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,5 +40,4 @@ public:
 
 private:
 	int TeamID = -1;
-	float Damage = 0.0f;
 };

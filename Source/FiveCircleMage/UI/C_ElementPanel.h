@@ -35,10 +35,13 @@ public:
 	void SetOwner(AC_Mage* Unit);
 
 	void ShowPanel();
-	void HidePanel();
-	void HidePanel(OUT ECastingElement& Element);
+	//void HidePanel();
+	//void HidePanel(OUT ECastingElement& Element);
+	const ECastingElement HidePanel();
 
 	void SetWindowSize(FVector2D WindowSize);
+
+	const bool& IsActive() { return bIsActive; }
 
 protected:
 	virtual void NativePreConstruct() override;

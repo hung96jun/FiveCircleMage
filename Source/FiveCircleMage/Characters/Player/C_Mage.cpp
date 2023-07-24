@@ -5,6 +5,8 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 
+#include "Utilities/CLog.h"
+
 AC_Mage::AC_Mage()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -61,15 +63,6 @@ AC_Mage::AC_Mage()
         CameraArm->bDoCollisionTest = true;
         bUseControllerRotationYaw = true;
     }
-
-    /*ElementPanel = CreateWidget<UUserWidget>(this, WidgetClass);
-    if (ElementPanel != nullptr)
-    {
-        ElementPanel->AddToViewport();
-        ElementPanel->SetVisibility(ESlateVisibility::Hidden);
-    }*/
-
-    //ElementPanel = GetController()->GetElementPanel();
 }
 
 void AC_Mage::BeginPlay()
@@ -77,6 +70,10 @@ void AC_Mage::BeginPlay()
     Super::BeginPlay();
 
     GenericTeamID = 1;
+
+    DashDelegate.BindUFunction(this, "EndDash");
+
+    GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AC_Mage::TestFunction1);
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -85,15 +82,15 @@ void AC_Mage::Tick(float DeltaTime)
 
     DirectionState = EDirectionState::None;
 
-    {
-        FVector location = GetActorLocation();
-        FVector dest = MouseLocation;
-        dest.Z = location.Z;
+    if (bCasting == true)
+        CLog::Print(L"Casting : true", 0.01f, FColor::Cyan);
+    else
+        CLog::Print(L"Casting : false", 0.01f, FColor::Cyan);
 
-        FRotator rot = (dest - location).Rotation();
-        SetActorRotation(rot);
-        //LookDirection = dest - location;
-    }
+    if (bCastingBreak == true)
+        CLog::Print(L"CastingBreak : true", 0.01f, FColor::Cyan);
+    else
+        CLog::Print(L"CastingBreak : false", 0.01f, FColor::Cyan);
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -111,9 +108,43 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     input->BindAction(InputActions.FindRef(L"Dash"), ETriggerEvent::Triggered, this, &AC_Mage::OnDash);
     input->BindAction(InputActions.FindRef(L"MagicCast"), ETriggerEvent::Triggered, this, &AC_Mage::OnMagicCast);
-    input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
+    //input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
 
-    input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
+    //input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
+}
+
+void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
+{
+    Super::GetDmg(Dmg, Type);
+
+    if (bCasting == true)
+    {
+        bCasting = false;
+        bCastingBreak = true;
+    }
+}
+
+void AC_Mage::PushCastingStack(const ECastingElement Element)
+{
+    TArray<ECastingElement> elements;
+    CastingStack.GetUnsortedCastingStack(&elements);
+
+    if (CastingStack.BeginCasting(Element) == true)
+    {
+        bCasting = true;
+    }
+    else
+    {
+        bCasting = false;
+        bCastingBreak = true;
+    }
+
+    CLog::Print(L"----------------------", 10.0f, FColor::Cyan);
+    for (ECastingElement element : elements)
+    {
+        CLog::Print(UC_CastingElement::EnumToString(element), 10.0f, FColor::Cyan);
+    }
+    CLog::Print(L"----------------------", 10.0f, FColor::Cyan);
 }
 
 #pragma region Bind Action Function
@@ -125,7 +156,7 @@ void AC_Mage::OnDash()
 
     FVector velocity = GetVelocity();
     if (velocity == FVector::ZeroVector)
-        velocity = FVector(1.0f, 0, 0);
+        velocity = GetActorForwardVector() * -1.0f;
 
     velocity.Z = 0.0f;
     velocity.Normalize();
@@ -136,40 +167,47 @@ void AC_Mage::OnDash()
 
     LaunchCharacter(velocity, true, false);
 
+    FTimerHandle dashTimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(dashTimerHandle, DashDelegate, 0.5f, false);
+
     IsDash = true;
+
+    GetCapsuleComponent()->OnComponentHit.Clear();
+    GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AC_Mage::TestFunction2);
+}
+
+void AC_Mage::EndDash()
+{
+    IsDash = false;
+    CLog::Print(L"Call EndDash", 10.0f, FColor::Purple);
 }
 
 void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
 
-    //FDebuffInfo debuff;
+    if(CastingStack.IsCasting() == true)
+    {
+        bCasting = false;
+        bOnFire = true;
 
-    //debuff.DebuffType = EUnitState::Slow;
-    //debuff.Value = 10.0f;
-    //debuff.Interval = 0.5f;
-    //debuff.Time = 3.0f;
-
-    //DamageComponent->SetDebuff(this, debuff);
+        CastingStack.EndCasting();
+    }
 }
 
 void AC_Mage::OnAssembleElement()
 {
-    CLog::Print(L"OnAssembleElement");
+    bCastingBreak = true;
+    bCasting = false;
 }
 #pragma endregion
 
 #pragma region Bind Axis Function
 void AC_Mage::ForwardMove(const FInputActionInstance& Instance)
 {
+    if (bCastingBreak == true) return;
+
     FVector value = Instance.GetValue().Get<FVector>();
-
-    if (value.X > 0)
-        DirectionState = EDirectionState::Forward;
-    else
-        DirectionState = EDirectionState::Back;
-
-    CLog::Print(static_cast<float>(value.X));
 
     if (IsDash) return;
 
@@ -178,31 +216,9 @@ void AC_Mage::ForwardMove(const FInputActionInstance& Instance)
 
 void AC_Mage::RightMove(const FInputActionInstance& Instance)
 {
+    if (bCastingBreak == true) return;
+
     FVector value = Instance.GetValue().Get<FVector>();
-
-    if (DirectionState == EDirectionState::Forward)
-    {
-        if (value.X > 0)
-            DirectionState = EDirectionState::Forward_Right;
-        else if (value.X < 0)
-            DirectionState = EDirectionState::Forward_Left;
-    }
-
-    else if (DirectionState == EDirectionState::Back)
-    {
-        if (value.X > 0)
-            DirectionState = EDirectionState::Back_Right;
-        else if (value.X < 0)
-            DirectionState = EDirectionState::Back_Left;
-    }
-
-    else if (DirectionState == EDirectionState::None)
-    {
-        if (value.X > 0)
-            DirectionState = EDirectionState::Right;
-        else if (value.X < 0)
-            DirectionState = EDirectionState::Left;
-    }
 
     if (IsDash) return;
 
@@ -211,49 +227,48 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 #pragma endregion 
 
 #pragma region Casting Magic Skill Func
-///////////////////////////////////////////////////////////
-// Code: void OnElementPanel()
-// Desc: Manage input key about element panel
-//////////////////////////////////////////////////////////
-void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
-{
-    bool bCheck = Instance.GetValue().Get<bool>();
+/////////////////////////////////////////////////////////////
+//// Code: void OnElementPanel()
+//// Desc: Manage input key about element panel
+////////////////////////////////////////////////////////////
+//void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
+//{
+//    bool bCheck = Instance.GetValue().Get<bool>();
+//
+//    if (bCheck == true)
+//        bCasting = true;
+//}
 
-    if (bCheck == true)
-        OpenElementPanel();
-    else
-        CloseElementPanel();
-}
-
-///////////////////////////////////////////////////////////
-// Code: void OpenElementPanel()
-// Desc: Open element panel
-//////////////////////////////////////////////////////////
-void AC_Mage::OpenElementPanel()
-{
-    //ElementPanel->ShowPanel();
-}
-
-///////////////////////////////////////////////////////////
-// Code: void CloseElementPanel()
-// Desc: Close element panel and insert element to stacks
-//////////////////////////////////////////////////////////
-void AC_Mage::CloseElementPanel()
-{
-    ECastingElement InputedElement = ECastingElement::None;
-
-    // 여기에 선택된 원소 판별 필요
-    //ElementPanel->HidePanel(InputedElement);
-
-    if (CastingStack.BeginCasting(InputedElement))
-    {
-        // Casting animation execute
-    }
-    else
-    {
-        // Casting break animation execute
-    }
-}
+/////////////////////////////////////////////////////////////
+//// Code: void OpenElementPanel()
+//// Desc: Open element panel
+////////////////////////////////////////////////////////////
+//void AC_Mage::OpenElementPanel()
+//{
+//    bCasting = true;
+//    //ElementPanel->ShowPanel();
+//}
+//
+/////////////////////////////////////////////////////////////
+//// Code: void CloseElementPanel()
+//// Desc: Close element panel and insert element to stacks
+////////////////////////////////////////////////////////////
+//void AC_Mage::CloseElementPanel()
+//{
+//    //ECastingElement InputedElement = ECastingElement::None;
+//
+//    //// 여기에 선택된 원소 판별 필요
+//    //ElementPanel->HidePanel(InputedElement);
+//
+//    //if (CastingStack.BeginCasting(InputedElement))
+//    //{
+//    //    // Casting animation execute
+//    //}
+//    //else
+//    //{
+//    //    // Casting break animation execute
+//    //}
+//}
 
 ///////////////////////////////////////////////////////////
 // Code: void GetCastingStack()
@@ -262,6 +277,9 @@ void AC_Mage::CloseElementPanel()
 void AC_Mage::GetCastingStack(OUT TArray<ECastingElement>* UICastingStack)
 {
     CastingStack.GetUnsortedCastingStack(UICastingStack);
+
+    FVector test;
+    test.GetSafeNormal();
 }
 
 ///////////////////////////////////////////////////////////
@@ -270,10 +288,17 @@ void AC_Mage::GetCastingStack(OUT TArray<ECastingElement>* UICastingStack)
 //////////////////////////////////////////////////////////
 void AC_Mage::Casting()
 {
-
+    
+}
+void AC_Mage::TestFunction1(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+    CLog::Print(L"Test1", 0.01f, FColor::Red);
+}
+void AC_Mage::TestFunction2(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+    CLog::Print(L"Test2", 0.01f, FColor::Purple);
 }
 #pragma endregion 
-
 void AC_Mage::AddInputAction(FString Key, FString Path)
 {
     UInputAction* inputAction = nullptr;
@@ -294,3 +319,4 @@ void AC_Mage::AddInputAction(FString Key, FString Path)
         CLog::Print(error, 1000.0f, FColor::Red);
     }
 }
+

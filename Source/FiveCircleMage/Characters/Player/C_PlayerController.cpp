@@ -1,15 +1,31 @@
 #include "Characters/Player/C_PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "Global.h"
 
+#include "Components/C_UIComponent.h"
 #include "UI/C_ElementPanel.h"
+#include "UI/C_MainMenu.h"
+#include "UI/C_OptionMenu.h"
+#include "UI/C_PlayerHUD.h"
 #include "Characters/Player/C_Mage.h"
 
 AC_PlayerController::AC_PlayerController()
 {
+    FString path = L"";
+
+    {
+        path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_AssemblingElement.IA_AssemblingElement'";
+        AddInputAction(L"ElementPanel", path);
+
+        path = L"EnhancedInput.InputAction'/Game/Blueprint/Input/IA_PauseGame.IA_PauseGame'";
+        AddInputAction(L"MainMenu", path);
+    }
+
+    UIComponent = CreateDefaultSubobject<UC_UIComponent>("UIComponent");
 }
 
 void AC_PlayerController::BeginPlay()
@@ -29,19 +45,6 @@ void AC_PlayerController::BeginPlay()
         }
     }
 
-    ElementPanel = CreateWidget<UC_ElementPanel>(this, WidgetClass);
-    if (ElementPanel != nullptr)
-    {
-        ElementPanel->AddToViewport();
-
-        ElementPanel->HidePanel();
-        //ElementPanel->SetVisibility(ESlateVisibility::Hidden);
-    }
-    else
-    {
-        CLog::Print(FString("Fuck you"));
-    }
-
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
@@ -51,12 +54,13 @@ void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (bIsFirstTick)
-    {
-        PushViewportSize();
-    }
+    //if (bIsFirstTick)
+    //{
+    //    PushViewportSize();
+    //}
 
     // Ground mouse trace
+    if(UGameplayStatics::IsGamePaused(GetWorld()) == false)
     {
         FVector start, end, direction;
         float distance = 2000.0f;
@@ -76,7 +80,14 @@ void AC_PlayerController::Tick(float DeltaTime)
 
         if (bTrace == true)
         {
-            Character->SetMouseLocation(result.Location);
+            //Character->SetMouseLocation(result.Location);
+            FVector location = Character->GetActorLocation();
+            FVector dest = result.Location;
+            dest.Z = location.Z;
+
+            FRotator rot = (dest - location).Rotation();
+            Character->SetActorRotation(rot);
+            Character->SetMouseLocation(dest);
         }
     }
 }
@@ -84,6 +95,11 @@ void AC_PlayerController::Tick(float DeltaTime)
 void AC_PlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
+
+    UEnhancedInputComponent* input = Cast<UEnhancedInputComponent>(InputComponent);
+
+    input->BindAction(InputActions.FindRef(L"ElementPanel"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffElementPanel);
+    input->BindAction(InputActions.FindRef(L"MainMenu"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffMainMenu);
 }
 
 void AC_PlayerController::OnPossess(APawn* aPawn)
@@ -93,9 +109,69 @@ void AC_PlayerController::OnPossess(APawn* aPawn)
     Character = Cast<AC_Mage>(aPawn);
 }
 
-void AC_PlayerController::PushViewportSize()
+void AC_PlayerController::AddInputAction(FString Key, FString Path)
 {
-    FVector2D windowSize = CAST(FVector2D, GEngine->GameViewport->Viewport->GetSizeXY());
+    UInputAction* inputAction = nullptr;
 
-    ElementPanel->SetWindowSize(windowSize);
+    CHelpers::GetAsset(&inputAction, Path);
+
+    if (inputAction != nullptr)
+    {
+        TPair<FString, UInputAction*> pair;
+        pair.Key = Key;
+        pair.Value = inputAction;
+
+        InputActions.Add(pair);
+    }
+    else
+    {
+        FString error = L"Mage class : AddInputAction function - " + Key + L" InputAction Value is nullptr";
+        CLog::Print(error, 1000.0f, FColor::Red);
+    }
+}
+
+void AC_PlayerController::OnOffElementPanel(const FInputActionInstance& Instance)
+{
+    bool bCheck = Instance.GetValue().Get<bool>();
+    
+    if (bCheck == true)
+        OpenElementPanel();
+    else
+        CloseElementPanel();
+}
+
+///////////////////////////////////////////////////////////
+// Code: void OnElementPanel()
+// Desc: Manage input key about element panel
+//////////////////////////////////////////////////////////
+void AC_PlayerController::OpenElementPanel()
+{
+    UC_ElementPanel* panel = UIComponent->GetUI<UC_ElementPanel>("ElementPanel");
+    panel->ShowPanel();
+
+    FVector2D windowSize = CAST(FVector2D, GEngine->GameViewport->Viewport->GetSizeXY());
+    panel->SetWindowSize(windowSize);
+}
+
+///////////////////////////////////////////////////////////
+// Code: void OpenElementPanel()
+// Desc: Open element panel
+//////////////////////////////////////////////////////////
+void AC_PlayerController::CloseElementPanel()
+{
+    UC_ElementPanel* panel = UIComponent->GetUI<UC_ElementPanel>("ElementPanel");
+    Character->PushCastingStack(panel->HidePanel());
+}
+
+void AC_PlayerController::OnOffMainMenu()
+{
+    CLog::Print(L"Call OnOffMainMenu", 10.0f, FColor::Blue);
+
+    UC_MainMenu* MainMenu = nullptr;
+
+    MainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
+
+    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
+
+    MainMenu->OnOffMenu();
 }

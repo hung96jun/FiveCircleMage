@@ -10,11 +10,15 @@
 UENUM(BlueprintType)
 enum class ESkillType : uint8
 {
-	None,
-	Missile,
-	Beam,
-	InPlace,
-	Self,
+    None,
+    Missile,
+    Beam,
+    InPlace,
+    Coord,
+    Mes,
+    Self,
+
+    Last = Self,
 };
 
 UCLASS()

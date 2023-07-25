@@ -32,10 +32,10 @@ public:
 		CurMoveSpeed = OriginMoveSpeed;
 	}
 
-	const float GetOriginHP() const { return OriginHP; }
+	float* GetOriginHP() { return &OriginHP; }
 	const float GetOriginMoveSpeed() const { return OriginMoveSpeed; }
 
-	const float GetCurHP() const { return CurHP; }
+	float* GetCurHP() { return &CurHP; }
 	const float GetCurMoveSpeed() const { return CurMoveSpeed; }
 
 	void GetDmg(const float Dmg) { CurHP = Dmg; }
@@ -46,14 +46,14 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float OriginHP;
+	float OriginHP = 0.0f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float OriginMoveSpeed;
+	float OriginMoveSpeed = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float CurHP;
+	float CurHP = 0.0f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float CurMoveSpeed;
+	float CurMoveSpeed = 0.0f;
 };
 
 UCLASS()
@@ -69,7 +69,7 @@ protected:
 		FUnitStatus UnitStatus;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "State")
-		EUnitState UnitState;
+		TArray<EUnitState> UnitStates;
 
 private:
 	UFUNCTION()
@@ -87,10 +87,14 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override {}
 
 	virtual void GetDmg(const float Dmg, const EUnitState Type);
+	virtual void GetHeal(const float Amount) {}
 	virtual void Death() {}
+
+	FUnitStatus* GetUnitStatus() { return &UnitStatus; }
 
 	void SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info);
 	const bool IsDebuffActive(const int Index) { return DebuffHandle[Index].IsActive(); }
+	FDebuffHandle* GetDebuffHandles() { return DebuffHandle; }
 
 	void DecreaseMoveSpeed(float Percent);
 	void ResetMoveSpeed();

@@ -20,5 +20,5 @@ void UC_Notify_Dash::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase*
 
 	if (character == nullptr) return;
 
-	character->EndDash();
+	//character->EndDash();
 }

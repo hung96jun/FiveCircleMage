@@ -11,6 +11,8 @@
 
 #define CAST(Type, Var) static_cast<Type>(Var)
 
+#define NotifyCheck() { if(MeshComp->GetOwner() == nullptr) return; }
+
 #define MAIN_PARTICLE 0
 #define END_PARTICLE 1
 #define SUB_PARTICLE 2

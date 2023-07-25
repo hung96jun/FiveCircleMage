@@ -5,7 +5,6 @@
 #include <queue>
 #include "Enums/C_CastingElement.h"
 #include "Enums/C_Direction.h"
-#include "UI/C_ElementPanel.h"
 #include "C_Mage.generated.h"
 
 using namespace std;
@@ -20,6 +19,8 @@ class USpringArmComponent;
 struct FInputActionInstance;
 
 class UC_DamageComponent;
+
+class UC_MagicDispenser;
 
 USTRUCT(BlueprintType)
 struct FUnitDirection
@@ -47,7 +48,6 @@ public:
 		StackIndex = 0;
 		bOnCasting = false;
 	}
-
 	///////////////////////////////////////////////////////////
 	// Code: void BeginCasting()
 	// Desc: Begin to cast element and return able to insert
@@ -82,9 +82,10 @@ public:
 	// Code: void GetUnsortedCastingStack(OUT vector<ECastingElement>* UICasctingStack)
 	// Desc: Substitute stacked element values to UICasingStack
 	///////////////////////////////////////////////////////////
-	void GetUnsortedCastingStack(OUT TArray<ECastingElement>*& UICastingStack) { *UICastingStack = UnsortedCastingStack; }
+	void GetUnsortedCastingStack(OUT TArray<ECastingElement>* UICastingStack) { *UICastingStack = UnsortedCastingStack; }
 
 	const bool& OnCasting() { return bOnCasting; }
+	const bool IsCasting() { return SortedCastingStack.size() > 0; }
 
 private:
 	///////////////////////////////////////////////////////////
@@ -93,7 +94,6 @@ private:
 	///////////////////////////////////////////////////////////
 	void BreakCasting()
 	{
-		CLog::Print(FString("Casting break!!!"), 2.0f, FColor::Red);
 		ClearCastingStack();
 	}
 
@@ -146,6 +146,9 @@ private:
 	///////////////////////////////////////////////////////////
 	bool CheckInserting()
 	{
+		// 여기 5대신에 현재 서클레벨 들어가야해요
+		if (StackIndex == 5) return false;
+
 		switch (InputedElement)
 		{
 		case ECastingElement::Fire:
@@ -211,6 +214,10 @@ protected:
 		UUserWidget* ElementPanel;*/
 	//------------------------------------------------------------------
 
+protected:
+	UFUNCTION()
+		void EndDash();
+
 private:
 	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);
 	const FVector RIGHT = FVector(0.0f, 1.0f, 0.0f);
@@ -225,15 +232,25 @@ public:
 	virtual void Tick(float DeltaTime) final;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
+	virtual void GetDmg(const float Dmg, const EUnitState Type) override;
 
 	EDirectionState GetDirectionState() { return DirectionState; }
 
-	bool GetIsDash() { return IsDash; }
-	void EndDash() { IsDash = false; }
+	const bool GetIsDash() { return IsDash; }
+	
+	void ResetCastingBreak() { bCastingBreak = false; }
+	void ResetCasting() { bCasting = false; }
+	void ResetOnFire() { bOnFire = false; }
+
+	const bool IsCasting() const { return bCasting; }
+	const bool IsCastingBreak() const { return bCastingBreak; }
+	const bool IsOnFire() const { return bOnFire; }
 
 	void SetMouseLocation(const FVector Value) { MouseLocation = Value; }
 	//const FVector GetMouseLocation() const { return MouseLocation; }
 	const FVector GetLookDirection() const { return LookDirection; }
+
+	void PushCastingStack(ECastingElement Element);
 
 protected:
 	///////////////////////////////////////////////////////////////////////////
@@ -249,22 +266,23 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	void ForwardMove(const FInputActionInstance& Instance);
 	void RightMove(const FInputActionInstance& Instance);
-	///////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////`
 
 	///////////////////////////////////////////////////////////////////////////
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
-public:
-	void SetElementPanel(UC_ElementPanel* Panel);
+//public:
+//	void SetElementPanel(UC_ElementPanel* Panel);
 
 protected:
-	void OnElementPanel(const FInputActionInstance& Instance);
-	void OpenElementPanel();
-	void CloseElementPanel();
-
 	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
 	void Casting();
 	///////////////////////////////////////////////////////////////////////////
+
+	UFUNCTION()
+	void TestFunction1(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	UFUNCTION()
+	void TestFunction2(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
 	void AddInputAction(FString Key, FString Path);
@@ -273,13 +291,18 @@ private:
 	FCastingStack CastingStack;
 	EDirectionState DirectionState = EDirectionState::Forward;
 
-	UC_ElementPanel* ElementPanel = nullptr;
-
 	bool IsDash = false;
+	bool bCasting = false;
+	bool bCastingBreak = false;
+	bool bOnFire = false;
 
 	/**
 	* Traced mouse position
 	*/
 	FVector MouseLocation = FVector::ZeroVector;
 	FVector LookDirection = FVector::ZeroVector;
+
+	FTimerDelegate DashDelegate;
+
+	UC_MagicDispenser* Dispenser;
 };

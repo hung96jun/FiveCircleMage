@@ -25,22 +25,32 @@ void UC_ElementPanel::ShowPanel()
 {
 	this->SetVisibility(ESlateVisibility::Visible);
 	bIsActive = true;
-}
-
-void UC_ElementPanel::HidePanel()
-{
-	this->SetVisibility(ESlateVisibility::Hidden);
-	bIsActive = false;
 
 	SelectedElement = ECastingElement::None;
 }
 
-void UC_ElementPanel::HidePanel(OUT ECastingElement& Element)
+//void UC_ElementPanel::HidePanel()
+//{
+//	this->SetVisibility(ESlateVisibility::Hidden);
+//	bIsActive = false;
+//
+//	SelectedElement = ECastingElement::None;
+//}
+//
+//void UC_ElementPanel::HidePanel(OUT ECastingElement& Element)
+//{
+//	this->SetVisibility(ESlateVisibility::Hidden);
+//	bIsActive = false;
+//
+//	Element = SelectedElement;
+//}
+
+ECastingElement UC_ElementPanel::HidePanel()
 {
 	this->SetVisibility(ESlateVisibility::Hidden);
 	bIsActive = false;
 
-	Element = SelectedElement;
+	return SelectedElement;
 }
 
 void UC_ElementPanel::SetWindowSize(FVector2D WindowSize)
@@ -65,6 +75,12 @@ void UC_ElementPanel::NativeDestruct()
 
 void UC_ElementPanel::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+	if (UGameplayStatics::IsGamePaused(GetWorld()) == true)
+	{
+		HidePanel();
+		return;
+	}
+
 	if (bIsActive == false) return;
 
 	Super::NativeTick(MyGeometry, InDeltaTime);

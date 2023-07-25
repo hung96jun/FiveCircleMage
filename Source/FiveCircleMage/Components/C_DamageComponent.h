@@ -28,6 +28,7 @@ public:
 	UC_DamageComponent();
 
 	void GiveDmg(AActor* Target, const float Dmg, const EUnitState Type = EUnitState::Normal);
+	void GiveHeal(AActor* Target, const float Amount);
 	void SetTeamID(int ID) { TeamID = ID; }
 
 protected:

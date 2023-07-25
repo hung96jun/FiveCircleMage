@@ -25,6 +25,17 @@ void UC_DamageComponent::GiveDmg(AActor* Target, const float Dmg, const EUnitSta
 	}
 }
 
+void UC_DamageComponent::GiveHeal(AActor* Target, const float Amount)
+{
+	if (Target == nullptr) return;
+
+	AC_Unit* unitTarget = Cast<AC_Unit>(Target);
+	if (unitTarget != nullptr)
+	{
+		unitTarget->GetHeal(Amount);
+	}
+}
+
 void UC_DamageComponent::SetDebuff(AC_Unit* Target, const FDebuffInfo Information)
 {
 	FTimerDelegate timerDelegate;

@@ -30,9 +30,12 @@ public:
 
 	virtual void PlayParticle(int32 ParticleType = MAIN_PARTICLE) override;
 
+	void SetSubParticle(UNiagaraSystem* Particle) { SubParticle = Particle; }
+
 private:
 	void SetBeamPosition(FVector CasterPosition);
 
 private:
-	UParticleSystem* SubParticle = nullptr;
+	UNiagaraComponent* SubParticleComp = nullptr;
+	UNiagaraSystem* SubParticle = nullptr;
 };

@@ -51,17 +51,10 @@ void AC_MagicBeam::BeginCasting(FVector CasterPosition, FVector TargetPosition, 
 
 void AC_MagicBeam::PlayParticle(int32 ParticleType)
 {
-	FTransform transform;
-	transform.SetLocation(GetActorLocation());
-	transform.SetRotation(GetActorRotation().Quaternion());
-
 	if (ParticleType == MAIN_PARTICLE)
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MainParticle, transform);
+		MainParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), MainParticle, GetActorLocation());
 	else if (ParticleType == END_PARTICLE && EndParticle != nullptr)
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndParticle, transform);
+		EndParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EndParticle, GetActorLocation());
 	else if (ParticleType == SUB_PARTICLE && SubParticle != nullptr)
-	{
-		transform.SetLocation(transform.GetLocation() + OwnerActor->GetActorForwardVector() * 170.0f);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SubParticle, transform);
-	}
+		SubParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SubParticle, GetActorLocation() + OwnerActor->GetActorForwardVector() * 170.0f);
 }

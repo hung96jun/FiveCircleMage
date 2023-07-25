@@ -35,8 +35,7 @@ public:
 	void SetOwner(AC_Mage* Unit);
 
 	void ShowPanel();
-	void HidePanel();
-	void HidePanel(OUT ECastingElement& Element);
+	ECastingElement HidePanel();
 
 	void SetWindowSize(FVector2D WindowSize);
 

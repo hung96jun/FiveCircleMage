@@ -39,6 +39,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		bool IsDeath = false;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		bool bCasting = false;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		bool bCastingBreak = false;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		bool bOnFire = false;
+
 public:
 	UC_PlayerAnimInstance();
 

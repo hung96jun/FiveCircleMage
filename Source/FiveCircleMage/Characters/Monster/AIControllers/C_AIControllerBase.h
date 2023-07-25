@@ -29,12 +29,6 @@ public:
 	UFUNCTION()
 		void OnSensingTarget(AActor* Actor, FAIStimulus Stimulus);
 
-	UFUNCTION()
-		void UpdateSightKey(bool Value);
-
-	UFUNCTION()
-		void UpdateTargetKey(AActor* Target);
-
 public:
 	AC_AIControllerBase();
 
@@ -54,11 +48,4 @@ protected:
 
 private:
 	AC_Monster* Character = nullptr;
-
-
-	//FTimerHandle SightKeyHandle;
-	FTimerHandle TargetKeyHandle;
-
-	//FTimerDelegate SightKeyDelegate;
-	FTimerDelegate TargetKeyDelegate;
 };

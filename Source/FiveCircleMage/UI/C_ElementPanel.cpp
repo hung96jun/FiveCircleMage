@@ -27,20 +27,28 @@ void UC_ElementPanel::ShowPanel()
 	bIsActive = true;
 }
 
-void UC_ElementPanel::HidePanel()
+//void UC_ElementPanel::HidePanel()
+//{
+//	this->SetVisibility(ESlateVisibility::Hidden);
+//	bIsActive = false;
+//
+//	SelectedElement = ECastingElement::None;
+//}
+//
+//void UC_ElementPanel::HidePanel(OUT ECastingElement& Element)
+//{
+//	this->SetVisibility(ESlateVisibility::Hidden);
+//	bIsActive = false;
+//
+//	Element = SelectedElement;
+//}
+
+const ECastingElement UC_ElementPanel::HidePanel()
 {
 	this->SetVisibility(ESlateVisibility::Hidden);
 	bIsActive = false;
 
-	SelectedElement = ECastingElement::None;
-}
-
-void UC_ElementPanel::HidePanel(OUT ECastingElement& Element)
-{
-	this->SetVisibility(ESlateVisibility::Hidden);
-	bIsActive = false;
-
-	Element = SelectedElement;
+	return SelectedElement;
 }
 
 void UC_ElementPanel::SetWindowSize(FVector2D WindowSize)
@@ -65,6 +73,12 @@ void UC_ElementPanel::NativeDestruct()
 
 void UC_ElementPanel::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+	if (UGameplayStatics::IsGamePaused(GetWorld()) == true)
+	{
+		HidePanel();
+		return;
+	}
+
 	if (bIsActive == false) return;
 
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -79,31 +93,36 @@ void UC_ElementPanel::SelectElement()
 	bool bIsLeft = MousePos.X < WindowCenterPoint.X;
 	bool bIsUp = MousePos.Y < WindowCenterPoint.Y;
 
+	// Set Oringin Color
+	FireElement->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f));
+	IceElement->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f));
+	LightElement->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f));
+	DarkElement->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f));
+
 	if (bIsLeft)
 	{
 		if (bIsUp)
 		{
-			//SelectedElement = ECastingElement::Fire;
-			//FireElement->SetColorAndOpacity(FColor(0.5f, 0.7f, 0.0f));
-			CLog::Print(FString("Fire"), 0.01f);
+			SelectedElement = ECastingElement::Fire;
+			FireElement->SetColorAndOpacity(FLinearColor(1.0f, 0.0f, 0.0f));
 		}
 		else
 		{
-			//SelectedElement = ECastingElement::Light;
-			CLog::Print(FString("Light"), 0.01f);
+			SelectedElement = ECastingElement::Light;
+			LightElement->SetColorAndOpacity(FLinearColor(0.0f, 0.7f, 0.0f));
 		}
 	}
 	else
 	{
 		if (bIsUp)
 		{
-			//SelectedElement = ECastingElement::Ice;
-			CLog::Print(FString("Ice"), 0.01f);
+			SelectedElement = ECastingElement::Ice;
+			IceElement->SetColorAndOpacity(FLinearColor(0.0f, 1.0f, 1.0f));
 		}
 		else
 		{
-			//SelectedElement = ECastingElement::Dark;
-			CLog::Print(FString("Dark"), 0.01f);
+			SelectedElement = ECastingElement::Dark;
+			DarkElement->SetColorAndOpacity(FLinearColor(1.0f, 0.08f, 0.91f));
 		}
 	}
 }

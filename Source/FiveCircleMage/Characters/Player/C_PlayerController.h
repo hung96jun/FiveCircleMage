@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Structs/C_DebuffInfo.h"
 #include "C_PlayerController.generated.h"
 
 /**
@@ -11,9 +12,11 @@ class UInputMappingContext;
 class UInputAction;
 class UUserWidget;
 class APlayerCameraManager;
-class UC_UIComponent;
 
+class UC_ElementPanel;
+class UC_PlayerHUD;
 class AC_Mage;
+class UC_UIComponent;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_PlayerController : public APlayerController
@@ -44,20 +47,25 @@ public:
 
 	virtual void SetupInputComponent() override;
 
-	//UC_OptionMenu* GetOptionMenu() { return OptionMenu; }
-
 protected:
 	virtual void OnPossess(APawn* aPawn) override;
 
-private:
-	void PushViewportSize();
+	///////////////////////////////////////////////////////////////////////////
+	// Key Bind Functions
+	///////////////////////////////////////////////////////////////////////////
+ 	void OnOffElementPanel(const FInputActionInstance& Instance);
 
-	void AddInputAction(FString Key, FString Path);
 	void OnOffMainMenu();
+	///////////////////////////////////////////////////////////////////////////
+
+private:
+	void AddInputAction(FString Key, FString Path);
+
+	void OpenElementPanel();
+	void CloseElementPanel();
 
 private:
 	AC_Mage* Character = nullptr;
 
 	bool bIsFirstTick = true;
-	//FVector2D MousePos;
 };

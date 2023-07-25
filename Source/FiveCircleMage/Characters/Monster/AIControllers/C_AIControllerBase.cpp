@@ -102,34 +102,24 @@ void AC_AIControllerBase::OnSensingTarget(AActor* Actor, FAIStimulus Stimulus)
 			AC_Mage* target = Cast<AC_Mage>(Actor);
 			if (target != nullptr)
 			{
-				GetWorld()->GetTimerManager().ClearTimer(TargetKeyHandle);
-				UpdateSightKey(true);
-				UpdateTargetKey(Actor);
-
 				Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", true);
 
-				CLog::Print(L"HasLineOfSight == true", 3.0f, FColor::Yellow);
+				if (Blackboard.Get()->GetValueAsObject(L"Target") == nullptr)
+					Blackboard.Get()->SetValueAsObject(L"Target", Actor);
+
+				//GetWorld()->GetTimerManager().ClearTimer(TargetKeyHandle);
+				//Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", true);
+
+				//CLog::Print(L"HasLineOfSight == true", 3.0f, FColor::Yellow);
 			}
 		}
 	}
 
 	else
 	{
-		GetWorld()->GetTimerManager().SetTimer(TargetKeyHandle, 8.0f, false);
-		UpdateSightKey(false);
-
+		//GetWorld()->GetTimerManager().SetTimer(TargetKeyHandle, 8.0f, false);
 		Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", false);
 
 		CLog::Print(L"HasLineOfSight == false", 3.0f, FColor::Yellow);
 	}
-}
-
-void AC_AIControllerBase::UpdateSightKey(bool Value)
-{
-	Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", Value);
-}
-
-void AC_AIControllerBase::UpdateTargetKey(AActor* Target)
-{
-	Blackboard.Get()->SetValueAsObject(L"Target", Target);
 }

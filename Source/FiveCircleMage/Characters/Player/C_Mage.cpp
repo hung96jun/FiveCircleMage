@@ -4,6 +4,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
+#include "Components/WidgetComponent.h"
+
+#include "C_GameInstance.h"
+#include "Managers/C_MagicManager.h"
+#include "UI/C_DashProgressBar.h"
+#include "Components/C_MagicDispenser.h"
 
 #include "Utilities/CLog.h"
 
@@ -63,6 +69,26 @@ AC_Mage::AC_Mage()
         CameraArm->bDoCollisionTest = true;
         bUseControllerRotationYaw = true;
     }
+
+    {
+        Dispenser = CreateDefaultSubobject<UC_MagicDispenser>("Dispenser");
+    }
+
+    {
+        WidgetComp = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
+        WidgetComp->SetupAttachment(RootComponent);
+
+        path = L"UMGEditor.WidgetBlueprint'/Game/Blueprint/UI/BpC_DashProgressBar.BpC_DashProgressBar_C'";
+        ConstructorHelpers::FClassFinder<UC_DashProgressBar> widgetClass(*path);
+        if (widgetClass.Succeeded())
+        {
+            WidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+            WidgetComp->SetWidgetClass(widgetClass.Class);
+            WidgetComp->SetDrawSize(FVector2D(200.0f, 50.0f));
+
+            WidgetComp->AddRelativeLocation(FVector(0.0f, 0.0f, -220.0f));
+        }
+    }
 }
 
 void AC_Mage::BeginPlay()
@@ -72,8 +98,9 @@ void AC_Mage::BeginPlay()
     GenericTeamID = 1;
 
     DashDelegate.BindUFunction(this, "EndDash");
+    DashCoolTimeDelegate.BindUFunction(this, "EndDashCoolTime");
 
-    GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AC_Mage::TestFunction1);
+    Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -81,6 +108,8 @@ void AC_Mage::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     DirectionState = EDirectionState::None;
+
+    Dispenser->Update(DeltaTime);
 
     if (bCasting == true)
         CLog::Print(L"Casting : true", 0.01f, FColor::Cyan);
@@ -138,19 +167,14 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
         bCasting = false;
         bCastingBreak = true;
     }
-
-    CLog::Print(L"----------------------", 10.0f, FColor::Cyan);
-    for (ECastingElement element : elements)
-    {
-        CLog::Print(UC_CastingElement::EnumToString(element), 10.0f, FColor::Cyan);
-    }
-    CLog::Print(L"----------------------", 10.0f, FColor::Cyan);
 }
 
 #pragma region Bind Action Function
 void AC_Mage::OnDash()
 {
-    if (IsDash) return;
+    Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->CallDashProgressBar();
+
+    if (bDash == true || bDashCoolTime == true) return;
 
     CLog::Print(L"OnDash");
 
@@ -169,24 +193,30 @@ void AC_Mage::OnDash()
 
     FTimerHandle dashTimerHandle;
     GetWorld()->GetTimerManager().SetTimer(dashTimerHandle, DashDelegate, 0.5f, false);
+    FTimerHandle dashCoolTimeHandle;
+    GetWorld()->GetTimerManager().SetTimer(dashCoolTimeHandle, DashCoolTimeDelegate, DashCoolTime, false);
 
-    IsDash = true;
-
-    GetCapsuleComponent()->OnComponentHit.Clear();
-    GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AC_Mage::TestFunction2);
+    bDash = true;
+    bDashCoolTime = true;
 }
 
 void AC_Mage::EndDash()
 {
-    IsDash = false;
-    CLog::Print(L"Call EndDash", 10.0f, FColor::Purple);
+    bDash = false;
+}
+
+void AC_Mage::EndDashCoolTime()
+{
+    bDashCoolTime = false;
 }
 
 void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
 
-    if(CastingStack.IsCasting() == true)
+    Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(L"BlackHole", GetActorLocation(), MouseLocation);
+
+    if (CastingStack.IsCasting() == true)
     {
         bCasting = false;
         bOnFire = true;
@@ -209,7 +239,7 @@ void AC_Mage::ForwardMove(const FInputActionInstance& Instance)
 
     FVector value = Instance.GetValue().Get<FVector>();
 
-    if (IsDash) return;
+    if (bDash) return;
 
     AddMovementInput(FORWARD * UnitStatus.GetCurMoveSpeed(), value.X);
 }
@@ -220,56 +250,13 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 
     FVector value = Instance.GetValue().Get<FVector>();
 
-    if (IsDash) return;
+    if (bDash) return;
 
     AddMovementInput(RIGHT * UnitStatus.GetCurMoveSpeed(), value.X);
 }
 #pragma endregion 
 
 #pragma region Casting Magic Skill Func
-/////////////////////////////////////////////////////////////
-//// Code: void OnElementPanel()
-//// Desc: Manage input key about element panel
-////////////////////////////////////////////////////////////
-//void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
-//{
-//    bool bCheck = Instance.GetValue().Get<bool>();
-//
-//    if (bCheck == true)
-//        bCasting = true;
-//}
-
-/////////////////////////////////////////////////////////////
-//// Code: void OpenElementPanel()
-//// Desc: Open element panel
-////////////////////////////////////////////////////////////
-//void AC_Mage::OpenElementPanel()
-//{
-//    bCasting = true;
-//    //ElementPanel->ShowPanel();
-//}
-//
-/////////////////////////////////////////////////////////////
-//// Code: void CloseElementPanel()
-//// Desc: Close element panel and insert element to stacks
-////////////////////////////////////////////////////////////
-//void AC_Mage::CloseElementPanel()
-//{
-//    //ECastingElement InputedElement = ECastingElement::None;
-//
-//    //// 여기에 선택된 원소 판별 필요
-//    //ElementPanel->HidePanel(InputedElement);
-//
-//    //if (CastingStack.BeginCasting(InputedElement))
-//    //{
-//    //    // Casting animation execute
-//    //}
-//    //else
-//    //{
-//    //    // Casting break animation execute
-//    //}
-//}
-
 ///////////////////////////////////////////////////////////
 // Code: void GetCastingStack()
 // Desc: Return casting stack data for aligning stack on UI
@@ -289,14 +276,6 @@ void AC_Mage::GetCastingStack(OUT TArray<ECastingElement>* UICastingStack)
 void AC_Mage::Casting()
 {
     
-}
-void AC_Mage::TestFunction1(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-    CLog::Print(L"Test1", 0.01f, FColor::Red);
-}
-void AC_Mage::TestFunction2(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-    CLog::Print(L"Test2", 0.01f, FColor::Purple);
 }
 #pragma endregion 
 void AC_Mage::AddInputAction(FString Key, FString Path)

@@ -3,10 +3,6 @@
 #include "Particles/ParticleSystem.h"
 #include "Components/C_DamageComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
-
 
 AC_MagicSkill::AC_MagicSkill()
 {
@@ -25,9 +21,15 @@ void AC_MagicSkill::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Duration -= DeltaTime;
+
+	if (MainParticleComp != nullptr)
+		MainParticleComp->SetWorldLocation(GetActorLocation());
+
+	if (EndParticleComp != nullptr)
+		EndParticleComp->SetWorldLocation(GetActorLocation());
 }
 
-void AC_MagicSkill::SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* CopyEndParticle, float Dmg, float LifeTime, EUnitState MagicProperty, float Speed)
+void AC_MagicSkill::SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* CopyEndParticle, float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)
 {
 	// ¿Ã∆Â∆Æ º≥¡§
 	MainParticle = CopyMainParticle;
@@ -35,6 +37,7 @@ void AC_MagicSkill::SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* C
 
 	Damage = Dmg;
 	State = MagicProperty;
+	MagicType = Type;
 	MoveSpeed = Speed;
 	OriginDuration = LifeTime;
 }
@@ -47,18 +50,10 @@ void AC_MagicSkill::SetCollision(FVector3d CollisionSize, FRotator Rotation)
 
 void AC_MagicSkill::PlayParticle(int32 ParticleType)
 {
-	FTransform transform;
-	transform.SetLocation(GetActorLocation());
-	transform.SetRotation(GetActorRotation().Quaternion());
-
-	//if(ParticleType == MAIN_PARTICLE)
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MainParticle, transform);
-	//else if(ParticleType == END_PARTICLE && EndParticle != nullptr)
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndParticle, transform);
-	if (ParticleType == MAIN_PARTICLE)
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), MainParticle, GetActorLocation());
+	if(ParticleType == MAIN_PARTICLE)
+		MainParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), MainParticle, GetActorLocation());
 	else if(ParticleType == END_PARTICLE && EndParticle != nullptr)
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EndParticle, GetActorLocation());
+		EndParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EndParticle, GetActorLocation());
 }
 
 void AC_MagicSkill::SetCastingRotation(FRotator Rotation)

@@ -129,7 +129,7 @@ protected:
 		float CollisionRadius = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Collision")
-		FVector CollisionScale = FVector::ZeroVector;
+		FVector CollisionScale = FVector(1.0f, 1.0f, 1.0f);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Collision")
 		FRotator Rotation = FRotator::ZeroRotator;
@@ -173,9 +173,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, FMagicInfo> MagicInfos;
-
+		
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int32 MaxMagic = 20;
+		int MaxMagic = 10;
 
 public:	
 	AC_MagicManager();
@@ -188,11 +188,10 @@ public:
 	//the pooled MagicSkill object is called and fired using the Key value 
 	//and Type value entered as parameters.
 	//@param Key : Magic key value
-	//@param Type : Magic Type
 	//@return Returns the called object among the pooled objects
 	//@return Returns nullptr if there is no pooled object
 	///////////////////////////////////////////////////////////////////////////
-	AC_MagicSkill* OnFireMagic(const FString Key, const ESkillType Type, const FVector Location);
+	AC_MagicSkill* OnFireMagic(const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
 
 protected:
 	virtual void BeginPlay() override;
@@ -201,9 +200,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	void CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info);
+
+private:
 	UDataTable* PoolingDataTable;
 	UDataTable* MagicDataTable;
 
-	TMap<ESkillType, TArray<AC_MagicSkill*>> Magics;
-	TMap<ESkillType, uint16> MagicCount;
+	TMap<FString, TArray<AC_MagicSkill*>> Magics;
+	TMap<FString, uint16> MagicCount;
 };

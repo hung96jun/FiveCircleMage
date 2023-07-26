@@ -27,10 +27,13 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/C_DamageBase.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Enums/C_SkillType.h"
 #include "C_MagicSkill.generated.h"
 
 class UCapsuleComponent;
-class UNiagaraSystem;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_MagicSkill : public AC_DamageBase
@@ -45,12 +48,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCapsuleComponent* Collision = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UNiagaraSystem* MainParticle = nullptr;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UNiagaraSystem* EndParticle = nullptr;
-
 public:
 	AC_MagicSkill();
 
@@ -59,12 +56,14 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* CopyEndParticle, float Dmg, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
+	void SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* CopyEndParticle, float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
 	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) {};
 	
 	virtual void PlayParticle(int32 ParticleType = MAIN_PARTICLE);
+
+	const ESkillType& GetMagicType() { return MagicType; }
 
 protected:
 	void SetCastingRotation(FRotator Rotation);
@@ -79,10 +78,12 @@ protected:
 	float Duration;
 	float MoveSpeed;
 
-	//UParticleSystem* MainParticle = nullptr;
-	//UParticleSystem* EndParticle = nullptr;
-	/*UNiagaraSystem* MainParticle = nullptr;
-	UNiagaraSystem* EndParticle = nullptr;*/
+	UNiagaraComponent* MainParticleComp = nullptr;
+	UNiagaraComponent* EndParticleComp = nullptr;
+
+	UNiagaraSystem* MainParticle = nullptr;
+	UNiagaraSystem* EndParticle = nullptr;
 
 	EUnitState State;
+	ESkillType MagicType;
 };

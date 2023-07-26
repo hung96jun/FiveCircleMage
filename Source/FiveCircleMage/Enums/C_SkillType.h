@@ -14,7 +14,11 @@ enum class ESkillType : uint8
 	Missile,
 	Beam,
 	InPlace,
+	Coord,
+	Mes,
 	Self,
+
+	Last = Self,
 };
 
 UCLASS()

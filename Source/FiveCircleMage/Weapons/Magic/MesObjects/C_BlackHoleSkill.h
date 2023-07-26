@@ -11,6 +11,7 @@ enum class EBlackHoleState
 {
 	None,
 	Inhalation,
+	Flash,
 	Explosion,
 };
 
@@ -21,6 +22,9 @@ class FIVECIRCLEMAGE_API AC_BlackHoleSkill : public AC_MagicDamagedMes
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UNiagaraSystem* FlashEffect;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float InhalationHeight = 50.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -30,7 +34,13 @@ protected:
 		float ExplosionDamage = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float FlashDelay = 1.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float DelayTime = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		float CurTime = 0.0f;
 
 protected:
 	UFUNCTION()

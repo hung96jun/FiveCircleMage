@@ -59,6 +59,7 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 
 private:
+	void PushViewportSize();
 	void AddInputAction(FString Key, FString Path);
 
 	void OpenElementPanel();

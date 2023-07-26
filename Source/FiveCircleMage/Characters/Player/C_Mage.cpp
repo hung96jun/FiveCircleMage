@@ -4,10 +4,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
-#include "Components/WidgetComponent.h"
-
-
-#include "UI/C_DashProgressBar.h"
 
 #include "Utilities/CLog.h"
 
@@ -67,22 +63,6 @@ AC_Mage::AC_Mage()
         CameraArm->bDoCollisionTest = true;
         bUseControllerRotationYaw = true;
     }
-
-    {
-        WidgetComp = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
-        WidgetComp->SetupAttachment(RootComponent);
-        
-        path = L"UMGEditor.WidgetBlueprint'/Game/Blueprint/UI/BpC_DashProgressBar.BpC_DashProgressBar_C'";
-        ConstructorHelpers::FClassFinder<UC_DashProgressBar> widgetClass(*path);
-        if (widgetClass.Succeeded())
-        {
-            WidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
-            WidgetComp->SetWidgetClass(widgetClass.Class);
-            WidgetComp->SetDrawSize(FVector2D(200.0f, 50.0f));
-
-            WidgetComp->AddRelativeLocation(FVector(0.0f, 0.0f, -220.0f));
-        }
-    }
 }
 
 void AC_Mage::BeginPlay()
@@ -94,18 +74,6 @@ void AC_Mage::BeginPlay()
     DashDelegate.BindUFunction(this, "EndDash");
 
     GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AC_Mage::TestFunction1);
-
-    //DashProgressBar = CreateWidget<UC_DashProgressBar>(Cast<APlayerController>(GetController()), DashClass, "DashProgressBar");
-    //if (DashProgressBar == nullptr)
-    //    CLog::Print(L"Fuck Dash", 10.0f, FColor::Red);
-    //else
-    //{
-    //    DashProgressBar->AddToViewport();
-    //    WidgetComp->SetWidget(DashProgressBar);
-    //}
-
-    Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
-
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -140,9 +108,9 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     input->BindAction(InputActions.FindRef(L"Dash"), ETriggerEvent::Triggered, this, &AC_Mage::OnDash);
     input->BindAction(InputActions.FindRef(L"MagicCast"), ETriggerEvent::Triggered, this, &AC_Mage::OnMagicCast);
-    //input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
+    input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
 
-    //input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
+    input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
 }
 
 void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
@@ -156,41 +124,16 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
     }
 }
 
-void AC_Mage::PushCastingStack(const ECastingElement Element)
-{
-    TArray<ECastingElement> elements;
-    CastingStack.GetUnsortedCastingStack(&elements);
-
-    if (CastingStack.BeginCasting(Element) == true)
-    {
-        bCasting = true;
-    }
-    else
-    {
-        bCasting = false;
-        bCastingBreak = true;
-    }
-
-    CLog::Print(L"----------------------", 10.0f, FColor::Cyan);
-    for (ECastingElement element : elements)
-    {
-        CLog::Print(UC_CastingElement::EnumToString(element), 10.0f, FColor::Cyan);
-    }
-    CLog::Print(L"----------------------", 10.0f, FColor::Cyan);
-}
-
 #pragma region Bind Action Function
 void AC_Mage::OnDash()
 {
-    Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->CallDashProgressBar();
-
     if (IsDash) return;
 
     CLog::Print(L"OnDash");
 
     FVector velocity = GetVelocity();
     if (velocity == FVector::ZeroVector)
-        velocity = GetActorForwardVector() * -1.0f;
+        velocity = FVector(1.0f, 0, 0);
 
     velocity.Z = 0.0f;
     velocity.Normalize();
@@ -202,10 +145,10 @@ void AC_Mage::OnDash()
     LaunchCharacter(velocity, true, false);
 
     FTimerHandle dashTimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(dashTimerHandle, DashDelegate, DashCoolTime, false);
+    GetWorld()->GetTimerManager().SetTimer(dashTimerHandle, DashDelegate, 0.5f, false);
 
     IsDash = true;
-    
+
     GetCapsuleComponent()->OnComponentHit.Clear();
     GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AC_Mage::TestFunction2);
 }
@@ -220,13 +163,21 @@ void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
 
-    if(CastingStack.IsCasting() == true)
-    {
-        bCasting = false;
-        bOnFire = true;
+    /**
+    * Casting stack check
+    * 0보다 크면 실행 아닐경우 return
+    * if(CastingStack > 0)
+    * {
+    *   bCasting = false;
+    *   bOnFire = true;
+    * }
+    * 
+    * else
+    *   return;
+    */
 
-        CastingStack.EndCasting();
-    }
+    bCasting = false;
+    bOnFire = true;
 }
 
 void AC_Mage::OnAssembleElement()
@@ -261,48 +212,50 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 #pragma endregion 
 
 #pragma region Casting Magic Skill Func
-/////////////////////////////////////////////////////////////
-//// Code: void OnElementPanel()
-//// Desc: Manage input key about element panel
-////////////////////////////////////////////////////////////
-//void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
-//{
-//    bool bCheck = Instance.GetValue().Get<bool>();
-//
-//    if (bCheck == true)
-//        bCasting = true;
-//}
+///////////////////////////////////////////////////////////
+// Code: void OnElementPanel()
+// Desc: Manage input key about element panel
+//////////////////////////////////////////////////////////
+void AC_Mage::OnElementPanel(const FInputActionInstance& Instance)
+{
+    bool bCheck = Instance.GetValue().Get<bool>();
 
-/////////////////////////////////////////////////////////////
-//// Code: void OpenElementPanel()
-//// Desc: Open element panel
-////////////////////////////////////////////////////////////
-//void AC_Mage::OpenElementPanel()
-//{
-//    bCasting = true;
-//    //ElementPanel->ShowPanel();
-//}
-//
-/////////////////////////////////////////////////////////////
-//// Code: void CloseElementPanel()
-//// Desc: Close element panel and insert element to stacks
-////////////////////////////////////////////////////////////
-//void AC_Mage::CloseElementPanel()
-//{
-//    //ECastingElement InputedElement = ECastingElement::None;
-//
-//    //// 여기에 선택된 원소 판별 필요
-//    //ElementPanel->HidePanel(InputedElement);
-//
-//    //if (CastingStack.BeginCasting(InputedElement))
-//    //{
-//    //    // Casting animation execute
-//    //}
-//    //else
-//    //{
-//    //    // Casting break animation execute
-//    //}
-//}
+    if (bCheck == true)
+        OpenElementPanel();
+    else
+        CloseElementPanel();
+}
+
+///////////////////////////////////////////////////////////
+// Code: void OpenElementPanel()
+// Desc: Open element panel
+//////////////////////////////////////////////////////////
+void AC_Mage::OpenElementPanel()
+{
+    bCasting = true;
+    //ElementPanel->ShowPanel();
+}
+
+///////////////////////////////////////////////////////////
+// Code: void CloseElementPanel()
+// Desc: Close element panel and insert element to stacks
+//////////////////////////////////////////////////////////
+void AC_Mage::CloseElementPanel()
+{
+    //ECastingElement InputedElement = ECastingElement::None;
+
+    //// 여기에 선택된 원소 판별 필요
+    //ElementPanel->HidePanel(InputedElement);
+
+    //if (CastingStack.BeginCasting(InputedElement))
+    //{
+    //    // Casting animation execute
+    //}
+    //else
+    //{
+    //    // Casting break animation execute
+    //}
+}
 
 ///////////////////////////////////////////////////////////
 // Code: void GetCastingStack()

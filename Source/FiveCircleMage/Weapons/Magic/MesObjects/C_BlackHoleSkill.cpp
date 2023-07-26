@@ -11,7 +11,6 @@ void AC_BlackHoleSkill::BeginPlay()
 	Super::BeginPlay();
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AC_BlackHoleSkill::OnBegin);
-
 }
 
 void AC_BlackHoleSkill::Tick(float DeltaTime)

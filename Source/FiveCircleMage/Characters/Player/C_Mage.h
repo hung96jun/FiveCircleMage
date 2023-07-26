@@ -15,12 +15,10 @@ using namespace std;
 class UInputAction;
 class UCameraComponent;
 class USpringArmComponent;
-class UWidgetComponent;
 
 struct FInputActionInstance;
 
 class UC_DamageComponent;
-class UC_DashProgressBar;
 
 USTRUCT(BlueprintType)
 struct FUnitDirection
@@ -85,7 +83,6 @@ public:
 	void GetUnsortedCastingStack(OUT TArray<ECastingElement>* UICastingStack) { *UICastingStack = UnsortedCastingStack; }
 
 	const bool& OnCasting() { return bOnCasting; }
-	const bool IsCasting() { return SortedCastingStack.size() > 0; }
 
 private:
 	///////////////////////////////////////////////////////////
@@ -146,8 +143,6 @@ private:
 	///////////////////////////////////////////////////////////
 	bool CheckInserting()
 	{
-		if (StackIndex == 5) return false;
-
 		switch (InputedElement)
 		{
 		case ECastingElement::Fire:
@@ -166,7 +161,7 @@ private:
 			break;
 
 		case ECastingElement::Dark:
-			if (CastingLog[CAST(int32, ECastingElement::Light)] > 0)
+			if (CastingLog[CAST(int32, ECastingElement::Ice)] > 0)
 				return false;
 			break;
 		}
@@ -204,15 +199,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		FUnitDirection UnitDirection;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		TSubclassOf<UC_DashProgressBar> DashClass;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		UWidgetComponent* WidgetComp;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		float DashCoolTime = 2.0f;
 
 	//------------------------------------------------------------------
 	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -258,8 +244,6 @@ public:
 	//const FVector GetMouseLocation() const { return MouseLocation; }
 	const FVector GetLookDirection() const { return LookDirection; }
 
-	void PushCastingStack(const ECastingElement Element);
-
 protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Bind Action Function
@@ -279,6 +263,14 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
+//public:
+//	void SetElementPanel(UC_ElementPanel* Panel);
+
+protected:
+	void OnElementPanel(const FInputActionInstance& Instance);
+	void OpenElementPanel();
+	void CloseElementPanel();
+
 	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
 	void Casting();
 	///////////////////////////////////////////////////////////////////////////
@@ -307,6 +299,4 @@ private:
 	FVector LookDirection = FVector::ZeroVector;
 
 	FTimerDelegate DashDelegate;
-
-	UC_DashProgressBar* DashProgressBar;
 };

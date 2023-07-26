@@ -55,13 +55,13 @@ void AC_MagicBeam::PlayParticle(int32 ParticleType)
 	transform.SetLocation(GetActorLocation());
 	transform.SetRotation(GetActorRotation().Quaternion());
 
-	//if (ParticleType == MAIN_PARTICLE)
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MainParticle, transform);
-	//else if (ParticleType == END_PARTICLE && EndParticle != nullptr)
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndParticle, transform);
-	//else if (ParticleType == SUB_PARTICLE && SubParticle != nullptr)
-	//{
-	//	transform.SetLocation(transform.GetLocation() + OwnerActor->GetActorForwardVector() * 170.0f);
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SubParticle, transform);
-	//}
+	if (ParticleType == MAIN_PARTICLE)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MainParticle, transform);
+	else if (ParticleType == END_PARTICLE && EndParticle != nullptr)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndParticle, transform);
+	else if (ParticleType == SUB_PARTICLE && SubParticle != nullptr)
+	{
+		transform.SetLocation(transform.GetLocation() + OwnerActor->GetActorForwardVector() * 170.0f);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SubParticle, transform);
+	}
 }

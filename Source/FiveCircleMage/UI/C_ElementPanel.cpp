@@ -27,28 +27,20 @@ void UC_ElementPanel::ShowPanel()
 	bIsActive = true;
 }
 
-//void UC_ElementPanel::HidePanel()
-//{
-//	this->SetVisibility(ESlateVisibility::Hidden);
-//	bIsActive = false;
-//
-//	SelectedElement = ECastingElement::None;
-//}
-//
-//void UC_ElementPanel::HidePanel(OUT ECastingElement& Element)
-//{
-//	this->SetVisibility(ESlateVisibility::Hidden);
-//	bIsActive = false;
-//
-//	Element = SelectedElement;
-//}
-
-const ECastingElement UC_ElementPanel::HidePanel()
+void UC_ElementPanel::HidePanel()
 {
 	this->SetVisibility(ESlateVisibility::Hidden);
 	bIsActive = false;
 
-	return SelectedElement;
+	SelectedElement = ECastingElement::None;
+}
+
+void UC_ElementPanel::HidePanel(OUT ECastingElement& Element)
+{
+	this->SetVisibility(ESlateVisibility::Hidden);
+	bIsActive = false;
+
+	Element = SelectedElement;
 }
 
 void UC_ElementPanel::SetWindowSize(FVector2D WindowSize)

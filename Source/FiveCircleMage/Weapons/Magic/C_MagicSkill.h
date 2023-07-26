@@ -30,7 +30,6 @@
 #include "C_MagicSkill.generated.h"
 
 class UCapsuleComponent;
-class UNiagaraSystem;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_MagicSkill : public AC_DamageBase
@@ -45,12 +44,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCapsuleComponent* Collision = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UNiagaraSystem* MainParticle = nullptr;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UNiagaraSystem* EndParticle = nullptr;
-
 public:
 	AC_MagicSkill();
 
@@ -59,7 +52,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* CopyEndParticle, float Dmg, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
+	void SetMagic(UParticleSystem* CopyMainParticle, UParticleSystem* CopyEndParticle, float Dmg, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
 	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) {};
@@ -79,10 +72,8 @@ protected:
 	float Duration;
 	float MoveSpeed;
 
-	//UParticleSystem* MainParticle = nullptr;
-	//UParticleSystem* EndParticle = nullptr;
-	/*UNiagaraSystem* MainParticle = nullptr;
-	UNiagaraSystem* EndParticle = nullptr;*/
+	UParticleSystem* MainParticle = nullptr;
+	UParticleSystem* EndParticle = nullptr;
 
 	EUnitState State;
 };

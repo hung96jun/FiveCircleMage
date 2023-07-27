@@ -162,6 +162,18 @@ private:
 	UNiagaraSystem* EndParticle = nullptr;
 };
 
+USTRUCT(BlueprintType)
+struct FMagicPool
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	const int GetPoolSize() { return Pool.Num(); }
+
+public:
+	TArray<AC_MagicSkill*> Pool;
+};
+
 UCLASS()
 class FIVECIRCLEMAGE_API AC_MagicManager : public AActor
 {
@@ -199,6 +211,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	void Init();
+
 private:
 	void CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info);
 
@@ -206,6 +220,6 @@ private:
 	UDataTable* PoolingDataTable;
 	UDataTable* MagicDataTable;
 
-	TMap<FString, TArray<AC_MagicSkill*>> Magics;
+	TMap<FString, FMagicPool> Magics;
 	TMap<FString, uint16> MagicCount;
 };

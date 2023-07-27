@@ -20,7 +20,10 @@ public:
 	AC_MagicManager* GetMagicManager() { return MagicManager; }
 
 protected:
-	virtual void Init();
+	virtual void Init() override;
+
+public:
+	void GamePooling();
 
 private:
 	AC_MagicManager* MagicManager = nullptr;

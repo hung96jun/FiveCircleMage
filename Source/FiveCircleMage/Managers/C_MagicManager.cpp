@@ -10,6 +10,7 @@
 #include "Utilities/CLog.h"
 #include "Utilities/Defines.h"
 
+
 AC_MagicManager::AC_MagicManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -77,6 +78,16 @@ void AC_MagicManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void AC_MagicManager::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void AC_MagicManager::Init()
+{
 	//////////////////////////////////////////////////////////////////////////////
 	// Create Magic Objects
 	//////////////////////////////////////////////////////////////////////////////
@@ -88,20 +99,21 @@ void AC_MagicManager::BeginPlay()
 		pair.Key = info.Value.GetKey();
 		pair.Value = 0;
 
+		CLog::Print(L"Add Magic - " + info.Value.GetKey(), 50.0f, FColor::Cyan);
+		
 		MagicCount.Add(pair);
 	}
 	//////////////////////////////////////////////////////////////////////////////
-}
 
-void AC_MagicManager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	CLog::Print(L"Pool End : Magics - " + FString::FromInt(Magics.Num()), 50.0f, FColor::Cyan);
+	CLog::Print(L"PoolSize : " + FString::FromInt(Magics.FindRef(L"BlackHole").GetPoolSize()), 50.0f, FColor::Cyan);
 
+	CLog::Print(L"End MagicManager Init", 50.0f, FColor::Cyan);
 }
 
 void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 {
-	TPair<FString, TArray<AC_MagicSkill*>> pair;
+	TPair<FString, FMagicPool> pair;
 	TArray<AC_MagicSkill*> magics;
 	pair.Key = Info.Value.GetKey();
 
@@ -133,16 +145,27 @@ void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 
 		magics.Add(magic);
 	}
-	pair.Value = magics;
+	pair.Value.Pool = magics;
 
 	Magics.Add(pair);
 }
 
 AC_MagicSkill* AC_MagicManager::OnFireMagic(const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation)
 {
-	CLog::Print(L"OnFireMagic", 10.0f, FColor::Cyan);
+	CLog::Print(L"Input : " + Key, 50.0f, FColor::Cyan);
+	UE_LOG(LogTemp, Warning, TEXT("Input : %s"), *FString(Key));
+	FString temp = L"Magics Element num : " + FString::FromInt(Magics.Num());
+	CLog::Print(temp, 50.0f, FColor::Cyan);
+	UE_LOG(LogTemp, Warning, TEXT("Data : %s"), *FString(temp));
 
-	TArray<AC_MagicSkill*> magics = Magics.FindRef(Key);
+	for (TPair<FString, FMagicPool> pair : Magics)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Key : %s"), *FString(pair.Key));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("OnFireMagic"));
+
+	TArray<AC_MagicSkill*> magics = Magics.FindRef(Key).Pool;
 	FMagicInfo info = MagicInfos.FindRef(Key);
 
 	if (MagicCount[Key] >= MaxMagic)

@@ -4,6 +4,7 @@ AC_MagicMes::AC_MagicMes()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	bActive = false;
 }
 
 void AC_MagicMes::BeginPlay()

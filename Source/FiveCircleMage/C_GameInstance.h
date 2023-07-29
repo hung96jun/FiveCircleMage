@@ -17,8 +17,13 @@ class FIVECIRCLEMAGE_API UC_GameInstance : public UGameInstance
 public:
 	UC_GameInstance();
 
+	AC_MagicManager* GetMagicManager() { return MagicManager; }
+
 protected:
-	virtual void Init();
+	virtual void Init() override;
+
+public:
+	void GamePooling();
 
 private:
 	AC_MagicManager* MagicManager = nullptr;

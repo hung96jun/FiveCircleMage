@@ -12,6 +12,8 @@ UC_DashProgressBar::UC_DashProgressBar(const FObjectInitializer& ObjectInitializ
 void UC_DashProgressBar::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UC_DashProgressBar::NativeDestruct()

@@ -9,9 +9,20 @@
 /**
  * 
  */
+class UC_GameInstance;
+
 UCLASS()
 class FIVECIRCLEMAGE_API AFiveCircleMageGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	AFiveCircleMageGameModeBase();
+
+public:
+	virtual void BeginPlay() override;
+	virtual void StartPlay() override;
+
+private:
+	UC_GameInstance* GameInstance = nullptr;
 };

@@ -45,41 +45,6 @@ void AC_PlayerController::BeginPlay()
         }
     }
 
-    //UC_ElementPanel* elementPanel = CreateWidget<UC_ElementPanel>(this, WidgetClasses.FindRef(L"ElementPanel"));
-    //if (elementPanel != nullptr)
-    //{
-    //    //ElementPanel->AddToViewport();
-    //    //
-    //    //ElementPanel->HidePanel();
-    //    ////ElementPanel->SetVisibility(ESlateVisibility::Hidden);
-    //    TPair<FString, UUserWidget*> widgetPair;
-    //    widgetPair.Key = L"ElementPanel";
-    //    widgetPair.Value = elementPanel;
-    //    
-    //    Widgets.Add(widgetPair);
-    //    elementPanel->AddToViewport();
-    //    elementPanel->HidePanel();
-    //}
-    //else
-    //{
-    //    CLog::Print(FString("Fuck you"));
-    //}
-
-    //UC_PlayerHUD* playerHUD = CreateWidget<UC_PlayerHUD>(this, WidgetClasses.FindRef(L"PlayerHUD"));
-    //if (playerHUD != nullptr)
-    //{
-    //    //PlayerHUD->AddToViewport();
-    //    //PlayerHUD->SetHealth(Character->GetUnitStatus()->GetOriginHP(), Character->GetUnitStatus()->GetCurHP());
-
-    //    TPair<FString, UUserWidget*> widgetPair;
-    //    widgetPair.Key = L"PlayerHUD";
-    //    widgetPair.Value = playerHUD;
-
-    //    Widgets.Add(widgetPair);
-    //    playerHUD->AddToViewport();
-    //    playerHUD->SetHealth(Character->GetUnitStatus()->GetOriginHP(), Character->GetUnitStatus()->GetCurHP());
-    //}
-
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
@@ -89,10 +54,10 @@ void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (bIsFirstTick)
-    {
-        PushViewportSize();
-    }
+    //if (bIsFirstTick)
+    //{
+    //    PushViewportSize();
+    //}
 
     // Ground mouse trace
     if(UGameplayStatics::IsGamePaused(GetWorld()) == false)
@@ -144,12 +109,6 @@ void AC_PlayerController::OnPossess(APawn* aPawn)
     Character = Cast<AC_Mage>(aPawn);
 }
 
-void AC_PlayerController::PushViewportSize()
-{
-    FVector2D windowSize = CAST(FVector2D, GEngine->GameViewport->Viewport->GetSizeXY());
-    //Cast<UC_ElementPanel>(Widgets.FindRef(L"ElementPanel"))->SetWindowSize(windowSize);
-}
-
 void AC_PlayerController::AddInputAction(FString Key, FString Path)
 {
     UInputAction* inputAction = nullptr;
@@ -181,6 +140,10 @@ void AC_PlayerController::OnOffElementPanel(const FInputActionInstance& Instance
         CloseElementPanel();
 }
 
+///////////////////////////////////////////////////////////
+// Code: void OnElementPanel()
+// Desc: Manage input key about element panel
+//////////////////////////////////////////////////////////
 void AC_PlayerController::OpenElementPanel()
 {
     UC_ElementPanel* panel = UIComponent->GetUI<UC_ElementPanel>("ElementPanel");
@@ -190,10 +153,14 @@ void AC_PlayerController::OpenElementPanel()
     panel->SetWindowSize(windowSize);
 }
 
+///////////////////////////////////////////////////////////
+// Code: void OpenElementPanel()
+// Desc: Open element panel
+//////////////////////////////////////////////////////////
 void AC_PlayerController::CloseElementPanel()
 {
     UC_ElementPanel* panel = UIComponent->GetUI<UC_ElementPanel>("ElementPanel");
-    panel->HidePanel();
+    Character->PushCastingStack(panel->HidePanel());
 }
 
 void AC_PlayerController::OnOffMainMenu()

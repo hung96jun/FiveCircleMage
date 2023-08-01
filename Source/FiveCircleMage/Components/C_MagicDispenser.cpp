@@ -1,12 +1,12 @@
 #include "Components/C_MagicDispenser.h"
 #include "Global.h"
 #include "Math/UnrealMathUtility.h"
+#include "C_GameInstance.h"
+#include "Managers/C_MagicManager.h"
 #include "Weapons/Magic/C_MagicSkill.h"
 
 UC_MagicDispenser::UC_MagicDispenser()
 {
-	//PrimaryComponentTick.bCanEverTick = true;
-
 	ElementTray.SetNum(5);
 
 	SetSkills();
@@ -15,8 +15,6 @@ UC_MagicDispenser::UC_MagicDispenser()
 void UC_MagicDispenser::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 }
 
 void UC_MagicDispenser::InitCasting()
@@ -42,7 +40,7 @@ void UC_MagicDispenser::SetMagicProperty()
 	}
 	else
 	{
-		// MagicManager::OnFireMagic(MagicKey, curOwnerLocation, TargetLocation, curOwnerRotation);
+		SpawnMagic(MagicKey, Owner->GetActorLocation(), TargetLocation, Owner->GetActorRotation());
 	}
 }
 
@@ -52,7 +50,7 @@ void UC_MagicDispenser::SetMultiple()
 	FRotator curOwnerRotation = Owner->GetActorRotation();
 
 	AC_MagicSkill* curCastingMagicSkill = nullptr;
-	//curCastingMagicSkill = MagicManager::OnFireMagic(MagicKey, curOwnerLocation, TargetLocation, curOwnerRotation);
+	curCastingMagicSkill = SpawnMagic(MagicKey, curOwnerLocation, TargetLocation, curOwnerRotation);
 
 	if (curCastingMagicSkill == nullptr)
 	{
@@ -63,7 +61,7 @@ void UC_MagicDispenser::SetMultiple()
 	TArray<FVector> extraLocation;
 	TArray<FRotator> extraRotation;
 	ESkillType type = curCastingMagicSkill->GetMagicType();
-	
+
 	switch (type)
 	{
 	case ESkillType::Missile:
@@ -82,7 +80,7 @@ void UC_MagicDispenser::SetMultiple()
 
 		for (int32 index = 0; index < extraLocation.Num(); index++)
 		{
-			// curCastingMagicSkill = MagicManager::OnFireMagic(MagicKey, curOwnerLocation, extraLocation[index], extraRotation[index]);
+			SpawnMagic(MagicKey, curOwnerLocation, extraLocation[index], extraRotation[index]);
 		}
 		break;
 	case ESkillType::InPlace:
@@ -94,9 +92,13 @@ void UC_MagicDispenser::SetMultiple()
 		{
 			CoordLocations.Push(TargetLocation + Owner->GetActorForwardVector() * 200 * index);
 		}
-		
 		break;
 	}
+}
+
+AC_MagicSkill* UC_MagicDispenser::SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot)
+{
+	return Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Key, CasterLocation, MouseLocation, Rot);
 }
 
 void UC_MagicDispenser::CastMagic(TArray<ECastingElement> Elements, FVector TargetPosition)
@@ -136,12 +138,12 @@ void UC_MagicDispenser::Update(float DeltaTime)
 	if (bIsCoord == false) return;
 
 	CurFrame += DeltaTime;
-	
+
 	if (CoordInterval < CurFrame)
 	{
 		CurFrame -= CoordInterval;
-		
-		// MagicManager::OnFireMagic(CoordMagicKey, FVector::ZeroVector, CoordLocations[0], FRotator::ZeroRotator);
+
+		SpawnMagic(CoordMagicKey, FVector::ZeroVector, CoordLocations[0]);
 		CoordLocations.RemoveAt(0);
 
 		if (CoordLocations.Num() == 0)

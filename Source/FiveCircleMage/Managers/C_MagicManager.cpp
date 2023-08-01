@@ -17,61 +17,61 @@ AC_MagicManager::AC_MagicManager()
 
 	FString path = L"";
 
-	{
-		{
-			path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicPoolingInfo.DT_MagicPoolingInfo'";
-			ConstructorHelpers::FObjectFinder<UDataTable> table(*path);
+	//{
+	//	{
+	//		path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicPoolingInfo.DT_MagicPoolingInfo'";
+	//		ConstructorHelpers::FObjectFinder<UDataTable> table(*path);
 
-			if (table.Succeeded())
-			{
-				PoolingDataTable = table.Object;
-				TArray<FMagicPoolingInfo*> pooling;
-				PoolingDataTable->GetAllRows<FMagicPoolingInfo>(FString(), pooling);
-				for (FMagicPoolingInfo* pool : pooling)
-				{
-					TPair<FString, FMagicPoolingInfo> info;
-					info.Key = pool->GetKey();
-					info.Value = pool;
+	//		if (table.Succeeded())
+	//		{
+	//			PoolingDataTable = table.Object;
+	//			TArray<FMagicPoolingInfo*> pooling;
+	//			PoolingDataTable->GetAllRows<FMagicPoolingInfo>(FString(), pooling);
+	//			for (FMagicPoolingInfo* pool : pooling)
+	//			{
+	//				TPair<FString, FMagicPoolingInfo> info;
+	//				info.Key = pool->GetCode();
+	//				info.Value = pool;
 
-					PoolingInfos.Add(info);
-				}
-			}
-		}
+	//				PoolingInfos.Add(info);
+	//			}
+	//		}
+	//	}
 
-		{
-			path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicInfo.DT_MagicInfo'";
-			ConstructorHelpers::FObjectFinder<UDataTable> table(*path);
+	//	{
+	//		path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicInfo.DT_MagicInfo'";
+	//		ConstructorHelpers::FObjectFinder<UDataTable> table(*path);
 
-			if (table.Succeeded())
-			{
-				MagicDataTable = table.Object;
-				TArray<FMagicInfo*> magics;
-				MagicDataTable->GetAllRows<FMagicInfo>(FString(), magics);
-				for (FMagicInfo* magic : magics)
-				{
-					TPair<FString, FMagicInfo> info;
-					info.Key = magic->GetMagicName();
-					info.Value = magic;
+	//		if (table.Succeeded())
+	//		{
+	//			MagicDataTable = table.Object;
+	//			TArray<FMagicInfo*> magics;
+	//			MagicDataTable->GetAllRows<FMagicInfo>(FString(), magics);
+	//			for (FMagicInfo* magic : magics)
+	//			{
+	//				TPair<FString, FMagicInfo> info;
+	//				info.Key = magic->GetMagicName();
+	//				info.Value = magic;
 
-					{
-						path = magic->GetMainParticlePath();
-						ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
-						if (niagara.Succeeded())
-							info.Value.SetMainParticle(niagara.Object);
-					}
+	//				{
+	//					path = magic->GetMainParticlePath();
+	//					ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
+	//					if (niagara.Succeeded())
+	//						info.Value.SetMainParticle(niagara.Object);
+	//				}
 
-					{
-						path = magic->GetEndParticlePath();
-						ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
-						if (niagara.Succeeded())
-							info.Value.SetEndParticle(niagara.Object);
-					}
+	//				{
+	//					path = magic->GetEndParticlePath();
+	//					ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
+	//					if (niagara.Succeeded())
+	//						info.Value.SetEndParticle(niagara.Object);
+	//				}
 
-					MagicInfos.Add(info);
-				}
-			}
-		}
-	}
+	//				MagicInfos.Add(info);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void AC_MagicManager::BeginPlay()
@@ -96,38 +96,34 @@ void AC_MagicManager::Init()
 		CreateMagicObject(info);
 
 		TPair<FString, uint16> pair;
-		pair.Key = info.Value.GetKey();
+		pair.Key = info.Value.GetCode();
 		pair.Value = 0;
 
-		CLog::Print(L"Add Magic - " + info.Value.GetKey(), 50.0f, FColor::Cyan);
-		
 		MagicCount.Add(pair);
 	}
 	//////////////////////////////////////////////////////////////////////////////
-
-	CLog::Print(L"Pool End : Magics - " + FString::FromInt(Magics.Num()), 50.0f, FColor::Cyan);
-	CLog::Print(L"PoolSize : " + FString::FromInt(Magics.FindRef(L"BlackHole").GetPoolSize()), 50.0f, FColor::Cyan);
-
-	CLog::Print(L"End MagicManager Init", 50.0f, FColor::Cyan);
 }
 
 void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 {
 	TPair<FString, FMagicPool> pair;
 	TArray<AC_MagicSkill*> magics;
-	pair.Key = Info.Value.GetKey();
+	pair.Key = Info.Value.GetCode();
 
 	FMagicInfo information = MagicInfos.FindRef(Info.Key);
 	for (int i = 0; i < MaxMagic; i++)
 	{
 		AC_MagicSkill* magic = Cast<AC_MagicSkill>(GetWorld()->SpawnActor(Info.Value.GetClass()));
-		magic->SetMagic(information.GetMainParticle(), information.GetEndParticle(), 
+		magic->SetMagic(information.GetMainParticle(), information.GetMainLocation(), information.GetMainRotation(),
+			information.GetEndParticle(), information.GetEndLocation(), information.GetEndRotation(),
 			information.GetDamage(), information.GetMagicType(), information.GetMaxDuration(), 
 			information.GetDebuffType(), information.GetMoveSpeed());
+		magic->SetCollisionRadius(information.GetCollisionRadius());
+		magic->SetCollisionHeight(information.GetCollisionHalfHeight());
 
 		switch (magic->GetMagicType())
 		{
-		case ESkillType::Coord: 
+		case ESkillType::Coord:
 		{
 			AC_MagicCoord* coord = Cast<AC_MagicCoord>(magic);
 			coord->SetDelayTime(information.GetTemp()[0]);
@@ -152,19 +148,6 @@ void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 
 AC_MagicSkill* AC_MagicManager::OnFireMagic(const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation)
 {
-	CLog::Print(L"Input : " + Key, 50.0f, FColor::Cyan);
-	UE_LOG(LogTemp, Warning, TEXT("Input : %s"), *FString(Key));
-	FString temp = L"Magics Element num : " + FString::FromInt(Magics.Num());
-	CLog::Print(temp, 50.0f, FColor::Cyan);
-	UE_LOG(LogTemp, Warning, TEXT("Data : %s"), *FString(temp));
-
-	for (TPair<FString, FMagicPool> pair : Magics)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Key : %s"), *FString(pair.Key));
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("OnFireMagic"));
-
 	TArray<AC_MagicSkill*> magics = Magics.FindRef(Key).Pool;
 	FMagicInfo info = MagicInfos.FindRef(Key);
 

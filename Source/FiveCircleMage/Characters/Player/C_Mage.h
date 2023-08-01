@@ -21,6 +21,7 @@ struct FInputActionInstance;
 
 class UC_DamageComponent;
 class UC_MagicDispenser;
+class UC_DashEffectComponent;
 
 USTRUCT(BlueprintType)
 struct FUnitDirection
@@ -181,7 +182,7 @@ private:
 
 	ECastingElement InputedElement;
 	int32 StackIndex = 0;
-
+	
 	bool bOnCasting = false;
 };
 
@@ -199,14 +200,20 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		USpringArmComponent* CameraArm;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TMap<FString, UInputAction*> InputActions;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UWidgetComponent* WidgetComp;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		UC_MagicDispenser* Dispenser;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		UC_DashEffectComponent* DashEffectComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		FUnitDirection UnitDirection;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		UWidgetComponent* WidgetComp;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TMap<FString, UInputAction*> InputActions;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		float DashCoolTime = 2.0f;
@@ -304,6 +311,4 @@ private:
 
 	FTimerDelegate DashDelegate;
 	FTimerDelegate DashCoolTimeDelegate;
-
-	UC_MagicDispenser* Dispenser;
 };

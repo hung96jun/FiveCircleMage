@@ -63,7 +63,7 @@ void AC_PlayerController::Tick(float DeltaTime)
     if(UGameplayStatics::IsGamePaused(GetWorld()) == false)
     {
         FVector start, end, direction;
-        float distance = 2000.0f;
+        float distance = 4000.0f;
         DeprojectMousePositionToWorld(start, direction);
         end = start + (direction * distance);
         

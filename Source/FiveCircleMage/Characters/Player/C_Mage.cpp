@@ -10,6 +10,7 @@
 #include "Managers/C_MagicManager.h"
 #include "UI/C_DashProgressBar.h"
 #include "Components/C_MagicDispenser.h"
+#include "Components/C_DashEffectComponent.h"
 
 #include "Utilities/CLog.h"
 
@@ -75,6 +76,10 @@ AC_Mage::AC_Mage()
     }
 
     {
+        DashEffectComponent = CreateDefaultSubobject<UC_DashEffectComponent>("DashEffectComponent");
+    }
+
+    {
         WidgetComp = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
         WidgetComp->SetupAttachment(RootComponent);
 
@@ -100,6 +105,9 @@ void AC_Mage::BeginPlay()
     DashDelegate.BindUFunction(this, "EndDash");
     DashCoolTimeDelegate.BindUFunction(this, "EndDashCoolTime");
 
+    bDash = false;
+    bDashCoolTime = false;
+
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
 }
 
@@ -110,16 +118,6 @@ void AC_Mage::Tick(float DeltaTime)
     DirectionState = EDirectionState::None;
 
     Dispenser->Update(DeltaTime);
-
-    if (bCasting == true)
-        CLog::Print(L"Casting : true", 0.01f, FColor::Cyan);
-    else
-        CLog::Print(L"Casting : false", 0.01f, FColor::Cyan);
-
-    if (bCastingBreak == true)
-        CLog::Print(L"CastingBreak : true", 0.01f, FColor::Cyan);
-    else
-        CLog::Print(L"CastingBreak : false", 0.01f, FColor::Cyan);
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -157,6 +155,7 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
 {
     TArray<ECastingElement> elements;
     CastingStack.GetUnsortedCastingStack(&elements);
+    DashEffectComponent->SetElement(Element);
 
     if (CastingStack.BeginCasting(Element) == true)
     {
@@ -166,6 +165,7 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
     {
         bCasting = false;
         bCastingBreak = true;
+        DashEffectComponent->SetElement(ECastingElement::None);
     }
 }
 
@@ -198,6 +198,8 @@ void AC_Mage::OnDash()
 
     bDash = true;
     bDashCoolTime = true;
+
+    DashEffectComponent->OnEffect();
 }
 
 void AC_Mage::EndDash()
@@ -214,7 +216,7 @@ void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
 
-    Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(L"BlackHole", GetActorLocation(), MouseLocation);
+    //Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(L"BlackHole", GetActorLocation(), MouseLocation);
 
     if (CastingStack.IsCasting() == true)
     {
@@ -222,6 +224,7 @@ void AC_Mage::OnMagicCast()
         bOnFire = true;
 
         CastingStack.EndCasting();
+        DashEffectComponent->SetElement(ECastingElement::None);
     }
 }
 

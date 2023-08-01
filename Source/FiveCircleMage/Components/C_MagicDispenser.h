@@ -10,7 +10,7 @@
 #include "Enums/C_SkillType.h"
 #include "C_MagicDispenser.generated.h"
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class FIVECIRCLEMAGE_API UC_MagicDispenser : public UActorComponent
 {
 	GENERATED_BODY()
@@ -38,6 +38,8 @@ private:
 	void SetMultiple();
 	void SetDarkness() {}
 
+	AC_MagicSkill* SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot = FRotator::ZeroRotator);
+
 private:
 	AC_Mage* Owner;
 	TArray<int32> ElementTray;
@@ -52,4 +54,4 @@ private:
 	TArray<FVector> CoordLocations;
 
 	float CurFrame = 0.0f;
-}; 
+};

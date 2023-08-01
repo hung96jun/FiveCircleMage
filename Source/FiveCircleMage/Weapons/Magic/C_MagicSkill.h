@@ -23,6 +23,9 @@
 /// 5. Beam
 ///		- Nothing
 /// 
+/// 6. Mes
+///		- VampiricAreaSkill: void SetInterval(float IntervalTime)
+/// 
 ///-----------------------------------------------------------------------------------------
 
 #include "CoreMinimal.h"
@@ -34,6 +37,33 @@
 #include "C_MagicSkill.generated.h"
 
 class UCapsuleComponent;
+
+struct FParticleInfo
+{
+public:
+	void SetParticle(UNiagaraSystem* _Particle, FVector _Location, FRotator _Rotation)
+	{
+		Particle = _Particle;
+		Location = _Location;
+		Rotation = _Rotation;
+	}
+
+	void Play(UCapsuleComponent*& Collision)
+	{
+		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, Collision, L"None", Location, Rotation,
+															EAttachLocation::KeepRelativeOffset, true);
+	}
+
+	const bool IsActive() { return Particle != nullptr; }
+	UNiagaraComponent*& GetComp() { return Comp; }
+
+private:
+	UNiagaraComponent* Comp = nullptr;
+	UNiagaraSystem* Particle = nullptr;
+
+	FVector Location = FVector::ZeroVector;
+	FRotator Rotation = FRotator::ZeroRotator;
+};
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_MagicSkill : public AC_DamageBase
@@ -56,8 +86,12 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void SetMagic(UNiagaraSystem* CopyMainParticle, UNiagaraSystem* CopyEndParticle, float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
+	void SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
+				  UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
+				  float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
 	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
+	void SetCollisionRadius(float Radius) { Collision->SetCapsuleRadius(Radius); }
+	void SetCollisionHeight(float HalfHeight) { Collision->SetCapsuleHalfHeight(HalfHeight); }
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) {};
 	
@@ -78,11 +112,8 @@ protected:
 	float Duration;
 	float MoveSpeed;
 
-	UNiagaraComponent* MainParticleComp = nullptr;
-	UNiagaraComponent* EndParticleComp = nullptr;
-
-	UNiagaraSystem* MainParticle = nullptr;
-	UNiagaraSystem* EndParticle = nullptr;
+	FParticleInfo MainParticle;
+	FParticleInfo EndParticle;
 
 	EUnitState State;
 	ESkillType MagicType;

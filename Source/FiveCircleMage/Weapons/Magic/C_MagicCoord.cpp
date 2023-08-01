@@ -55,7 +55,7 @@ void AC_MagicCoord::Tick(float DeltaTime)
 		Targets.Empty();
 		ActiveCollision(false);
 
-		if (EndParticle != nullptr)
+		if (EndParticle.IsActive())
 			PlayParticle(END_PARTICLE);
 	}
 }

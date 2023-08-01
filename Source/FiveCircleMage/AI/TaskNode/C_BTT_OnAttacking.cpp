@@ -3,6 +3,8 @@
 #include "Characters/Monster/AIControllers/C_AIControllerBase.h"
 #include "Utilities/Defines.h"
 
+#include "Utilities/CLog.h"
+
 UC_BTT_OnAttacking::UC_BTT_OnAttacking()
 {
 	NodeName = "BTT_OnAttacking";
@@ -18,6 +20,8 @@ EBTNodeResult::Type UC_BTT_OnAttacking::ExecuteTask(UBehaviorTreeComponent& Owne
 	CheckNullResult(controller, EBTNodeResult::Failed);
 
 	controller->OnAttacking();
+
+	CLog::Print(L"OnAttacking", 10.0f, FColor::Cyan);
 
 	return EBTNodeResult::Succeeded;
 }

@@ -28,7 +28,7 @@ public:
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) override;
 
-	void SetMaxRadius(float Radius) { MaxRadius = Radius; }
+	void SetMaxRadius(float Radius) { MaxRadius = Radius; Collision->SetCapsuleHalfHeight(MaxRadius + 100.0f); }
 	void SetSpreadSpeed(float Speed) { SpreadSpeed = Speed; }
 
 private:

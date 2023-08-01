@@ -54,10 +54,10 @@ void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (bIsFirstTick)
-    {
-        PushViewportSize();
-    }
+    //if (bIsFirstTick)
+    //{
+    //    PushViewportSize();
+    //}
 
     // Ground mouse trace
     if(UGameplayStatics::IsGamePaused(GetWorld()) == false)
@@ -109,12 +109,6 @@ void AC_PlayerController::OnPossess(APawn* aPawn)
     Character = Cast<AC_Mage>(aPawn);
 }
 
-void AC_PlayerController::PushViewportSize()
-{
-    FVector2D windowSize = CAST(FVector2D, GEngine->GameViewport->Viewport->GetSizeXY());
-    //Cast<UC_ElementPanel>(Widgets.FindRef(L"ElementPanel"))->SetWindowSize(windowSize);
-}
-
 void AC_PlayerController::AddInputAction(FString Key, FString Path)
 {
     UInputAction* inputAction = nullptr;
@@ -146,6 +140,10 @@ void AC_PlayerController::OnOffElementPanel(const FInputActionInstance& Instance
         CloseElementPanel();
 }
 
+///////////////////////////////////////////////////////////
+// Code: void OnElementPanel()
+// Desc: Manage input key about element panel
+//////////////////////////////////////////////////////////
 void AC_PlayerController::OpenElementPanel()
 {
     UC_ElementPanel* panel = UIComponent->GetUI<UC_ElementPanel>("ElementPanel");
@@ -155,6 +153,10 @@ void AC_PlayerController::OpenElementPanel()
     panel->SetWindowSize(windowSize);
 }
 
+///////////////////////////////////////////////////////////
+// Code: void OpenElementPanel()
+// Desc: Open element panel
+//////////////////////////////////////////////////////////
 void AC_PlayerController::CloseElementPanel()
 {
     UC_ElementPanel* panel = UIComponent->GetUI<UC_ElementPanel>("ElementPanel");

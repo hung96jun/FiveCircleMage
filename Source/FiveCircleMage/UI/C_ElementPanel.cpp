@@ -25,8 +25,6 @@ void UC_ElementPanel::ShowPanel()
 {
 	this->SetVisibility(ESlateVisibility::Visible);
 	bIsActive = true;
-
-	SelectedElement = ECastingElement::None;
 }
 
 //void UC_ElementPanel::HidePanel()
@@ -45,7 +43,7 @@ void UC_ElementPanel::ShowPanel()
 //	Element = SelectedElement;
 //}
 
-ECastingElement UC_ElementPanel::HidePanel()
+const ECastingElement UC_ElementPanel::HidePanel()
 {
 	this->SetVisibility(ESlateVisibility::Hidden);
 	bIsActive = false;

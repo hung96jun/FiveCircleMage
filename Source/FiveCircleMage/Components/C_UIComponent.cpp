@@ -39,7 +39,7 @@ void UC_UIComponent::CreateUI()
         pair.Value->AddToViewport();
         pair.Value->SetVisibility(ESlateVisibility::Hidden);
 
-        Widgets.Add(pair);       
+        Widgets.Add(pair);
     }
 
     //ElementPanel = CreateWidget<UC_ElementPanel>(this, WidgetClasses.FindRef(L"ElementPanel"));

@@ -15,11 +15,11 @@ using namespace std;
 class UInputAction;
 class UCameraComponent;
 class USpringArmComponent;
+class UWidgetComponent;
 
 struct FInputActionInstance;
 
 class UC_DamageComponent;
-
 class UC_MagicDispenser;
 
 USTRUCT(BlueprintType)
@@ -146,7 +146,6 @@ private:
 	///////////////////////////////////////////////////////////
 	bool CheckInserting()
 	{
-		// 여기 5대신에 현재 서클레벨 들어가야해요
 		if (StackIndex == 5) return false;
 
 		switch (InputedElement)
@@ -206,6 +205,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		FUnitDirection UnitDirection;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UWidgetComponent* WidgetComp;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		float DashCoolTime = 2.0f;
+
 	//------------------------------------------------------------------
 	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TSubclassOf<UUserWidget> WidgetClass;
@@ -217,6 +222,9 @@ protected:
 protected:
 	UFUNCTION()
 		void EndDash();
+
+	UFUNCTION()
+		void EndDashCoolTime();
 
 private:
 	const FVector FORWARD = FVector(1.0f, 0.0f, 0.0f);
@@ -236,7 +244,7 @@ public:
 
 	EDirectionState GetDirectionState() { return DirectionState; }
 
-	const bool GetIsDash() { return IsDash; }
+	const bool GetIsDash() { return bDash; }
 	
 	void ResetCastingBreak() { bCastingBreak = false; }
 	void ResetCasting() { bCasting = false; }
@@ -250,7 +258,7 @@ public:
 	//const FVector GetMouseLocation() const { return MouseLocation; }
 	const FVector GetLookDirection() const { return LookDirection; }
 
-	void PushCastingStack(ECastingElement Element);
+	void PushCastingStack(const ECastingElement Element);
 
 protected:
 	///////////////////////////////////////////////////////////////////////////
@@ -271,18 +279,9 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
-//public:
-//	void SetElementPanel(UC_ElementPanel* Panel);
-
-protected:
 	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
 	void Casting();
 	///////////////////////////////////////////////////////////////////////////
-
-	UFUNCTION()
-	void TestFunction1(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	UFUNCTION()
-	void TestFunction2(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
 	void AddInputAction(FString Key, FString Path);
@@ -291,7 +290,8 @@ private:
 	FCastingStack CastingStack;
 	EDirectionState DirectionState = EDirectionState::Forward;
 
-	bool IsDash = false;
+	bool bDash = false;
+	bool bDashCoolTime = false;
 	bool bCasting = false;
 	bool bCastingBreak = false;
 	bool bOnFire = false;
@@ -303,6 +303,7 @@ private:
 	FVector LookDirection = FVector::ZeroVector;
 
 	FTimerDelegate DashDelegate;
+	FTimerDelegate DashCoolTimeDelegate;
 
 	UC_MagicDispenser* Dispenser;
 };

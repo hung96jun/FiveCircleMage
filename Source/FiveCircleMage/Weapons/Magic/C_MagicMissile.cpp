@@ -21,7 +21,7 @@ void AC_MagicMissile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 	ActiveCollision(false);
 
-	if (EndParticle != nullptr)
+	if (EndParticle.IsActive())
 		PlayParticle(END_PARTICLE);
 }
 

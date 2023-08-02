@@ -9,6 +9,7 @@ AC_MagicSkill::AC_MagicSkill()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Collision = CreateDefaultSubobject<UCapsuleComponent>("Collision");
+	ActiveCollision(false);
 }
 
 void AC_MagicSkill::BeginPlay()
@@ -78,6 +79,7 @@ bool AC_MagicSkill::IsOtherActor(AActor* OtherActor)
 
 	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
 
+	if (otherUnit == nullptr) return false;
 	if (otherUnit->GetForceType() == OwnerActor->GetForceType()) return false;
 
 	return true;
@@ -91,6 +93,7 @@ bool AC_MagicSkill::IsOtherActor(AActor* OtherActor, AC_Unit*& CastedOtherActor)
 
 	CastedOtherActor = Cast<AC_Unit>(OtherActor);
 
+	if (CastedOtherActor == nullptr) return false;
 	if (CastedOtherActor->GetForceType() == OwnerActor->GetForceType()) return false;
 
 	return true;

@@ -48,6 +48,9 @@ void AC_PlayerController::BeginPlay()
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
+
+    UIComponent->CallUI(L"PlayerHUD");
+    UIComponent->GetUI<UC_PlayerHUD>(L"PlayerHUD")->SetHealth(Character->GetUnitStatus()->GetOriginHP(), Character->GetUnitStatus()->GetCurHP());
 }
 
 void AC_PlayerController::Tick(float DeltaTime)

@@ -23,16 +23,6 @@ class UC_DamageComponent;
 class UC_MagicDispenser;
 class UC_DashEffectComponent;
 
-USTRUCT(BlueprintType)
-struct FUnitDirection
-{
-	GENERATED_USTRUCT_BODY()
-
-public:
-	FVector ForwardVector;
-	FVector RightVector;
-};
-
 //-------------------------------[struct FCastingStack]-------------------------------------------------------------------------------------------------------------------
 USTRUCT(BlueprintType)
 struct FCastingStack
@@ -186,7 +176,6 @@ private:
 	bool bOnCasting = false;
 };
 
-
 //-------------------------------[class AC_Mage]-------------------------------------------------------------------------------------------------------------------
 UCLASS()
 class FIVECIRCLEMAGE_API AC_Mage : public AC_Unit
@@ -209,22 +198,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		UC_DashEffectComponent* DashEffectComponent;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		FUnitDirection UnitDirection;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, UInputAction*> InputActions;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		float DashCoolTime = 2.0f;
-
-	//------------------------------------------------------------------
-	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TSubclassOf<UUserWidget> WidgetClass;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UUserWidget* ElementPanel;*/
-	//------------------------------------------------------------------
 
 protected:
 	UFUNCTION()
@@ -251,18 +229,16 @@ public:
 
 	EDirectionState GetDirectionState() { return DirectionState; }
 
-	const bool GetIsDash() { return bDash; }
-	
 	void ResetCastingBreak() { bCastingBreak = false; }
 	void ResetCasting() { bCasting = false; }
 	void ResetOnFire() { bOnFire = false; }
 
+	const bool IsDash() { return bDash; }
 	const bool IsCasting() const { return bCasting; }
 	const bool IsCastingBreak() const { return bCastingBreak; }
 	const bool IsOnFire() const { return bOnFire; }
 
 	void SetMouseLocation(const FVector Value) { MouseLocation = Value; }
-	//const FVector GetMouseLocation() const { return MouseLocation; }
 	const FVector GetLookDirection() const { return LookDirection; }
 
 	void PushCastingStack(const ECastingElement Element);
@@ -273,7 +249,6 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	void OnDash();
 	void OnMagicCast();
-	void OnAssembleElement();
 	///////////////////////////////////////////////////////////////////////////
 
 	///////////////////////////////////////////////////////////////////////////
@@ -287,7 +262,6 @@ protected:
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
 	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
-	void Casting();
 	///////////////////////////////////////////////////////////////////////////
 
 private:

@@ -9,7 +9,6 @@ UC_MagicDispenser::UC_MagicDispenser()
 {
 	ElementTray.SetNum(5);
 
-	SetSkills();
 }
 
 void UC_MagicDispenser::BeginPlay()
@@ -28,7 +27,8 @@ void UC_MagicDispenser::InitCasting()
 
 void UC_MagicDispenser::SetMagicProperty()
 {
-	bool isBasicMagic = ElementTray[1] + ElementTray[2] > 0;
+	bool isBasicMagic = ElementTray[CAST(int32, ECastingElement::Fire)] + 
+		ElementTray[CAST(int32, ECastingElement::Ice)] > 0;
 
 	if (ElementTray[CAST(int32, ECastingElement::Light)] > 0 && isBasicMagic)
 	{
@@ -98,7 +98,7 @@ void UC_MagicDispenser::SetMultiple()
 
 AC_MagicSkill* UC_MagicDispenser::SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot)
 {
-	return Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Key, CasterLocation, MouseLocation, Rot);
+	return Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Owner, Key, CasterLocation, MouseLocation, Rot);
 }
 
 void UC_MagicDispenser::CastMagic(TArray<ECastingElement> Elements, FVector TargetPosition)
@@ -154,10 +154,3 @@ void UC_MagicDispenser::Update(float DeltaTime)
 		}
 	}
 }
-
-//void UC_MagicDispenser::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-//{
-//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-//	// ...
-//}

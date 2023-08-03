@@ -71,6 +71,11 @@ void AC_LivingBoom::Tick(float DeltaTime)
 		if (DelayTime <= 0.0f)
 			Boom();
 	}
+
+	if (Target != nullptr && *Target->GetUnitStatus()->GetCurHP() <= 0.0f)
+	{
+		Boom();
+	}
 }
 
 void AC_LivingBoom::BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation)
@@ -84,12 +89,12 @@ void AC_LivingBoom::BeginCasting(FVector CasterPosition, FVector TargetPosition,
 	DelayTime = OriginDelayTime;
 
 	SetCastingRotation(Rotation);
-
 	SetActorLocation(TargetPosition);
 
+	ActiveCollision(false);
 	ActivePatchCollision(true);
 
-	PlayParticle(SUB_PARTICLE);
+	PlayParticle(MAIN_PARTICLE);
 
 	if (Duration < DelayTime)
 		Duration = DelayTime + 1.0f;
@@ -97,6 +102,9 @@ void AC_LivingBoom::BeginCasting(FVector CasterPosition, FVector TargetPosition,
 
 void AC_LivingBoom::Boom()
 {
+	MainParticle.Stop();
+	PlayParticle(END_PARTICLE);
+
 	for (AC_Unit* unit : UnitsInArea)
 	{
 		DamageComp->GiveDmg(unit, Damage, State);
@@ -122,8 +130,6 @@ void AC_LivingBoom::PlayParticle(int32 ParticleType)
 		MainParticle.Play(Collision);
 	else if (ParticleType == END_PARTICLE && EndParticle.IsActive())
 		EndParticle.Play(Collision);
-	else if (ParticleType == SUB_PARTICLE && SubParticle.IsActive())
-		SubParticle.Play(PatchCollision);
 }
 
 void AC_LivingBoom::SetTarget(AC_Unit* _Target)

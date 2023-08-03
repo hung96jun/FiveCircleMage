@@ -54,11 +54,6 @@ public:
 															EAttachLocation::KeepRelativeOffset, true);
 	}
 
-	void Stop()
-	{
-		Comp->DestroyComponent();
-	}
-
 	const bool IsActive() { return Particle != nullptr; }
 	UNiagaraComponent*& GetComp() { return Comp; }
 

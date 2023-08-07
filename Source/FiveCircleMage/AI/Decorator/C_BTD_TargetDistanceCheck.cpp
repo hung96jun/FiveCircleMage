@@ -7,6 +7,7 @@
 UC_BTD_TargetDistanceCheck::UC_BTD_TargetDistanceCheck()
 {
 	NodeName = L"BTD_TargetDistanceCheck";
+	
 }
 
 bool UC_BTD_TargetDistanceCheck::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
@@ -18,18 +19,20 @@ bool UC_BTD_TargetDistanceCheck::CalculateRawConditionValue(UBehaviorTreeCompone
 	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
 	CheckNullResult(controller, false);
 
-	ACharacter* character = controller->GetCharacter();
-	CheckNullResult(character, false);
-
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	CheckNullResult(blackboard, false);
 
-	float attackRange = blackboard->GetValueAsFloat("AttackRange");
+	float targetDistance = blackboard->GetValueAsFloat("Distance");
 
-	AActor* target = Cast<AActor>(blackboard->GetValueAsObject("Target"));
-	CheckNullResult(target, false);
+	bool result = false;
+	if (CheckDistance != 0.0f)
+		result = targetDistance < CheckDistance;
 
-	float distance = FVector(character->GetActorLocation() - target->GetActorLocation()).Size();
+	else
+	{
+		float compairDistance = blackboard->GetValueAsFloat(DistanceKey.SelectedKeyName);
+		result = targetDistance < compairDistance;
+	}
 
-	return distance < attackRange;
+	return result;
 }

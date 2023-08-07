@@ -48,6 +48,9 @@ void AC_PlayerController::BeginPlay()
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
+
+    UIComponent->CallUI(L"PlayerHUD");
+    UIComponent->GetUI<UC_PlayerHUD>(L"PlayerHUD")->SetHealth(Character->GetUnitStatus()->GetOriginHP(), Character->GetUnitStatus()->GetCurHP());
 }
 
 void AC_PlayerController::Tick(float DeltaTime)
@@ -63,7 +66,7 @@ void AC_PlayerController::Tick(float DeltaTime)
     if(UGameplayStatics::IsGamePaused(GetWorld()) == false)
     {
         FVector start, end, direction;
-        float distance = 2000.0f;
+        float distance = 4000.0f;
         DeprojectMousePositionToWorld(start, direction);
         end = start + (direction * distance);
         

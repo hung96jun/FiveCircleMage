@@ -16,6 +16,7 @@ void AC_DamageBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 }
 
 void AC_DamageBase::Tick(float DeltaTime)

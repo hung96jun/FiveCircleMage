@@ -51,6 +51,8 @@ void AC_AIControllerBase::BeginPlay()
 
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AC_AIControllerBase::OnSensingTarget);
 	//TargetKeyDelegate.BindUFunction(this, "UpdateTargetKey", nullptr);
+
+	AttackTimerDelegate.BindUFunction(this, L"EndAttacking");
 }
 
 void AC_AIControllerBase::Tick(float DeltaTime)
@@ -59,6 +61,19 @@ void AC_AIControllerBase::Tick(float DeltaTime)
 
 	//Character->AddMovementInput(FVector(10.0f, 0.0f, 0.0f));
 	//MoveToLocation(FVector(10.0f, 0.0f, 0.0f));
+
+	if (Blackboard != nullptr)
+	{
+		AC_Monster* monster = Cast<AC_Monster>(GetCharacter());
+		if (monster == nullptr) return;
+
+		AActor* otherActor = Cast<AActor>(Blackboard->GetValueAsObject("Target"));
+		if (otherActor == nullptr) return;
+
+		FVector location = otherActor->GetActorLocation();
+
+		monster->SetTargetLocation(location);
+	}
 }
 
 void AC_AIControllerBase::SetPawn(APawn* InPawn)
@@ -69,6 +84,26 @@ void AC_AIControllerBase::SetPawn(APawn* InPawn)
 
 void AC_AIControllerBase::OnAttacking()
 {
+	bAttacking = true;
+	Blackboard.Get()->SetValueAsBool(L"bAttacking", bAttacking);
+
+	if (MaxAttackNum == 0)
+		Character->SetAttackNum(0);
+	else
+	{
+		int random = FMath::RandRange(0, MaxAttackNum);
+		Character->SetAttackNum(random);
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle, AttackTimerDelegate, AttackCoolTime, false);
+}
+
+void AC_AIControllerBase::EndAttacking()
+{
+	bAttacking = false;
+	Blackboard.Get()->SetValueAsBool(L"bAttacking", bAttacking);
+
+	GetWorld()->GetTimerManager().ClearTimer(AttackTimerHandle);
 }
 
 void AC_AIControllerBase::OnPossess(APawn* InPawn)
@@ -80,11 +115,16 @@ void AC_AIControllerBase::OnPossess(APawn* InPawn)
 	Character = Cast<AC_Monster>(InPawn);
 	if (Character->GetBehaviorTree() == nullptr) return;
 
+	AttackCoolTime = Character->GetAttackCoolTime();
+	MaxAttackNum = Character->GetMaxAttackNum();
+
 	UBlackboardComponent* blackboard = nullptr;
 	if (UseBlackboard(Character->GetBehaviorTree()->GetBlackboardAsset(), blackboard))
 		RunBehaviorTree(Character->GetBehaviorTree());
 
 	Blackboard = blackboard;
+	Blackboard.Get()->SetValueAsFloat(L"AttackRange", Character->GetAttackRange());
+	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_AIControllerBase::OnUnPossess()
@@ -106,11 +146,6 @@ void AC_AIControllerBase::OnSensingTarget(AActor* Actor, FAIStimulus Stimulus)
 
 				if (Blackboard.Get()->GetValueAsObject(L"Target") == nullptr)
 					Blackboard.Get()->SetValueAsObject(L"Target", Actor);
-
-				//GetWorld()->GetTimerManager().ClearTimer(TargetKeyHandle);
-				//Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", true);
-
-				//CLog::Print(L"HasLineOfSight == true", 3.0f, FColor::Yellow);
 			}
 		}
 	}

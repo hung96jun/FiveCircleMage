@@ -28,7 +28,11 @@ void AC_MagicMissile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 void AC_MagicMissile::Tick(float DeltaTime)
 {
 	if (bActive == false) return;
-	if (Duration < 0.0f) return;
+	if (Duration < 0.0f)
+	{
+		bActive = false;
+		return;
+	}
 
 	Super::Tick(DeltaTime);
 
@@ -41,7 +45,7 @@ void AC_MagicMissile::BeginCasting(FVector CasterPosition, FVector TargetPositio
 	Duration = OriginDuration;
 
 	SetCastingRotation(Rotation);
-
+	
 	SetActorLocation(CasterPosition);
 
 	MoveDirection = (TargetPosition - CasterPosition).GetSafeNormal();
@@ -55,5 +59,5 @@ void AC_MagicMissile::Move(float DeltaTime)
 {
 	FVector Location = GetActorLocation() + MoveSpeed * MoveDirection * DeltaTime;
 
-	SetActorLocation(Location); 
+	SetActorLocation(Location);
 }

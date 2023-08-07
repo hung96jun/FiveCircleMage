@@ -26,7 +26,7 @@ void AC_VampiricAreaSkill::BeginCasting(FVector CasterPosition, FVector TargetPo
 
 	DamageInterval = DelayTime;
 
-	DamageTimerDelegate.BindUFunction(this, "OnAction");
+	DamageTimerDelegate.BindUFunction(this, "OnActive");
 	GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, DamageTimerDelegate, DamageInterval, true);
 }
 

@@ -10,6 +10,7 @@ AC_LivingBoom::AC_LivingBoom()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PatchCollision = CreateDefaultSubobject<UCapsuleComponent>("PatchCollision");
+	PatchCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AC_LivingBoom::BeginPlay()
@@ -105,7 +106,7 @@ void AC_LivingBoom::Boom()
 			if (unit == Target) continue;
 
 			// Spread living boom to other monsters as MultipleCount amount
-			Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Key, FVector::ZeroVector, unit->GetActorLocation());
+			Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(OwnerActor, Key, FVector::ZeroVector, unit->GetActorLocation());
 			MultipleCount--;
 		}
 	}

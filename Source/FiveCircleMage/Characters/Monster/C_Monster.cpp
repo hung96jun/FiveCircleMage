@@ -26,3 +26,9 @@ void AC_Monster::SetAttackNum(const int Num)
 	bAttacking = true;
 	AttackNum = Num;
 }
+
+void AC_Monster::ResetAttackState()
+{
+	bAttacking = false;
+	AttackNum = -1;
+}

@@ -220,7 +220,7 @@ protected:
 		TMap<FString, FMagicInfo> MagicInfos;
 		
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int MaxMagic = 10;
+		int MaxMagic = 25;
 
 public:	
 	AC_MagicManager();
@@ -236,7 +236,7 @@ public:
 	//@return Returns the called object among the pooled objects
 	//@return Returns nullptr if there is no pooled object
 	///////////////////////////////////////////////////////////////////////////
-	AC_MagicSkill* OnFireMagic(const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
+	AC_MagicSkill* OnFireMagic(AC_Unit* Owner, const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
 
 protected:
 	virtual void BeginPlay() override;
@@ -255,4 +255,6 @@ private:
 
 	TMap<FString, FMagicPool> Magics;
 	TMap<FString, uint16> MagicCount;
+
+	TArray<FString> Errors;
 };

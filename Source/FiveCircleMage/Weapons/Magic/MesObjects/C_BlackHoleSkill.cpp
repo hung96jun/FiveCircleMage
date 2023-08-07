@@ -7,7 +7,7 @@ AC_BlackHoleSkill::AC_BlackHoleSkill()
 	PrimaryActorTick.bCanEverTick = true;
 
 	FString path = L"";
-	
+
 	{
 		path = L"/Script/Niagara.NiagaraSystem'/Game/Assets/Particles/NiagaeaBigVFXPack/Effects/Niagara/Explosion/NS_Explosion_kira.NS_Explosion_kira'";
 		ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
@@ -44,9 +44,9 @@ void AC_BlackHoleSkill::Tick(float DeltaTime)
 
 	else if (BlackHoleState == EBlackHoleState::Inhalation && CurTime <= 0.5f)
 	{
-		FVector scale = EndParticle.GetComp()->GetRelativeScale3D();
-		scale -= scale * (0.5 * DeltaTime);
-		EndParticle.GetComp()->SetRelativeScale3D(scale);
+		//FVector scale = EndParticle.GetComp()->GetRelativeScale3D();
+		//scale -= scale * (0.5 * DeltaTime);
+		//EndParticle.GetComp()->SetRelativeScale3D(scale);
 	}
 }
 
@@ -63,7 +63,7 @@ void AC_BlackHoleSkill::BeginCasting(FVector CasterPosition, FVector TargetPosit
 		CLog::Print(L"BlackHole OnActive function not isActive", 10.0f, FColor::Red);
 	else
 		CLog::Print(L"BlackHole OnActive function isActive", 10.0f, FColor::Blue);
-	
+
 	ChangeTimerDelegate.BindUFunction(this, "ChangeState");
 	GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, ChangeTimerDelegate, DelayTime, false);
 
@@ -118,12 +118,12 @@ void AC_BlackHoleSkill::OnActive()
 			DamageComp->GiveDmg(unit, Damage);
 		}
 	}
-		break;
+	break;
 	case EBlackHoleState::Flash:
 	{
 
 	}
-		break;
+	break;
 	case EBlackHoleState::Explosion:
 	{
 		for (AC_Unit* unit : OtherUnits)
@@ -141,7 +141,7 @@ void AC_BlackHoleSkill::OnActive()
 		ChangeTimerDelegate.BindUFunction(this, "ChangeState");
 		GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, ChangeTimerDelegate, 0.5f, false);
 	}
-		break;
+	break;
 	}
 }
 
@@ -156,8 +156,8 @@ void AC_BlackHoleSkill::ChangeState()
 		ChangeTimerDelegate.BindUFunction(this, "ChangeState");
 		GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, ChangeTimerDelegate, 0.5f, false);
 	}
-	
-	else if(BlackHoleState == EBlackHoleState::Flash)
+
+	else if (BlackHoleState == EBlackHoleState::Flash)
 	{
 		OnExplosion();
 		PlayParticle(END_PARTICLE);

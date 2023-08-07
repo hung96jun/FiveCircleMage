@@ -59,10 +59,14 @@ public:
 
 	void SetOwnerActor(AC_Unit* Actor) { OwnerActor = Actor; }
 
+	void SetDamageFactor(float DamageFactor) { ExtraDamageFactor = DamageFactor; }
+	void InitDamageFactor() { ExtraDamageFactor = 1.0f; }
+
 protected:
 	void Spawn(const FVector Location, const FRotator Rotation = FRotator::ZeroRotator) {}
-	
+
 protected:
 	bool bActive = false;
 	AC_Unit* OwnerActor = nullptr;
+	float ExtraDamageFactor = 1.0f;
 };

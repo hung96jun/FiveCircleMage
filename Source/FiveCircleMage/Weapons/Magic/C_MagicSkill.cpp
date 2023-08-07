@@ -9,6 +9,7 @@ AC_MagicSkill::AC_MagicSkill()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Collision = CreateDefaultSubobject<UCapsuleComponent>("Collision");
+	ActiveCollision(false);
 }
 
 void AC_MagicSkill::BeginPlay()
@@ -51,23 +52,15 @@ void AC_MagicSkill::PlayParticle(int32 ParticleType)
 	if (ParticleType == MAIN_PARTICLE)
 		MainParticle.Play(Collision);
 	else if (ParticleType == END_PARTICLE && EndParticle.IsActive())
+	{
 		EndParticle.Play(Collision);
+		MainParticle.Stop();
+	}
 }
 
 void AC_MagicSkill::SetCastingRotation(FRotator Rotation)
 {
-	FRotator TmpRotation = GetActorRotation();
-
-	if (Rotation.Pitch != 0.0f)
-		TmpRotation.Pitch = Rotation.Pitch;
-
-	if (Rotation.Yaw != 0.0f)
-		TmpRotation.Yaw = Rotation.Yaw;
-
-	if (Rotation.Roll != 0.0f)
-		TmpRotation.Roll = Rotation.Roll;
-
-	SetActorRotation(TmpRotation);
+	SetActorRotation(OriginRot + Rotation);
 }
 
 bool AC_MagicSkill::IsOtherActor(AActor* OtherActor)
@@ -78,6 +71,7 @@ bool AC_MagicSkill::IsOtherActor(AActor* OtherActor)
 
 	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
 
+	if (otherUnit == nullptr) return false;
 	if (otherUnit->GetForceType() == OwnerActor->GetForceType()) return false;
 
 	return true;
@@ -91,6 +85,7 @@ bool AC_MagicSkill::IsOtherActor(AActor* OtherActor, AC_Unit*& CastedOtherActor)
 
 	CastedOtherActor = Cast<AC_Unit>(OtherActor);
 
+	if (CastedOtherActor == nullptr) return false;
 	if (CastedOtherActor->GetForceType() == OwnerActor->GetForceType()) return false;
 
 	return true;

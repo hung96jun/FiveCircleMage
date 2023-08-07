@@ -6,8 +6,11 @@
 #include "EnhancedInputComponent.h"
 #include "Components/WidgetComponent.h"
 
+#include "C_GameInstance.h"
+#include "Managers/C_MagicManager.h"
 #include "UI/C_DashProgressBar.h"
 #include "Components/C_MagicDispenser.h"
+#include "Components/C_DashEffectComponent.h"
 
 #include "Utilities/CLog.h"
 
@@ -73,6 +76,10 @@ AC_Mage::AC_Mage()
     }
 
     {
+        DashEffectComponent = CreateDefaultSubobject<UC_DashEffectComponent>("DashEffectComponent");
+    }
+
+    {
         WidgetComp = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
         WidgetComp->SetupAttachment(RootComponent);
 
@@ -95,10 +102,16 @@ void AC_Mage::BeginPlay()
 
     GenericTeamID = 1;
 
+    ForceType = EUnitForceType::Player;
+
     DashDelegate.BindUFunction(this, "EndDash");
     DashCoolTimeDelegate.BindUFunction(this, "EndDashCoolTime");
 
+    bDash = false;
+    bDashCoolTime = false;
+
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
+    Dispenser->SetOwner(this);
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -108,16 +121,6 @@ void AC_Mage::Tick(float DeltaTime)
     DirectionState = EDirectionState::None;
 
     Dispenser->Update(DeltaTime);
-
-    if (bCasting == true)
-        CLog::Print(L"Casting : true", 0.01f, FColor::Cyan);
-    else
-        CLog::Print(L"Casting : false", 0.01f, FColor::Cyan);
-
-    if (bCastingBreak == true)
-        CLog::Print(L"CastingBreak : true", 0.01f, FColor::Cyan);
-    else
-        CLog::Print(L"CastingBreak : false", 0.01f, FColor::Cyan);
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -135,9 +138,6 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     input->BindAction(InputActions.FindRef(L"Dash"), ETriggerEvent::Triggered, this, &AC_Mage::OnDash);
     input->BindAction(InputActions.FindRef(L"MagicCast"), ETriggerEvent::Triggered, this, &AC_Mage::OnMagicCast);
-    //input->BindAction(InputActions.FindRef(L"AssembleElement"), ETriggerEvent::Triggered, this, &AC_Mage::OnAssembleElement);
-
-    //input->BindAction(InputActions.FindRef(L"OnElementPanel"), ETriggerEvent::Triggered, this, &AC_Mage::OnElementPanel);
 }
 
 void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
@@ -153,8 +153,9 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
 
 void AC_Mage::PushCastingStack(const ECastingElement Element)
 {
-    TArray<ECastingElement> elements;
-    CastingStack.GetUnsortedCastingStack(&elements);
+    //TArray<ECastingElement> elements;
+    //CastingStack.GetUnsortedCastingStack(&elements);
+    DashEffectComponent->SetElement(Element);
 
     if (CastingStack.BeginCasting(Element) == true)
     {
@@ -164,6 +165,7 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
     {
         bCasting = false;
         bCastingBreak = true;
+        DashEffectComponent->SetElement(ECastingElement::None);
     }
 }
 
@@ -196,6 +198,8 @@ void AC_Mage::OnDash()
 
     bDash = true;
     bDashCoolTime = true;
+
+    DashEffectComponent->OnEffect();
 }
 
 void AC_Mage::EndDash()
@@ -212,19 +216,19 @@ void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
 
+    //Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(L"BlackHole", GetActorLocation(), MouseLocation);
+
     if (CastingStack.IsCasting() == true)
     {
         bCasting = false;
         bOnFire = true;
 
+        DashEffectComponent->SetElement(ECastingElement::None);
+        TArray<ECastingElement> castingElement;
+        CastingStack.GetUnsortedCastingStack(&castingElement);
+        Dispenser->CastMagic(castingElement, MouseLocation);
         CastingStack.EndCasting();
     }
-}
-
-void AC_Mage::OnAssembleElement()
-{
-    bCastingBreak = true;
-    bCasting = false;
 }
 #pragma endregion
 
@@ -264,16 +268,8 @@ void AC_Mage::GetCastingStack(OUT TArray<ECastingElement>* UICastingStack)
     FVector test;
     test.GetSafeNormal();
 }
+#pragma endregion
 
-///////////////////////////////////////////////////////////
-// Code: void Casting()
-// Desc: Casting magic skill
-//////////////////////////////////////////////////////////
-void AC_Mage::Casting()
-{
-    
-}
-#pragma endregion 
 void AC_Mage::AddInputAction(FString Key, FString Path)
 {
     UInputAction* inputAction = nullptr;
@@ -294,4 +290,3 @@ void AC_Mage::AddInputAction(FString Key, FString Path)
         CLog::Print(error, 1000.0f, FColor::Red);
     }
 }
-

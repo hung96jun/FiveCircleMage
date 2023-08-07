@@ -4,12 +4,13 @@
 #include "C_GameInstance.h"
 #include "Managers/C_MagicManager.h"
 #include "Weapons/Magic/C_MagicSkill.h"
+#include "Weapons/Magic/C_MagicInplace.h"
+#include "Weapons/Magic/MesObjects/C_LivingBoom.h"
 
 UC_MagicDispenser::UC_MagicDispenser()
 {
 	ElementTray.SetNum(5);
 
-	SetSkills();
 }
 
 void UC_MagicDispenser::BeginPlay()
@@ -28,15 +29,46 @@ void UC_MagicDispenser::InitCasting()
 
 void UC_MagicDispenser::SetMagicProperty()
 {
-	bool isBasicMagic = ElementTray[1] + ElementTray[2] > 0;
+	bool isBasicMagic = ElementTray[CAST(int32, ECastingElement::Fire)] + 
+		ElementTray[CAST(int32, ECastingElement::Ice)] > 0;
 
-	if (ElementTray[CAST(int32, ECastingElement::Light)] > 0 && isBasicMagic)
+	bool isEnchantedMagic = (ElementTray[CAST(int32, ECastingElement::Light)] + ElementTray[CAST(int32, ECastingElement::Dark)]) > 0;
+
+	// Seperate Basic element and Enchanted element
+	// Basic: fire || ice
+	// Enchanted: light || dark
+	if (isBasicMagic && isEnchantedMagic)
 	{
-		SetMultiple();
-	}
-	else if (ElementTray[CAST(int32, ECastingElement::Dark)] > 0 && isBasicMagic)
-	{
-		SetDarkness();
+		MagicKey = "";
+		int iter;
+		int elementNum;
+
+		if (ElementTray[CAST(int32, ECastingElement::Fire)])
+			elementNum = CAST(int32, ECastingElement::Fire);
+		else
+			elementNum = CAST(int32, ECastingElement::Ice);
+
+		iter = ElementTray[CAST(int32, ECastingElement::Fire)] + ElementTray[CAST(int32, ECastingElement::Ice)];
+
+		for (int32 i = 0; i < 5; i++)
+		{
+			if (iter)
+			{
+				MagicKey += FString::FromInt(elementNum);
+				iter--;
+			}
+			else
+				MagicKey += "0";
+		}
+
+		if (ElementTray[CAST(int32, ECastingElement::Light)] > 0)
+		{
+			SetMultiple();
+		}
+		else if (ElementTray[CAST(int32, ECastingElement::Dark)] > 0)
+		{
+			SetDarkness();
+		}
 	}
 	else
 	{
@@ -50,6 +82,7 @@ void UC_MagicDispenser::SetMultiple()
 	FRotator curOwnerRotation = Owner->GetActorRotation();
 
 	AC_MagicSkill* curCastingMagicSkill = nullptr;
+
 	curCastingMagicSkill = SpawnMagic(MagicKey, curOwnerLocation, TargetLocation, curOwnerRotation);
 
 	if (curCastingMagicSkill == nullptr)
@@ -61,7 +94,7 @@ void UC_MagicDispenser::SetMultiple()
 	TArray<FVector> extraLocation;
 	TArray<FRotator> extraRotation;
 	ESkillType type = curCastingMagicSkill->GetMagicType();
-	
+
 	switch (type)
 	{
 	case ESkillType::Missile:
@@ -84,6 +117,7 @@ void UC_MagicDispenser::SetMultiple()
 		}
 		break;
 	case ESkillType::InPlace:
+		
 		break;
 	case ESkillType::Coord:
 		bIsCoord = true;
@@ -93,12 +127,30 @@ void UC_MagicDispenser::SetMultiple()
 			CoordLocations.Push(TargetLocation + Owner->GetActorForwardVector() * 200 * index);
 		}
 		break;
+	case ESkillType::Mes:
+		AC_LivingBoom* livingBoom = Cast<AC_LivingBoom>(curCastingMagicSkill);
+		livingBoom->SetMultple(ElementTray[CAST(int32, ECastingElement::Light)]);
+		break;
 	}
 }
 
-AC_MagicSkill* UC_MagicDispenser::SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot)
+void UC_MagicDispenser::SetDarkness()
 {
-	return Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Key, CasterLocation, MouseLocation, Rot);
+	float tmpDamageFactor = 1.0f + (DarknessDamageFactor * ElementTray[CAST(int32, ECastingElement::Dark)]);
+	
+	AC_MagicSkill* curCastingMagicSkill = nullptr;
+	curCastingMagicSkill = SpawnMagic(MagicKey, Owner->GetActorLocation(), TargetLocation, Owner->GetActorRotation(), true);
+
+	curCastingMagicSkill->SetDamageFactor(tmpDamageFactor);
+}
+
+AC_MagicSkill* UC_MagicDispenser::SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot, bool bIsDarkEnchanted)
+{
+	AC_MagicSkill* magicSkill = Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Owner, Key, CasterLocation, MouseLocation, Rot);
+
+	if (bIsDarkEnchanted == false) magicSkill->InitDamageFactor();
+
+	return magicSkill;
 }
 
 void UC_MagicDispenser::CastMagic(TArray<ECastingElement> Elements, FVector TargetPosition)
@@ -138,11 +190,11 @@ void UC_MagicDispenser::Update(float DeltaTime)
 	if (bIsCoord == false) return;
 
 	CurFrame += DeltaTime;
-	
+
 	if (CoordInterval < CurFrame)
 	{
 		CurFrame -= CoordInterval;
-		
+
 		SpawnMagic(CoordMagicKey, FVector::ZeroVector, CoordLocations[0]);
 		CoordLocations.RemoveAt(0);
 
@@ -154,10 +206,3 @@ void UC_MagicDispenser::Update(float DeltaTime)
 		}
 	}
 }
-
-//void UC_MagicDispenser::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-//{
-//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-//	// ...
-//}

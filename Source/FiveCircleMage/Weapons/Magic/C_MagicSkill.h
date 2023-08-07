@@ -50,8 +50,28 @@ public:
 
 	void Play(UCapsuleComponent*& Collision)
 	{
+		if (Particle == nullptr)
+		{
+			CLog::Print("Particle is nullptr!!!");
+			return;
+		}
+
+		if (Collision == nullptr)
+		{
+			CLog::Print("Collision is nullptr!!");
+			return;
+		}
+
 		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, Collision, L"None", Location, Rotation,
 															EAttachLocation::KeepRelativeOffset, true);
+		Comp->ResetSystem();
+		Comp->SetVisibility(true);
+	}
+
+	void Stop()
+	{
+		Comp->SetPaused(true);
+		Comp->SetVisibility(false);
 	}
 
 	const bool IsActive() { return Particle != nullptr; }
@@ -99,6 +119,8 @@ public:
 
 	const ESkillType& GetMagicType() { return MagicType; }
 
+	void SetOriginRotation(FRotator Rot) { OriginRot = Rot; }
+
 protected:
 	void SetCastingRotation(FRotator Rotation);
 	
@@ -117,4 +139,6 @@ protected:
 
 	EUnitState State;
 	ESkillType MagicType;
+
+	FRotator OriginRot;
 };

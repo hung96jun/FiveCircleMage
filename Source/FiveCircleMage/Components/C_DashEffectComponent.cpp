@@ -70,7 +70,7 @@ void UC_DashEffectComponent::SetElement(const ECastingElement& Element)
 	SelectedEffect = DashEffects[CAST(int, Element)];
 }
 
-void UC_DashEffectComponent::OnEffect()
+void UC_DashEffectComponent::OnEffect(const FVector& Value)
 {
 	FVector direction = -(GetOwner()->GetVelocity());
 	FRotator rot = direction.Rotation();

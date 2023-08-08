@@ -30,6 +30,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Test")
 		FVector TargetLocation = FVector::ZeroVector;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Test")
+		float LineDistance = 1000.0f;
+
 public:
 	AC_Monster();
 

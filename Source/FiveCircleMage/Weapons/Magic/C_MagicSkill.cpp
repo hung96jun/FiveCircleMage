@@ -28,8 +28,8 @@ void AC_MagicSkill::Tick(float DeltaTime)
 }
 
 void AC_MagicSkill::SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
-							 UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation, 
-							 float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)
+	UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
+	float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)
 {
 	MainParticle.SetParticle(CopyMainParticle, CopyMainLocation, CopyMainRotation);
 	EndParticle.SetParticle(CopyEndParticle, CopyEndLocation, CopyEndRotation);
@@ -52,23 +52,15 @@ void AC_MagicSkill::PlayParticle(int32 ParticleType)
 	if (ParticleType == MAIN_PARTICLE)
 		MainParticle.Play(Collision);
 	else if (ParticleType == END_PARTICLE && EndParticle.IsActive())
+	{
 		EndParticle.Play(Collision);
+		MainParticle.Stop();
+	}
 }
 
 void AC_MagicSkill::SetCastingRotation(FRotator Rotation)
 {
-	FRotator TmpRotation = GetActorRotation();
-
-	if (Rotation.Pitch != 0.0f)
-		TmpRotation.Pitch = Rotation.Pitch;
-
-	if (Rotation.Yaw != 0.0f)
-		TmpRotation.Yaw = Rotation.Yaw;
-
-	if (Rotation.Roll != 0.0f)
-		TmpRotation.Roll = Rotation.Roll;
-
-	SetActorRotation(TmpRotation);
+	SetActorRotation(OriginRot + Rotation);
 }
 
 bool AC_MagicSkill::IsOtherActor(AActor* OtherActor)

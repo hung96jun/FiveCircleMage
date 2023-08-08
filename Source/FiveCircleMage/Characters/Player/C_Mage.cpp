@@ -110,6 +110,8 @@ void AC_Mage::BeginPlay()
 
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
     Dispenser->SetOwner(this);
+
+    ForceType = EUnitForceType::Player;
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -151,8 +153,6 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
 
 void AC_Mage::PushCastingStack(const ECastingElement Element)
 {
-    //TArray<ECastingElement> elements;
-    //CastingStack.GetUnsortedCastingStack(&elements);
     DashEffectComponent->SetElement(Element);
 
     if (CastingStack.BeginCasting(Element) == true)
@@ -197,7 +197,7 @@ void AC_Mage::OnDash()
     bDash = true;
     bDashCoolTime = true;
 
-    DashEffectComponent->OnEffect();
+    //DashEffectComponent->OnEffect();
 }
 
 void AC_Mage::EndDash()
@@ -213,8 +213,6 @@ void AC_Mage::EndDashCoolTime()
 void AC_Mage::OnMagicCast()
 {
     CLog::Print(L"OnMagicCast");
-
-    //Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(L"BlackHole", GetActorLocation(), MouseLocation);
 
     if (CastingStack.IsCasting() == true)
     {
@@ -262,9 +260,6 @@ void AC_Mage::RightMove(const FInputActionInstance& Instance)
 void AC_Mage::GetCastingStack(OUT TArray<ECastingElement>* UICastingStack)
 {
     CastingStack.GetUnsortedCastingStack(UICastingStack);
-
-    FVector test;
-    test.GetSafeNormal();
 }
 #pragma endregion
 

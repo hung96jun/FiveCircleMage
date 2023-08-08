@@ -218,9 +218,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, FMagicInfo> MagicInfos;
-		
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int MaxMagic = 10;
+		int MaxMagic = 25;
 
 public:	
 	AC_MagicManager();

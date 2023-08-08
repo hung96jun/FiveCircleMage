@@ -37,7 +37,7 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	void OnFire(const FVector& Target);
+	void OnFire(const FVector& Start, const FVector& Target);
 
 private:
 	void SetParabolation(const FVector& Start, const FVector& End);

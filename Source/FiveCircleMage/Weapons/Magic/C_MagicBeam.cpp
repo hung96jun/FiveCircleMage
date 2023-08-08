@@ -54,7 +54,11 @@ void AC_MagicBeam::PlayParticle(int32 ParticleType)
 	if (ParticleType == MAIN_PARTICLE)
 		MainParticle.Play(Collision);
 	else if (ParticleType == END_PARTICLE && EndParticle.IsActive())
+	{
 		EndParticle.Play(Collision);
+		MainParticle.Stop();
+		SubParticle.Stop();
+	}
 	else if (ParticleType == SUB_PARTICLE && SubParticle.IsActive())
 		SubParticle.Play(Collision);
 }

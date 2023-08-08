@@ -8,6 +8,19 @@
 //class UC_MainMenu;
 //class UC_OptionMenu;
 
+USTRUCT(BlueprintType)
+struct FWidgetInfo
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TSubclassOf<UUserWidget> WidgetClasses;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int ZOrder;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FIVECIRCLEMAGE_API UC_UIComponent : public UActorComponent
 {
@@ -18,7 +31,7 @@ protected:
 		TMap<FString, UUserWidget*> Widgets;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TMap<FString, TSubclassOf<UUserWidget>> WidgetClasses;
+		TMap<FString, FWidgetInfo> WidgetInfos;
 
 	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	//	UC_ElementPanel* ElementPanel;

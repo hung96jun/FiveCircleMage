@@ -15,6 +15,9 @@ class FIVECIRCLEMAGE_API UC_MagicDispenser : public UActorComponent
 {
 	GENERATED_BODY()
 
+private:
+	const float DarknessDamageFactor = 0.6f;
+
 public:
 	UC_MagicDispenser();
 
@@ -34,9 +37,9 @@ private:
 	void SetMagicProperty();
 
 	void SetMultiple();
-	void SetDarkness() {}
+	void SetDarkness();
 
-	AC_MagicSkill* SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot = FRotator::ZeroRotator);
+	AC_MagicSkill* SpawnMagic(FString Key, FVector CasterLocation, FVector MouseLocation, FRotator Rot = FRotator::ZeroRotator, bool bIsDarkEnchanted = false);
 
 private:
 	AC_Mage* Owner;

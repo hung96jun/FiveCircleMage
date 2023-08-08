@@ -1,6 +1,7 @@
 #include "Characters/Monster/C_Monster.h"
 #include "BehaviorTree/BehaviorTree.h"
 
+#include "Utilities/CLog.h"
 
 AC_Monster::AC_Monster()
 {
@@ -13,6 +14,8 @@ void AC_Monster::BeginPlay()
 	Super::BeginPlay();
 
 	GenericTeamID = 2;
+
+	ForceType = EUnitForceType::Monster;
 }
 
 void AC_Monster::Tick(float DeltaTime)

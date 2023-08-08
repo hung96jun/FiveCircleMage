@@ -50,8 +50,28 @@ public:
 
 	void Play(UCapsuleComponent*& Collision)
 	{
+		if (Particle == nullptr)
+		{
+			CLog::Print("Particle is nullptr!!!");
+			return;
+		}
+
+		if (Collision == nullptr)
+		{
+			CLog::Print("Collision is nullptr!!");
+			return;
+		}
+
 		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, Collision, L"None", Location, Rotation,
-															EAttachLocation::KeepRelativeOffset, true);
+			EAttachLocation::KeepRelativeOffset, true);
+		Comp->ResetSystem();
+		Comp->SetVisibility(true);
+	}
+
+	void Stop()
+	{
+		Comp->SetPaused(true);
+		Comp->SetVisibility(false);
 	}
 
 	const bool IsActive() { return Particle != nullptr; }
@@ -87,25 +107,27 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	void SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
-				  UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
-				  float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
+		UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
+		float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
 	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
 	void SetCollisionRadius(float Radius) { Collision->SetCapsuleRadius(Radius); }
 	void SetCollisionHeight(float HalfHeight) { Collision->SetCapsuleHalfHeight(HalfHeight); }
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) {};
-	
+
 	virtual void PlayParticle(int32 ParticleType = MAIN_PARTICLE);
 
 	const ESkillType& GetMagicType() { return MagicType; }
 
+	void SetOriginRotation(FRotator Rot) { OriginRot = Rot; }
+
 protected:
 	void SetCastingRotation(FRotator Rotation);
-	
+
 	bool IsOtherActor(AActor* OtherActor);
 	bool IsOtherActor(AActor* OtherActor, AC_Unit*& CastedOtherActor);
 
-	void ActiveCollision(bool Active) { Active ? Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly) : Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);}
+	void ActiveCollision(bool Active) { Active ? Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly) : Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 
 protected:
 	float OriginDuration;
@@ -117,4 +139,6 @@ protected:
 
 	EUnitState State;
 	ESkillType MagicType;
+
+	FRotator OriginRot;
 };

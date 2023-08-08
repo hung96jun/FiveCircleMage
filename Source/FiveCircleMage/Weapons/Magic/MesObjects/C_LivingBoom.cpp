@@ -61,7 +61,7 @@ void AC_LivingBoom::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	if(DelayTime < 0.5f && Collision->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	if (DelayTime < 0.5f && Collision->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
 		ActiveCollision(true);
 
 	if (DelayTime > 0.0f)

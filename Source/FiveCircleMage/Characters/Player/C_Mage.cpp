@@ -121,6 +121,17 @@ void AC_Mage::Tick(float DeltaTime)
     DirectionState = EDirectionState::None;
 
     Dispenser->Update(DeltaTime);
+
+    if (bEnablePushElement == false)
+    {
+        CurCastingDelayTime += DeltaTime;
+
+        if (CurCastingDelayTime >= CastingDelay[CastingStack.StackSize()])
+        {
+            CurCastingDelayTime -= CastingDelay[CastingStack.StackSize()];
+            bEnablePushElement = true;
+        }
+    }
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

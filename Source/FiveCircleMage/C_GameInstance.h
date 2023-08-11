@@ -14,6 +14,10 @@ class FIVECIRCLEMAGE_API UC_GameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		AC_MagicManager* MagicManager = nullptr;
+
 public:
 	UC_GameInstance();
 
@@ -25,6 +29,4 @@ protected:
 public:
 	void GamePooling();
 
-private:
-	AC_MagicManager* MagicManager = nullptr;
 };

@@ -142,7 +142,6 @@ void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 			information.GetDebuffType(), information.GetMoveSpeed());
 		magic->SetCollisionRadius(information.GetCollisionRadius());
 		magic->SetCollisionHeight(information.GetCollisionHalfHeight());
-		//magic->SetActorRotation(information.GetRotation());
 		magic->SetOriginRotation(information.GetRotation());
 
 		switch (magic->GetMagicType())
@@ -152,8 +151,7 @@ void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 			AC_MagicCoord* coord = Cast<AC_MagicCoord>(magic);
 			coord->SetDelayTime(information.GetTemp()[0]);
 		}
-			break;
-
+		break;
 		case ESkillType::InPlace:
 		{
 			AC_MagicInplace* inplace = Cast<AC_MagicInplace>(magic);

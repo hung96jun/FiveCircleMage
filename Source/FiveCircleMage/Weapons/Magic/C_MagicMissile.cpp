@@ -45,7 +45,7 @@ void AC_MagicMissile::BeginCasting(FVector CasterPosition, FVector TargetPositio
 	Duration = OriginDuration;
 
 	SetCastingRotation(Rotation);
-	
+
 	SetActorLocation(CasterPosition);
 
 	MoveDirection = (TargetPosition - CasterPosition).GetSafeNormal();

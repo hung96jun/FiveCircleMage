@@ -25,14 +25,14 @@ bool UC_BTD_TargetDistanceCheck::CalculateRawConditionValue(UBehaviorTreeCompone
 	float targetDistance = blackboard->GetValueAsFloat("Distance");
 
 	bool result = false;
-	if (CheckDistance != 0.0f)
-		result = targetDistance < CheckDistance;
+	if (bFloatCompair == true)
+		return targetDistance < CheckDistance;
 
 	else
 	{
 		float compairDistance = blackboard->GetValueAsFloat(DistanceKey.SelectedKeyName);
-		result = targetDistance < compairDistance;
+		return targetDistance < compairDistance;
 	}
 
-	return result;
+	return false;
 }

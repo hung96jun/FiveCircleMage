@@ -30,7 +30,7 @@ public:
 
 	void SetElement(const ECastingElement& Element);
 
-	void OnEffect();
+	void OnEffect(const FVector& Value);
 
 private:
 	TArray<UNiagaraSystem*> DashEffects;

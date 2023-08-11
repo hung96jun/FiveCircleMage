@@ -75,6 +75,7 @@ public:
 	///////////////////////////////////////////////////////////
 	void GetUnsortedCastingStack(OUT TArray<ECastingElement>* UICastingStack) { *UICastingStack = UnsortedCastingStack; }
 
+	const int32 StackSize() { return SortedCastingStack.size(); }
 	const bool& OnCasting() { return bOnCasting; }
 	const bool IsCasting() { return SortedCastingStack.size() > 0; }
 
@@ -276,6 +277,11 @@ private:
 	bool bCasting = false;
 	bool bCastingBreak = false;
 	bool bOnFire = false;
+
+	// Delay between each stacking casting element
+	bool bEnablePushElement = true;
+	float CurCastingDelayTime = 0.0f;
+	const TArray<float> CastingDelay = { 0.0f, 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };
 
 	/**
 	* Traced mouse position

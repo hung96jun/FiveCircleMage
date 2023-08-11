@@ -63,7 +63,7 @@ public:
 		}
 
 		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, Collision, L"None", Location, Rotation,
-															EAttachLocation::KeepRelativeOffset, true);
+			EAttachLocation::KeepRelativeOffset, true);
 		Comp->ResetSystem();
 		Comp->SetVisibility(true);
 	}
@@ -107,14 +107,14 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	void SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
-				  UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
-				  float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
+		UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
+		float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
 	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
 	void SetCollisionRadius(float Radius) { Collision->SetCapsuleRadius(Radius); }
 	void SetCollisionHeight(float HalfHeight) { Collision->SetCapsuleHalfHeight(HalfHeight); }
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) {};
-	
+
 	virtual void PlayParticle(int32 ParticleType = MAIN_PARTICLE);
 
 	const ESkillType& GetMagicType() { return MagicType; }
@@ -123,11 +123,11 @@ public:
 
 protected:
 	void SetCastingRotation(FRotator Rotation);
-	
+
 	bool IsOtherActor(AActor* OtherActor);
 	bool IsOtherActor(AActor* OtherActor, AC_Unit*& CastedOtherActor);
 
-	void ActiveCollision(bool Active) { Active ? Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly) : Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);}
+	void ActiveCollision(bool Active) { Active ? Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly) : Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 
 protected:
 	float OriginDuration;

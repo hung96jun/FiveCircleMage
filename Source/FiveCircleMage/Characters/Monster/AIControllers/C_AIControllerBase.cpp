@@ -53,6 +53,7 @@ void AC_AIControllerBase::BeginPlay()
 	//TargetKeyDelegate.BindUFunction(this, "UpdateTargetKey", nullptr);
 
 	AttackTimerDelegate.BindUFunction(this, L"EndAttacking");
+	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_AIControllerBase::Tick(float DeltaTime)
@@ -82,6 +83,27 @@ void AC_AIControllerBase::SetPawn(APawn* InPawn)
 
 }
 
+void AC_AIControllerBase::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	if (InPawn == nullptr) return;
+
+	Character = Cast<AC_Monster>(InPawn);
+	if (Character->GetBehaviorTree() == nullptr) return;
+
+	AttackCoolTime = Character->GetAttackCoolTime();
+	MaxAttackNum = Character->GetMaxAttackNum();
+
+	UBlackboardComponent* blackboard = nullptr;
+	if (UseBlackboard(Character->GetBehaviorTree()->GetBlackboardAsset(), blackboard))
+		RunBehaviorTree(Character->GetBehaviorTree());
+
+	Blackboard = blackboard;
+	Blackboard.Get()->SetValueAsFloat(L"AttackRange", Character->GetAttackRange());
+	Blackboard.Get()->SetValueAsFloat(L"Distance", 1000.0f);
+}
+
 void AC_AIControllerBase::OnAttacking()
 {
 	bAttacking = true;
@@ -104,27 +126,6 @@ void AC_AIControllerBase::EndAttacking()
 	Blackboard.Get()->SetValueAsBool(L"bAttacking", bAttacking);
 
 	GetWorld()->GetTimerManager().ClearTimer(AttackTimerHandle);
-}
-
-void AC_AIControllerBase::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
-
-	if (InPawn == nullptr) return;
-
-	Character = Cast<AC_Monster>(InPawn);
-	if (Character->GetBehaviorTree() == nullptr) return;
-
-	AttackCoolTime = Character->GetAttackCoolTime();
-	MaxAttackNum = Character->GetMaxAttackNum();
-
-	UBlackboardComponent* blackboard = nullptr;
-	if (UseBlackboard(Character->GetBehaviorTree()->GetBlackboardAsset(), blackboard))
-		RunBehaviorTree(Character->GetBehaviorTree());
-
-	Blackboard = blackboard;
-	Blackboard.Get()->SetValueAsFloat(L"AttackRange", Character->GetAttackRange());
-	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_AIControllerBase::OnUnPossess()

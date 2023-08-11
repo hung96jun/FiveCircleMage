@@ -28,8 +28,8 @@ void AC_MagicSkill::Tick(float DeltaTime)
 }
 
 void AC_MagicSkill::SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
-							 UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation, 
-							 float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)
+	UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
+	float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)
 {
 	MainParticle.SetParticle(CopyMainParticle, CopyMainLocation, CopyMainRotation);
 	EndParticle.SetParticle(CopyEndParticle, CopyEndLocation, CopyEndRotation);

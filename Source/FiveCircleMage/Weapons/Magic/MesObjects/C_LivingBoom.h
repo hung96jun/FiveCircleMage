@@ -5,14 +5,14 @@
 #include "C_LivingBoom.generated.h"
 
 /**
- * 
+ *
  */
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_LivingBoom : public AC_MagicMes
 {
 	GENERATED_BODY()
-	
+
 public:
 	AC_LivingBoom();
 

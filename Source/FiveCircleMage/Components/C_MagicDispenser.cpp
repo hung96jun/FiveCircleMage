@@ -29,7 +29,7 @@ void UC_MagicDispenser::InitCasting()
 
 void UC_MagicDispenser::SetMagicProperty()
 {
-	bool isBasicMagic = ElementTray[CAST(int32, ECastingElement::Fire)] + 
+	bool isBasicMagic = ElementTray[CAST(int32, ECastingElement::Fire)] +
 		ElementTray[CAST(int32, ECastingElement::Ice)] > 0;
 
 	bool isEnchantedMagic = (ElementTray[CAST(int32, ECastingElement::Light)] + ElementTray[CAST(int32, ECastingElement::Dark)]) > 0;
@@ -117,7 +117,7 @@ void UC_MagicDispenser::SetMultiple()
 		}
 		break;
 	case ESkillType::InPlace:
-		
+
 		break;
 	case ESkillType::Coord:
 		bIsCoord = true;
@@ -137,7 +137,7 @@ void UC_MagicDispenser::SetMultiple()
 void UC_MagicDispenser::SetDarkness()
 {
 	float tmpDamageFactor = 1.0f + (DarknessDamageFactor * ElementTray[CAST(int32, ECastingElement::Dark)]);
-	
+
 	AC_MagicSkill* curCastingMagicSkill = nullptr;
 	curCastingMagicSkill = SpawnMagic(MagicKey, Owner->GetActorLocation(), TargetLocation, Owner->GetActorRotation(), true);
 

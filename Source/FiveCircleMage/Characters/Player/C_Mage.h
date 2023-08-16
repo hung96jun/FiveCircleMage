@@ -193,6 +193,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		UWidgetComponent* WidgetComp;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UWidgetComponent* CastingStackUIComp;
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		UC_MagicDispenser* Dispenser;
 
@@ -278,10 +281,11 @@ private:
 	bool bCastingBreak = false;
 	bool bOnFire = false;
 
-	// Delay between each stacking casting element
+	// Taking time to stack casting element
 	bool bEnablePushElement = true;
 	float CurCastingDelayTime = 0.0f;
-	const TArray<float> CastingDelay = { 0.0f, 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };
+	const TArray<float> CastingDelay = { 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };
+	ECastingElement PushedElement;
 
 	/**
 	* Traced mouse position

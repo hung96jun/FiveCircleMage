@@ -11,6 +11,7 @@
 #include "UI/C_DashProgressBar.h"
 #include "Components/C_MagicDispenser.h"
 #include "Components/C_DashEffectComponent.h"
+#include "UI/C_CastingStack.h"
 
 #include "Utilities/CLog.h"
 
@@ -94,6 +95,34 @@ AC_Mage::AC_Mage()
             WidgetComp->AddRelativeLocation(FVector(0.0f, 0.0f, -220.0f));
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    {
+        CastingStackUIComp = CreateDefaultSubobject<UWidgetComponent>("CastingStackUIComp");
+        CastingStackUIComp->SetupAttachment(RootComponent);
+
+        path = L"UMGEditor.WidgetBlueprint'/Game/Blueprint/UI/BpC_CastingStack.BpC_CastingStack_C'";
+        ConstructorHelpers::FClassFinder<UC_CastingStack> castingStackClass(*path);
+        if (castingStackClass.Succeeded())
+        {
+            CastingStackUIComp->SetWidgetSpace(EWidgetSpace::Screen);
+            CastingStackUIComp->SetWidgetClass(castingStackClass.Class);
+            CastingStackUIComp->SetDrawSize(FVector2D(200.0f, 30.0f));
+
+            CastingStackUIComp->AddRelativeLocation(FVector(0.0f, 80.0f, 200.0f));
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // 1. 게임실행
+            // 2. 5스택 쌓기
+            // 3. 일시정지 후 f8
+            // 4. 위치 확인해서 1칸당 평균 이동 값 도출하기
+            //
+            //CastingStackUIComp->GetRelativeLocation();
+            //CastingStackUIComp->SetRelativeLocation(FVector::ZeroVector);
+            //////////////////////////////////////////////////////////////////////////////////////
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void AC_Mage::BeginPlay()
@@ -109,6 +138,7 @@ void AC_Mage::BeginPlay()
     bDashCoolTime = false;
 
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
+    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetOwner(this);
     Dispenser->SetOwner(this);
 
     ForceType = EUnitForceType::Player;
@@ -122,6 +152,7 @@ void AC_Mage::Tick(float DeltaTime)
 
     Dispenser->Update(DeltaTime);
 
+    ////////////////////////////////////////////////////////////////////
     if (bEnablePushElement == false)
     {
         CurCastingDelayTime += DeltaTime;
@@ -130,8 +161,24 @@ void AC_Mage::Tick(float DeltaTime)
         {
             CurCastingDelayTime -= CastingDelay[CastingStack.StackSize()];
             bEnablePushElement = true;
+
+            if (CastingStack.BeginCasting(PushedElement) == true)
+            {
+                bCasting = true;
+            }
+            else
+            {
+                bCasting = false;
+                bCastingBreak = true;
+                DashEffectComponent->SetElement(ECastingElement::None);
+
+                Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->HidePanel();
+            }
+
+            PushedElement = ECastingElement::None;
         }
     }
+    ////////////////////////////////////////////////////////////////////
 }
 
 void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -164,18 +211,28 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
 
 void AC_Mage::PushCastingStack(const ECastingElement Element)
 {
+    if (bEnablePushElement == false)
+    {
+        // "지금은 캐스팅할 수 없다" 음성 넣고 싶고
+        
+        /////////////////////////////////////////////////////////////////////
+        Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->ShakePanel();
+        /////////////////////////////////////////////////////////////////////
+
+        return;
+    }
+
     DashEffectComponent->SetElement(Element);
 
-    if (CastingStack.BeginCasting(Element) == true)
-    {
-        bCasting = true;
-    }
-    else
-    {
-        bCasting = false;
-        bCastingBreak = true;
-        DashEffectComponent->SetElement(ECastingElement::None);
-    }
+    bEnablePushElement = false;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    PushedElement = Element;
+
+    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->ShowPanel();
+    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetStackSlot(CastingStack.StackSize(), CAST(int32, PushedElement), CastingDelay[CastingStack.StackSize()]);
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
 
 #pragma region Bind Action Function
@@ -223,6 +280,8 @@ void AC_Mage::EndDashCoolTime()
 
 void AC_Mage::OnMagicCast()
 {
+    if (bEnablePushElement == false) return;
+
     CLog::Print(L"OnMagicCast");
 
     if (CastingStack.IsCasting() == true)
@@ -235,6 +294,10 @@ void AC_Mage::OnMagicCast()
         CastingStack.GetUnsortedCastingStack(&castingElement);
         Dispenser->CastMagic(castingElement, MouseLocation);
         CastingStack.EndCasting();
+
+        ////////////////////////////////////////////////////////////////////
+        Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->HidePanel();
+        ////////////////////////////////////////////////////////////////////
     }
 }
 #pragma endregion

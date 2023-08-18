@@ -22,5 +22,5 @@ void UC_SpiderAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	Speed = Character->GetVelocity().Size();
 	Direction = UKismetAnimationLibrary::CalculateDirection(Character->GetVelocity(), Character->GetActorRotation());
-
+	bAttacking = Character->IsAttacking();
 }

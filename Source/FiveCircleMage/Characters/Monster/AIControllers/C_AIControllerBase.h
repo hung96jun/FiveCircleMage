@@ -25,9 +25,19 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UAISenseConfig_Sight* SensingSight;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float AttackCoolTime = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int MaxAttackNum = 0;
+
 public:
 	UFUNCTION()
 		void OnSensingTarget(AActor* Actor, FAIStimulus Stimulus);
+
+protected:
+	UFUNCTION()
+		void EndAttacking();
 
 public:
 	AC_AIControllerBase();
@@ -47,5 +57,10 @@ protected:
 	virtual void OnUnPossess() override;
 
 private:
+	FTimerDelegate AttackTimerDelegate;
+	FTimerHandle AttackTimerHandle;
+
 	AC_Monster* Character = nullptr;
+
+	bool bAttacking = false;
 };

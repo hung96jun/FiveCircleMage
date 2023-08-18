@@ -52,9 +52,13 @@ void AC_MagicBeam::BeginCasting(FVector CasterPosition, FVector TargetPosition, 
 void AC_MagicBeam::PlayParticle(int32 ParticleType)
 {
 	if (ParticleType == MAIN_PARTICLE)
-		MainParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), MainParticle, GetActorLocation());
-	else if (ParticleType == END_PARTICLE && EndParticle != nullptr)
-		EndParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EndParticle, GetActorLocation());
-	else if (ParticleType == SUB_PARTICLE && SubParticle != nullptr)
-		SubParticleComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SubParticle, GetActorLocation() + OwnerActor->GetActorForwardVector() * 170.0f);
+		MainParticle.Play(Collision);
+	else if (ParticleType == END_PARTICLE && EndParticle.IsActive())
+	{
+		EndParticle.Play(Collision);
+		MainParticle.Stop();
+		SubParticle.Stop();
+	}
+	else if (ParticleType == SUB_PARTICLE && SubParticle.IsActive())
+		SubParticle.Play(Collision);
 }

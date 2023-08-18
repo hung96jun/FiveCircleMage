@@ -23,13 +23,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) override;
-	void SetDelayTime(float Time) { OriginDelayTime = DelayTime; }
+	void SetDelayTime(float Time) { OriginDelayTime = Time; }
 
 protected:
 	//virtual void OnActive() {}
 	virtual void EndActive();
 
-private:
+protected:
 	float OriginDelayTime;
 	float DelayTime;
 };

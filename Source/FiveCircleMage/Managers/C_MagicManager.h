@@ -18,17 +18,19 @@ struct FMagicPoolingInfo : public FTableRowBase
 
 public:
 	FMagicPoolingInfo() {}
-	FMagicPoolingInfo(const FString Key, TSubclassOf<AC_MagicSkill> Class, const ESkillType Type)
-		: Key(Key), Class(Class), MagicType(Type) {}
+	FMagicPoolingInfo(const FString Name, const FString Code, TSubclassOf<AC_MagicSkill> Class, const ESkillType Type)
+		: Name(Name), Code(Code), Class(Class), MagicType(Type) {}
 
-	const FString& GetKey() { return Key; }
+	const FString& GetName() { return Name; }
+	const FString& GetCode() { return Code; }
 	const ESkillType& GetMagicType() { return MagicType; }
 	//const int32& GetMax() { return Max; }
 	TSubclassOf<AC_MagicSkill> GetClass() { return Class; }
 
 	FMagicPoolingInfo& operator=(FMagicPoolingInfo* Other)
 	{
-		this->Key = Other->GetKey();
+		this->Name = Other->GetName();
+		this->Code = Other->GetCode();
 		this->Class = Other->GetClass();
 		this->MagicType = Other->GetMagicType();
 		//this->Max = Other->GetMax();
@@ -38,7 +40,10 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FString Key = L"";
+		FString Name = L"";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FString Code = L"";
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TSubclassOf<AC_MagicSkill> Class = nullptr;
@@ -58,6 +63,7 @@ struct FMagicInfo : public FTableRowBase
 public:
 	FMagicInfo() {}
 
+	const FString& GetMagicCode() { return Code; }
 	const FString& GetMagicName() { return MagicName; }
 	const ESkillType& GetMagicType() { return MagicType; }
 	const FString& GetMainParticlePath() {return MainParticlePath; }
@@ -66,7 +72,11 @@ public:
 	const float& GetMoveSpeed() {return MoveSpeed; }
 	const float& GetDamage() {return Damage; }
 	const EUnitState& GetDebuffType() {return DebuffType; }
-	const float& GetCollisionHeight() {return CollisionHeight; }
+	const FVector& GetMainLocation() { return MainLocation; }
+	const FRotator& GetMainRotation() { return MainRotation; }
+	const FVector& GetEndLocation() { return EndLocation; }
+	const FRotator& GetEndRotation() { return EndRotation; }
+	const float& GetCollisionHalfHeight() {return CollisionHalfHeight; }
 	const float& GetCollisionRadius() {return CollisionRadius; }
 	const FVector& GetCollisionScale() { return CollisionScale; }
 	const FRotator& GetRotation() {return Rotation;}
@@ -80,6 +90,7 @@ public:
 
 	FMagicInfo& operator=(FMagicInfo* Other)
 	{
+		this->Code = Other->GetMagicCode();
 		this->MagicName = Other->GetMagicName();
 		this->MagicType = Other->GetMagicType();
 		this->MainParticlePath = Other->GetMainParticlePath();
@@ -88,7 +99,11 @@ public:
 		this->MoveSpeed = Other->GetMoveSpeed();
 		this->Damage = Other->GetDamage();
 		this->DebuffType = Other->GetDebuffType();
-		this->CollisionHeight = Other->GetCollisionHeight();
+		this->MainLocation = Other->GetMainLocation();
+		this->MainRotation = Other->GetMainRotation();
+		this->EndLocation = Other->GetEndLocation();
+		this->EndRotation = Other->GetEndRotation();
+		this->CollisionHalfHeight = Other->GetCollisionHalfHeight();
 		this->CollisionRadius = Other->GetCollisionRadius();
 		this->CollisionScale = Other->GetCollisionScale();
 		this->Rotation = Other->GetRotation();
@@ -98,6 +113,9 @@ public:
 	}
 
 protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
+		FString Code = L"";
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		FString MagicName = L"";
 
@@ -122,8 +140,20 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		EUnitState DebuffType = EUnitState::Normal;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Particle")
+		FVector MainLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Particle")
+		FRotator MainRotation = FRotator::ZeroRotator;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Particle")
+		FVector EndLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Particle")
+		FRotator EndRotation = FRotator::ZeroRotator;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Collision")
-		float CollisionHeight = 0.0f;
+		float CollisionHalfHeight = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Collision")
 		float CollisionRadius = 0.0f;
@@ -153,6 +183,9 @@ protected:
 	
 	5. Beam
 		- Nothing
+
+	6. Mes
+		- VampiricAreaSkill : void SetInterval(float IntervalTime);
 	*/
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Additional Information")
 		TArray<float> Temps;
@@ -185,9 +218,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, FMagicInfo> MagicInfos;
-		
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int MaxMagic = 10;
+		int MaxMagic = 25;
 
 public:	
 	AC_MagicManager();
@@ -199,11 +232,11 @@ public:
 	//Based on the MagicInfo information entered in the DataTable Blueprint, 
 	//the pooled MagicSkill object is called and fired using the Key value 
 	//and Type value entered as parameters.
-	//@param Key : Magic key value
+	//@param Key : Magic Code value
 	//@return Returns the called object among the pooled objects
 	//@return Returns nullptr if there is no pooled object
 	///////////////////////////////////////////////////////////////////////////
-	AC_MagicSkill* OnFireMagic(const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
+	AC_MagicSkill* OnFireMagic(AC_Unit* Owner, const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
 
 protected:
 	virtual void BeginPlay() override;
@@ -222,4 +255,6 @@ private:
 
 	TMap<FString, FMagicPool> Magics;
 	TMap<FString, uint16> MagicCount;
+
+	TArray<FString> Errors;
 };

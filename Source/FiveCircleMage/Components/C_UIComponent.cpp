@@ -30,33 +30,16 @@ void UC_UIComponent::CallUI(FString key)
 
 void UC_UIComponent::CreateUI()
 {
-    for (TPair<FString, TSubclassOf<UUserWidget>> classPair : WidgetClasses)
+    for (TPair<FString, FWidgetInfo> widgetPair : WidgetInfos)
     {
         TPair<FString, UUserWidget*> pair;
-        pair.Key = classPair.Key;
-        pair.Value = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), WidgetClasses.FindRef(classPair.Key));
+        pair.Key = widgetPair.Key;
+        //pair.Value = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), WidgetClasses.FindRef(classPair.Key));
+        pair.Value = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), widgetPair.Value.WidgetClasses);
 
-        pair.Value->AddToViewport();
+        pair.Value->AddToViewport(widgetPair.Value.ZOrder);
         pair.Value->SetVisibility(ESlateVisibility::Hidden);
 
         Widgets.Add(pair);
     }
-
-    //ElementPanel = CreateWidget<UC_ElementPanel>(this, WidgetClasses.FindRef(L"ElementPanel"));
-    //if (ElementPanel != nullptr)
-    //{
-    //    ElementPanel->AddToViewport();
-    //
-    //    ElementPanel->HidePanel();
-    //    //ElementPanel->SetVisibility(ESlateVisibility::Hidden);
-    //}
-    //else
-    //{
-    //    CLog::Print(FString("Fuck you"));
-    //}
-    //
-    //MainMenu = CreateWidget<UC_MainMenu>(this, WidgetClasses.FindRef(L"MainMenu"));
-    ////MainMenu->SetOwner(this);
-    //
-    //OptionMenu = CreateWidget<UC_OptionMenu>(this, WidgetClasses.FindRef(L"OptionMenu"));
 }

@@ -12,6 +12,7 @@
 class UButton;
 class AC_PlayerController;
 class UC_OptionMenu;
+class UC_VolumeMenu;
 
 UCLASS()
 class FIVECIRCLEMAGE_API UC_MainMenu : public UUserWidget
@@ -19,12 +20,12 @@ class FIVECIRCLEMAGE_API UC_MainMenu : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
-
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, meta = (BindWidget))
 		UButton* ResumeButton;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, meta = (BindWidget))
-		UButton* OptionButton;
+		UButton* GrafficOptionButton;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, meta = (BindWidget))
+		UButton* SoundOptionButton;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, meta = (BindWidget))
 		UButton* ExitButton;
 
@@ -36,11 +37,16 @@ public:
 
 	void SetOptionMenu(UC_OptionMenu* optionMenu) { OptionMenu = optionMenu; }
 
+	void SetOptionMenu(UC_VolumeMenu* optionMenu) { VolumeMenu = optionMenu; }
+
 	UFUNCTION()
 	void OnOffMenu();
 	
 	UFUNCTION()
-	void ClickedOptionButton();
+	void ClickedGrafficOptionButton();
+
+	UFUNCTION()
+	void ClickedSoundOptionButton();
 
 	UFUNCTION()
 	void ClickedExitButton();
@@ -48,6 +54,6 @@ public:
 private:
 	bool bIsActive = false;
 
-	//AC_PlayerController* OwnerController = nullptr;
 	UC_OptionMenu* OptionMenu = nullptr;
+	UC_VolumeMenu* VolumeMenu = nullptr;
 };

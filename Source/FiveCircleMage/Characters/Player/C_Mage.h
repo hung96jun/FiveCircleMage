@@ -23,16 +23,6 @@ class UC_DamageComponent;
 class UC_MagicDispenser;
 class UC_DashEffectComponent;
 
-USTRUCT(BlueprintType)
-struct FUnitDirection
-{
-	GENERATED_USTRUCT_BODY()
-
-public:
-	FVector ForwardVector;
-	FVector RightVector;
-};
-
 //-------------------------------[struct FCastingStack]-------------------------------------------------------------------------------------------------------------------
 USTRUCT(BlueprintType)
 struct FCastingStack
@@ -85,6 +75,7 @@ public:
 	///////////////////////////////////////////////////////////
 	void GetUnsortedCastingStack(OUT TArray<ECastingElement>* UICastingStack) { *UICastingStack = UnsortedCastingStack; }
 
+	const int32 StackSize() { return SortedCastingStack.size(); }
 	const bool& OnCasting() { return bOnCasting; }
 	const bool IsCasting() { return SortedCastingStack.size() > 0; }
 
@@ -182,10 +173,9 @@ private:
 
 	ECastingElement InputedElement;
 	int32 StackIndex = 0;
-
+	
 	bool bOnCasting = false;
 };
-
 
 //-------------------------------[class AC_Mage]-------------------------------------------------------------------------------------------------------------------
 UCLASS()
@@ -200,25 +190,20 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		USpringArmComponent* CameraArm;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UWidgetComponent* WidgetComp;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		UC_MagicDispenser* Dispenser;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		UC_DashEffectComponent* DashEffectComponent;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, UInputAction*> InputActions;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		FUnitDirection UnitDirection;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		UWidgetComponent* WidgetComp;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		float DashCoolTime = 2.0f;
-
-	//------------------------------------------------------------------
-	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TSubclassOf<UUserWidget> WidgetClass;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UUserWidget* ElementPanel;*/
-	//------------------------------------------------------------------
 
 protected:
 	UFUNCTION()
@@ -245,18 +230,16 @@ public:
 
 	EDirectionState GetDirectionState() { return DirectionState; }
 
-	const bool GetIsDash() { return bDash; }
-	
 	void ResetCastingBreak() { bCastingBreak = false; }
 	void ResetCasting() { bCasting = false; }
 	void ResetOnFire() { bOnFire = false; }
 
+	const bool IsDash() { return bDash; }
 	const bool IsCasting() const { return bCasting; }
 	const bool IsCastingBreak() const { return bCastingBreak; }
 	const bool IsOnFire() const { return bOnFire; }
 
 	void SetMouseLocation(const FVector Value) { MouseLocation = Value; }
-	//const FVector GetMouseLocation() const { return MouseLocation; }
 	const FVector GetLookDirection() const { return LookDirection; }
 
 	void PushCastingStack(const ECastingElement Element);
@@ -267,7 +250,6 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	void OnDash();
 	void OnMagicCast();
-	void OnAssembleElement();
 	///////////////////////////////////////////////////////////////////////////
 
 	///////////////////////////////////////////////////////////////////////////
@@ -281,7 +263,6 @@ protected:
 	// Casting Magic Skill Func
 	///////////////////////////////////////////////////////////////////////////
 	void GetCastingStack(OUT TArray<ECastingElement>* UICastingStack);
-	void Casting();
 	///////////////////////////////////////////////////////////////////////////
 
 private:
@@ -297,6 +278,11 @@ private:
 	bool bCastingBreak = false;
 	bool bOnFire = false;
 
+	// Delay between each stacking casting element
+	bool bEnablePushElement = true;
+	float CurCastingDelayTime = 0.0f;
+	const TArray<float> CastingDelay = { 0.0f, 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };
+
 	/**
 	* Traced mouse position
 	*/
@@ -305,8 +291,4 @@ private:
 
 	FTimerDelegate DashDelegate;
 	FTimerDelegate DashCoolTimeDelegate;
-
-	UC_MagicDispenser* Dispenser;
-
-	UC_DashEffectComponent* DashEffectComponent;
 };

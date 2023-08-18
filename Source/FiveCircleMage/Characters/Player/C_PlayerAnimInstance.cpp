@@ -29,7 +29,7 @@ void UC_PlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	DirectionState = Character->GetDirectionState();
 
-	IsDash = Character->GetIsDash();
+	IsDash = Character->IsDash();
 
 	bCasting = Character->IsCasting();
 	bCastingBreak = Character->IsCastingBreak();

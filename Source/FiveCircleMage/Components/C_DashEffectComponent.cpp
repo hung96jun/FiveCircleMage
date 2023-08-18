@@ -6,6 +6,7 @@
 
 #include "Enums/C_CastingElement.h"
 #include "Utilities/Defines.h"
+#include "Utilities/CLog.h"
 
 UC_DashEffectComponent::UC_DashEffectComponent()
 {
@@ -52,12 +53,12 @@ UC_DashEffectComponent::UC_DashEffectComponent()
 	}
 }
 
-
 void UC_DashEffectComponent::BeginPlay()
 {
 	Super::BeginPlay();
-}
 
+	SetElement(ECastingElement::None);
+}
 
 void UC_DashEffectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -69,13 +70,29 @@ void UC_DashEffectComponent::SetElement(const ECastingElement& Element)
 	SelectedEffect = DashEffects[CAST(int, Element)];
 }
 
-void UC_DashEffectComponent::OnEffect()
+void UC_DashEffectComponent::OnEffect(const FVector& Value)
 {
-	FVector direction = -GetOwner()->GetVelocity();
+	FVector direction = -(GetOwner()->GetVelocity());
 	FRotator rot = direction.Rotation();
 	rot.Pitch = 0.0f;
 	rot.Roll = 0.0f;
+	rot.Yaw += 180.0f;
 
-	UNiagaraFunctionLibrary::SpawnSystemAttached(SelectedEffect, GetOwner()->GetRootComponent(), "None",
-		GetOwner()->GetActorLocation(), rot, EAttachLocation::KeepWorldPosition, true);
+	direction.Normalize();
+	FVector location = GetOwner()->GetActorLocation();
+	direction *= Offset;
+	location.X += direction.X;
+	location.Y += direction.Y;
+
+	//UNiagaraComponent* comp = UNiagaraFunctionLibrary::SpawnSystemAttached(SelectedEffect, GetOwner()->GetRootComponent(), "None",
+	//	FVector::ZeroVector, rot, EAttachLocation::KeepRelativeOffset, true);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SelectedEffect,
+		location, rot);
+
+	//if (comp == nullptr)
+	//	CLog::Print(L"Niagara nullptr", 10.0f, FColor::Cyan);
+	//else
+	//	CLog::Print(L"Niagara not nullptr", 10.0f, FColor::Cyan);
+
+	CLog::Print(L"Dash OnEffect", 10.0f, FColor::Red);
 }

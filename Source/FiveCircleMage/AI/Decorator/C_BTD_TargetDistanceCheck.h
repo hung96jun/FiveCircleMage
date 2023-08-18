@@ -12,6 +12,16 @@ class FIVECIRCLEMAGE_API UC_BTD_TargetDistanceCheck : public UBTDecorator
 {
 	GENERATED_BODY()
 	
+protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bFloatCompair = false;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float CheckDistance = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FBlackboardKeySelector DistanceKey;
+
 public:
 	UC_BTD_TargetDistanceCheck();
 

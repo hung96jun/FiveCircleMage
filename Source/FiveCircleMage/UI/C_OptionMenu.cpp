@@ -2,11 +2,10 @@
 
 
 #include "UI/C_OptionMenu.h"
+#include "GameFramework/GameUserSettings.h"
 #include "Components/ComboBoxString.h"
 #include "Components/CheckBox.h"
-#include "GameFramework/GameUserSettings.h"
 #include "Components/Button.h"
-
 #include "Characters/Player/C_Mage.h"
 
 UC_OptionMenu::UC_OptionMenu(const FObjectInitializer& ObjectInitializer)

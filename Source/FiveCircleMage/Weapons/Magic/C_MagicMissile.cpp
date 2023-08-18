@@ -21,14 +21,18 @@ void AC_MagicMissile::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 	ActiveCollision(false);
 
-	if (EndParticle != nullptr)
+	if (EndParticle.IsActive())
 		PlayParticle(END_PARTICLE);
 }
 
 void AC_MagicMissile::Tick(float DeltaTime)
 {
 	if (bActive == false) return;
-	if (Duration < 0.0f) return;
+	if (Duration < 0.0f)
+	{
+		bActive = false;
+		return;
+	}
 
 	Super::Tick(DeltaTime);
 
@@ -55,5 +59,5 @@ void AC_MagicMissile::Move(float DeltaTime)
 {
 	FVector Location = GetActorLocation() + MoveSpeed * MoveDirection * DeltaTime;
 
-	SetActorLocation(Location); 
+	SetActorLocation(Location);
 }

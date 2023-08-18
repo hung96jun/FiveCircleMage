@@ -10,7 +10,6 @@
 UC_MagicDispenser::UC_MagicDispenser()
 {
 	ElementTray.SetNum(5);
-
 }
 
 void UC_MagicDispenser::BeginPlay()
@@ -121,10 +120,11 @@ void UC_MagicDispenser::SetMultiple()
 		break;
 	case ESkillType::Coord:
 		bIsCoord = true;
+		CoordMagicKey = MagicKey;
 
 		for (int32 index = 1; index <= ElementTray[CAST(int32, ECastingElement::Light)] * 2; index++)
 		{
-			CoordLocations.Push(TargetLocation + Owner->GetActorForwardVector() * 200 * index);
+			CoordLocations.Push(TargetLocation + Owner->GetActorForwardVector() * 600 * index);
 		}
 		break;
 	case ESkillType::Mes:

@@ -21,7 +21,9 @@ void AC_Unit::Tick(float DeltaTime)
 
 void AC_Unit::GetDmg(const float Dmg, const EUnitState Type)
 {
-	
+	UnitStatus.GetDmg(Dmg);
+
+	//Type에 의한 디버프 설정해야함
 }
 
 void AC_Unit::SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info)

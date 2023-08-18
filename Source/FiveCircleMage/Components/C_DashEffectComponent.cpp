@@ -86,13 +86,6 @@ void UC_DashEffectComponent::OnEffect(const FVector& Value)
 
 	//UNiagaraComponent* comp = UNiagaraFunctionLibrary::SpawnSystemAttached(SelectedEffect, GetOwner()->GetRootComponent(), "None",
 	//	FVector::ZeroVector, rot, EAttachLocation::KeepRelativeOffset, true);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SelectedEffect,
-		location, rot);
-
-	//if (comp == nullptr)
-	//	CLog::Print(L"Niagara nullptr", 10.0f, FColor::Cyan);
-	//else
-	//	CLog::Print(L"Niagara not nullptr", 10.0f, FColor::Cyan);
-
-	CLog::Print(L"Dash OnEffect", 10.0f, FColor::Red);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), 
+		SelectedEffect,	location, rot);
 }

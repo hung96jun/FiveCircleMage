@@ -31,5 +31,6 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	void Spawn();
+	virtual void SetActive(const bool Active) override;
+
 };

@@ -38,6 +38,8 @@ public:
 	float* GetCurHP() { return &CurHP; }
 	const float GetCurMoveSpeed() const { return CurMoveSpeed; }
 
+	const float GetHPRate() { return CurHP / OriginHP; }
+
 	void GetDmg(const float Dmg) { CurHP = Dmg; }
 	void DecreaseMoveSpeed(const float Percent) { CurMoveSpeed = OriginMoveSpeed * (1 - Percent); }
 	void ResetMoveSpeed() { CurMoveSpeed = OriginMoveSpeed; }

@@ -22,6 +22,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float Damage;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EUnitState DebuffType;
 };
 
 USTRUCT(BlueprintType)
@@ -54,7 +57,7 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	void SetActive(const bool Value) { bActive = Value; }
+	virtual void SetActive(const bool Value) { bActive = Value; }
 	const bool IsActive() { return bActive; }
 
 	void SetOwnerActor(AC_Unit* Actor) { OwnerActor = Actor; }

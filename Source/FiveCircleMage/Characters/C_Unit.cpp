@@ -3,6 +3,7 @@
 AC_Unit::AC_Unit()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
 }
 
 void AC_Unit::BeginPlay()

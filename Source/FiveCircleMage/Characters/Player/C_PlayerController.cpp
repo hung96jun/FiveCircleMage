@@ -168,13 +168,13 @@ void AC_PlayerController::CloseElementPanel()
 
 void AC_PlayerController::OnOffMainMenu()
 {
-    CLog::Print(L"Call OnOffMainMenu", 10.0f, FColor::Blue);
-
     UC_MainMenu* MainMenu = nullptr;
 
     MainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
 
     MainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
+
+    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_VolumeMenu>("VolumeMenu"));
 
     MainMenu->OnOffMenu();
 }

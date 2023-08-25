@@ -4,6 +4,7 @@
 #include "NavigationPath.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "Characters/Monster/AIControllers/C_AIControllerBase.h"
 
@@ -15,6 +16,9 @@ UC_BTT_MoveTo::UC_BTT_MoveTo()
 	NodeName = L"BTT_MoveTo";
 
 	bNotifyTick = true;
+
+	Target.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UC_BTT_MoveTo, Target), AActor::StaticClass());
+	Target.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UC_BTT_MoveTo, Target));
 }
 
 EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -35,23 +39,44 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	//UNavigationSystemV1* navSystem = UNavigationSystemV1::GetCurrent(owner->GetWorld());
 	//CheckNullResult(navSystem, EBTNodeResult::Failed);
 
-	FVector targetLocation = FVector::ZeroVector;
-
-	if (Target.SelectedKeyType == UBlackboardKeyType_Object::StaticClass())
-	{
-		AActor* target = Cast<AActor>(blackboard->GetValueAsObject(Target.SelectedKeyName));
-		targetLocation = target->GetActorLocation();
-	}
-
-	else if (Target.SelectedKeyType == UBlackboardKeyType_Vector::StaticClass())
-	{
-		targetLocation = blackboard->GetValueAsVector(Target.SelectedKeyName);
-	}
-
 	FAIMoveRequest moveInfo;
-	moveInfo.SetGoalLocation(targetLocation);
+
+	if (bTargetActor == true && bTargetVector == false)
+	{
+		TargetActor = Cast<AActor>(blackboard->GetValueAsObject(Target.SelectedKeyName));
+		//TargetLocation = target->GetActorLocation();
+		if (TargetActor == nullptr)
+			return EBTNodeResult::Failed;
+		moveInfo.SetGoalActor(TargetActor);
+	}
+
+	else if (bTargetVector == true && bTargetActor == false)
+	{
+		//TargetLocation = blackboard->GetValueAsVector(Target.SelectedKeyName);
+		moveInfo.SetGoalLocation(blackboard->GetValueAsVector(Target.SelectedKeyName));
+	}
+
+	else
+	{
+		CLog::Print(L"Target : Failed", 10.0f, FColor::Red);
+		return EBTNodeResult::Failed;
+	}
+	
+	if (AcceptableRadius > 0.0f)
+	{
+		AcceptableDistance = AcceptableRadius;
+		AcceptableDistance -= FMath::FRandRange(0.0f, AcceptableRandomRadius);
+	}
+	else
+	{
+		AcceptableDistance = blackboard->GetValueAsFloat(AcceptableKey.SelectedKeyName);
+		AcceptableDistance -= FMath::FRandRange(0.0f, AcceptableRandomRadius);
+	}
+
 	FNavPathSharedPtr navPath;
 	controller->MoveTo(moveInfo, &navPath);
+
+	CurTimer = 0.0f;
 
 	//CLog::Print(L"Call MoveTo", 1.0f, FColor::Green);
 
@@ -67,36 +92,51 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
 	if (controller == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
+	ACharacter* owner = controller->GetCharacter();
+	if (owner == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	if (blackboard == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
-	float acceptableDistance = 0.0f;
-	if (AcceptableRadius >= 0.0f)
-		acceptableDistance = AcceptableRadius;
-	else
-		acceptableDistance = blackboard->GetValueAsFloat(AcceptableKey.SelectedKeyName);
+	FString debug = L"";
 
 	float distance = blackboard->GetValueAsFloat(L"Distance");
+		
+	debug += L"\nDistance : " + FString::SanitizeFloat(distance);
+	debug += L"\nAcceptable : " + FString::SanitizeFloat(AcceptableDistance);
 
-	if (distance < acceptableDistance)
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-}
+	CLog::Print(debug, 0.1f, FColor::Green);
 
-EBTNodeResult::Type UC_BTT_MoveTo::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-	Super::AbortTask(OwnerComp, NodeMemory);
+	if (distance < AcceptableDistance)
+	{
+		if (bTraceCheck == true)
+		{
+			FVector start, end;
+			start = owner->GetActorLocation();
+			end = TargetActor->GetActorLocation();
 
-	CheckNullResult(OwnerComp.GetAIOwner(), EBTNodeResult::Failed);
+			TArray<AActor*> ignores;
+			ignores.Add(owner);
+			ignores.Add(TargetActor);
 
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
-	CheckNullResult(controller, EBTNodeResult::Failed);
+			FHitResult hit;
+			bool bHit = UKismetSystemLibrary::LineTraceSingle(owner->GetWorld(),
+				start, end, ETraceTypeQuery::TraceTypeQuery1, false,
+				ignores, EDrawDebugTrace::ForOneFrame, hit, true);
 
-	ACharacter* owner = controller->GetCharacter();
-	CheckNullResult(owner, EBTNodeResult::Failed);
+			if (bHit == false)
+			{
+				owner->GetCharacterMovement()->StopMovementImmediately();
+				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+			}
+		}
 
-	FVector start = owner->GetActorLocation();
+		else
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	}
 
-	//UNavigationSystemV1::FindPathToLocationSynchronously()
+	else if(CurTimer >= ResetTime)
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
-	return EBTNodeResult::Type();
+	CurTimer += DeltaSeconds;
 }

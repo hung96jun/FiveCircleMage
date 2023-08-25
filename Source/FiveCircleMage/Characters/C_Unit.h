@@ -40,11 +40,11 @@ public:
 
 	const float GetHPRate() { return CurHP / OriginHP; }
 
-	void GetDmg(const float Dmg) { CurHP = Dmg; }
+	void GetDmg(const float Dmg) { CurHP -= Dmg; }
 	void DecreaseMoveSpeed(const float Percent) { CurMoveSpeed = OriginMoveSpeed * (1 - Percent); }
 	void ResetMoveSpeed() { CurMoveSpeed = OriginMoveSpeed; }
 
-	const bool IsDeath() { return CurHP < 0.0f; }
+	const bool IsDeath() { return CurHP <= 0.0f; }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

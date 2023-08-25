@@ -9,9 +9,9 @@
 #include "C_GameInstance.h"
 #include "Managers/C_MagicManager.h"
 #include "UI/C_DashProgressBar.h"
+#include "UI/C_CastingStack.h"
 #include "Components/C_MagicDispenser.h"
 #include "Components/C_DashEffectComponent.h"
-#include "UI/C_CastingStack.h"
 
 #include "Utilities/CLog.h"
 
@@ -110,16 +110,6 @@ AC_Mage::AC_Mage()
             CastingStackUIComp->SetDrawSize(FVector2D(200.0f, 30.0f));
 
             CastingStackUIComp->AddRelativeLocation(FVector(0.0f, 80.0f, 200.0f));
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // 1. 게임실행
-            // 2. 5스택 쌓기
-            // 3. 일시정지 후 f8
-            // 4. 위치 확인해서 1칸당 평균 이동 값 도출하기
-            //
-            //CastingStackUIComp->GetRelativeLocation();
-            //CastingStackUIComp->SetRelativeLocation(FVector::ZeroVector);
-            //////////////////////////////////////////////////////////////////////////////////////
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -138,8 +128,9 @@ void AC_Mage::BeginPlay()
     bDashCoolTime = false;
 
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
-    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetOwner(this);
     Dispenser->SetOwner(this);
+
+    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetOwner(this);
 
     ForceType = EUnitForceType::Player;
 }
@@ -185,11 +176,7 @@ void AC_Mage::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     UEnhancedInputComponent* input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
     if (input == nullptr)
-    {
-        FString error = L"PlayerBase class : SetupPlayerInputComponent function - input value is nullptr";
-        CLog::Print(error, 10.0f, FColor::Red);
         return;
-    }
 
     input->BindAction(InputActions.FindRef(L"ForwardMove"), ETriggerEvent::Triggered, this, &AC_Mage::ForwardMove);
     input->BindAction(InputActions.FindRef(L"RightMove"), ETriggerEvent::Triggered, this, &AC_Mage::RightMove);
@@ -214,13 +201,15 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
     if (bEnablePushElement == false)
     {
         // "지금은 캐스팅할 수 없다" 음성 넣고 싶고
-        
+
         /////////////////////////////////////////////////////////////////////
         Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->ShakePanel();
         /////////////////////////////////////////////////////////////////////
 
         return;
     }
+
+    if (CastingStack.StackSize() == 5) return;
 
     DashEffectComponent->SetElement(Element);
 
@@ -232,7 +221,6 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
     Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->ShowPanel();
     Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetStackSlot(CastingStack.StackSize(), CAST(int32, PushedElement), CastingDelay[CastingStack.StackSize()]);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 }
 
 #pragma region Bind Action Function
@@ -241,8 +229,6 @@ void AC_Mage::OnDash()
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->CallDashProgressBar();
 
     if (bDash == true || bDashCoolTime == true) return;
-
-    CLog::Print(L"OnDash");
 
     FVector velocity = GetVelocity();
     if (velocity == FVector::ZeroVector)
@@ -281,8 +267,6 @@ void AC_Mage::EndDashCoolTime()
 void AC_Mage::OnMagicCast()
 {
     if (bEnablePushElement == false) return;
-
-    CLog::Print(L"OnMagicCast");
 
     if (CastingStack.IsCasting() == true)
     {

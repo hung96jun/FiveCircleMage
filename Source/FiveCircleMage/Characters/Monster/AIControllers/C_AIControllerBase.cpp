@@ -13,43 +13,43 @@ AC_AIControllerBase::AC_AIControllerBase()
 {
 	FString path = L"";
 
-	{
-		AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
-		SensingSight = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
-		SetPerceptionComponent(*AIPerceptionComponent);
+	//{
+	//	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
+	//	SensingSight = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
+	//	SetPerceptionComponent(*AIPerceptionComponent);
 
-		/////////////////////////////////////////////////////////////////////////////
-		// 초기화
-		/////////////////////////////////////////////////////////////////////////////
-		/// 시야 범위
-		SensingSight->SightRadius = 3000.0f;
-		/// 추적 시야 범위
-		SensingSight->LoseSightRadius = 3500.0f;
-		/// 시야 각도(절반)
-		SensingSight->PeripheralVisionAngleDegrees = 90.0f;
-		/// 추적 최대 시간
-		//SensingSight->SetMaxAge(5.0f);
-		/////////////////////////////////////////////////////////////////////////////
+	//	/////////////////////////////////////////////////////////////////////////////
+	//	// 초기화
+	//	/////////////////////////////////////////////////////////////////////////////
+	//	/// 시야 범위
+	//	SensingSight->SightRadius = 3000.0f;
+	//	/// 추적 시야 범위
+	//	SensingSight->LoseSightRadius = 3500.0f;
+	//	/// 시야 각도(절반)
+	//	SensingSight->PeripheralVisionAngleDegrees = 90.0f;
+	//	/// 추적 최대 시간
+	//	//SensingSight->SetMaxAge(5.0f);
+	//	/////////////////////////////////////////////////////////////////////////////
 
-		/// 적 객체 감지
-		SensingSight->DetectionByAffiliation.bDetectEnemies = true;
-		/// 아군 객체 감지
-		SensingSight->DetectionByAffiliation.bDetectFriendlies = false;
-		/// 중립 객체 감지
-		SensingSight->DetectionByAffiliation.bDetectNeutrals = true;
+	//	/// 적 객체 감지
+	//	SensingSight->DetectionByAffiliation.bDetectEnemies = true;
+	//	/// 아군 객체 감지
+	//	SensingSight->DetectionByAffiliation.bDetectFriendlies = false;
+	//	/// 중립 객체 감지
+	//	SensingSight->DetectionByAffiliation.bDetectNeutrals = true;
 
-		/// 메인 감지 기능
-		GetPerceptionComponent()->SetDominantSense(*SensingSight->GetSenseImplementation());
-		/// 감지 기능 추가
-		GetPerceptionComponent()->ConfigureSense(*SensingSight);
-	}
+	//	/// 메인 감지 기능
+	//	GetPerceptionComponent()->SetDominantSense(*SensingSight->GetSenseImplementation());
+	//	/// 감지 기능 추가
+	//	GetPerceptionComponent()->ConfigureSense(*SensingSight);
+	//}
 }
 
 void AC_AIControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AC_AIControllerBase::OnSensingTarget);
+	//AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AC_AIControllerBase::OnSensingTarget);
 	//TargetKeyDelegate.BindUFunction(this, "UpdateTargetKey", nullptr);
 
 	AttackTimerDelegate.BindUFunction(this, L"EndAttacking");
@@ -133,29 +133,29 @@ void AC_AIControllerBase::OnUnPossess()
 	Super::OnUnPossess();
 
 }
-
-void AC_AIControllerBase::OnSensingTarget(AActor* Actor, FAIStimulus Stimulus)
-{
-	if (Stimulus.WasSuccessfullySensed() == true)
-	{
-		if (Actor != nullptr)
-		{
-			AC_Mage* target = Cast<AC_Mage>(Actor);
-			if (target != nullptr)
-			{
-				Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", true);
-
-				if (Blackboard.Get()->GetValueAsObject(L"Target") == nullptr)
-					Blackboard.Get()->SetValueAsObject(L"Target", Actor);
-			}
-		}
-	}
-
-	else
-	{
-		//GetWorld()->GetTimerManager().SetTimer(TargetKeyHandle, 8.0f, false);
-		Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", false);
-
-		CLog::Print(L"HasLineOfSight == false", 3.0f, FColor::Yellow);
-	}
-}
+//
+//void AC_AIControllerBase::OnSensingTarget(AActor* Actor, FAIStimulus Stimulus)
+//{
+//	if (Stimulus.WasSuccessfullySensed() == true)
+//	{
+//		if (Actor != nullptr)
+//		{
+//			AC_Mage* target = Cast<AC_Mage>(Actor);
+//			if (target != nullptr)
+//			{
+//				Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", true);
+//
+//				if (Blackboard.Get()->GetValueAsObject(L"Target") == nullptr)
+//					Blackboard.Get()->SetValueAsObject(L"Target", Actor);
+//			}
+//		}
+//	}
+//
+//	else
+//	{
+//		//GetWorld()->GetTimerManager().SetTimer(TargetKeyHandle, 8.0f, false);
+//		Blackboard.Get()->SetValueAsBool(L"HasLineOfSight", false);
+//
+//		CLog::Print(L"HasLineOfSight == false", 3.0f, FColor::Yellow);
+//	}
+//}

@@ -59,18 +59,17 @@ void AC_BlackHoleSkill::BeginCasting(FVector CasterPosition, FVector TargetPosit
 	OnInhalation();
 	DamageTimerDelegate.BindUFunction(this, "OnActive");
 	GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, DamageTimerDelegate, DamageInterval, true, DamageInterval);
-	if (GetWorld()->GetTimerManager().IsTimerActive(DamageTimerHandle))
-		CLog::Print(L"BlackHole OnActive function not isActive", 10.0f, FColor::Red);
-	else
-		CLog::Print(L"BlackHole OnActive function isActive", 10.0f, FColor::Blue);
+	//if (GetWorld()->GetTimerManager().IsTimerActive(DamageTimerHandle))
+	//	CLog::Print(L"BlackHole OnActive function not isActive", 10.0f, FColor::Red);
+	//else
+	//	CLog::Print(L"BlackHole OnActive function isActive", 10.0f, FColor::Blue);
 
 	ChangeTimerDelegate.BindUFunction(this, "ChangeState");
 	GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, ChangeTimerDelegate, DelayTime, false);
-
-	if (GetWorld()->GetTimerManager().IsTimerActive(ChangeTimerHandle))
-		CLog::Print(L"BlackHole ChangeState function not isActive", 10.0f, FColor::Red);
-	else
-		CLog::Print(L"BlackHole ChangeState function isActive", 10.0f, FColor::Blue);
+	//if (GetWorld()->GetTimerManager().IsTimerActive(ChangeTimerHandle))
+	//	CLog::Print(L"BlackHole ChangeState function not isActive", 10.0f, FColor::Red);
+	//else
+	//	CLog::Print(L"BlackHole ChangeState function isActive", 10.0f, FColor::Blue);
 }
 
 void AC_BlackHoleSkill::OnInhalation()

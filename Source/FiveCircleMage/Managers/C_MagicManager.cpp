@@ -170,7 +170,8 @@ void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 
 AC_MagicSkill* AC_MagicManager::OnFireMagic(AC_Unit* OwnerActor, const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation)
 {
-	FString tmp = Key;
+	if (Magics.Contains(Key) == false) return nullptr;
+
 	TArray<AC_MagicSkill*> magics = Magics.FindRef(Key).Pool;
 	FMagicInfo info = MagicInfos.FindRef(Key);
 

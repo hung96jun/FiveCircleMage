@@ -6,6 +6,7 @@
 
 #include "Characters/Player/C_PlayerController.h"
 #include "UI/C_OptionMenu.h"
+#include "UI/C_VolumeMenu.h"
 
 #include "Characters/Player/C_Mage.h"
 
@@ -28,9 +29,14 @@ void UC_MainMenu::NativeConstruct()
 		ResumeButton->OnClicked.Clear();
 	ResumeButton->OnClicked.AddDynamic(this, &UC_MainMenu::OnOffMenu);
 
-	if (OptionButton->OnClicked.IsBound() == true)
-		OptionButton->OnClicked.Clear();
-	OptionButton->OnClicked.AddDynamic(this, &UC_MainMenu::ClickedOptionButton);
+	if (GrafficOptionButton->OnClicked.IsBound() == true)
+		GrafficOptionButton->OnClicked.Clear();
+	GrafficOptionButton->OnClicked.AddDynamic(this, &UC_MainMenu::ClickedGrafficOptionButton);
+
+	if (SoundOptionButton->OnClicked.IsBound() == true)
+		SoundOptionButton->OnClicked.Clear();
+	SoundOptionButton->OnClicked.AddDynamic(this, &UC_MainMenu::ClickedSoundOptionButton);
+
 	
 	if (ExitButton->OnClicked.IsBound() == true)
 		ExitButton->OnClicked.Clear();
@@ -63,6 +69,7 @@ void UC_MainMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 void UC_MainMenu::OnOffMenu()
 {
 	if (OptionMenu->IsActive()) return;
+	if (VolumeMenu->IsActive()) return;
 
 	bIsActive = !bIsActive;
 
@@ -74,13 +81,22 @@ void UC_MainMenu::OnOffMenu()
 		SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UC_MainMenu::ClickedOptionButton()
+void UC_MainMenu::ClickedGrafficOptionButton()
 {
 	bIsActive = false;
 
 	SetVisibility(ESlateVisibility::Hidden);
 
 	OptionMenu->OnOffMenu();
+}
+
+void UC_MainMenu::ClickedSoundOptionButton()
+{
+	bIsActive = false;
+
+	SetVisibility(ESlateVisibility::Hidden);
+
+	VolumeMenu->OnOffMenu();
 }
 
 void UC_MainMenu::ClickedExitButton()

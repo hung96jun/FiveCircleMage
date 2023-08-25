@@ -281,7 +281,7 @@ private:
 	bool bCastingBreak = false;
 	bool bOnFire = false;
 
-	// Taking time to stack casting element
+	// Delay between each stacking casting element
 	bool bEnablePushElement = true;
 	float CurCastingDelayTime = 0.0f;
 	const TArray<float> CastingDelay = { 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };

@@ -13,9 +13,6 @@ class FIVECIRCLEMAGE_API AC_Boss : public AC_Unit
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AI")
-		UBehaviorTree* BehaviorTree = nullptr;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		float RangedAttackDistance = 0.0f;
 
@@ -93,6 +90,16 @@ public:
 	void EndMeleeAttack() { bMeleeAttacking = false; }
 	void EndRangedAttack() { bRangedAttacking = false; }
 	void EndSpawnedShout() { bSpawnedShouting = false; }
+
+	// Update and return datas for updating blackboard
+	bool GetEnableMeleeAttack() { return bEnableMeleeAttack; }
+	bool GetEnableRangedAttack() { return bEnableRangedAttack; }
+	bool GetEnableSpawnedShout() { return bEnableSpawnedShout; }
+	bool GetGroggy() { return bOnGroggy; }
+	float GetHPRate() { return CurHPRate(); }
+	bool GetSecondPhase() { return bOnSecondPhase; }
+	bool GetIsDead() { return bIsDead; }
+	bool GetOnAttacking() { return bAttacking; }
 
 private:
 	AActor* Target = nullptr;

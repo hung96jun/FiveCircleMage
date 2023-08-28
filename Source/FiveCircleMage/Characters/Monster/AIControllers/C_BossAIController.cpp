@@ -18,6 +18,8 @@ AC_BossAIController::AC_BossAIController()
 void AC_BossAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_BossAIController::Tick(float DeltaTime)

@@ -10,6 +10,7 @@
 #include "Utilities/CLog.h"
 #include "Utilities/Defines.h"
 
+#include "Characters/C_Unit.h"
 
 AC_MagicManager::AC_MagicManager()
 {

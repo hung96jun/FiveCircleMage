@@ -52,6 +52,9 @@ void AC_Boss::BeginPlay()
 	Super::BeginPlay();
 
 	// 초기설정값 지정
+
+	UnitStatus = FUnitStatus(2000.0f, 50.0f);
+	Init();
 }
 
 void AC_Boss::Tick(float DeltaTime)
@@ -78,13 +81,13 @@ void AC_Boss::Init()
 
 	bOnGroggy = false;
 
-	bEnableSpawnedShout = false;
+	bEnableSpawnedShout = true;
 	bSpawnedShouting = false;
 
-	bEnableRangedAttack = false;
+	bEnableRangedAttack = true;
 	bRangedAttacking = false;
 
-	bEnableMeleeAttack = false;
+	bEnableMeleeAttack = true;
 	bMeleeAttacking = false;
 
 	bAttacking = false;
@@ -157,6 +160,13 @@ void AC_Boss::SetValueAtBB()
 
 	// Second Phase
 	BBAsset->SetValueAsBool(L"bOnSecondPhase", bOnSecondPhase);
+
+	// Distance
+	if (Target != nullptr)
+	{
+		DistanceToTarget = (Target->GetActorLocation() - GetActorLocation()).Length();
+		BBAsset->SetValueAsFloat(L"Distance", DistanceToTarget);
+	}
 }
 
 void AC_Boss::BeginSecondPhase()
@@ -189,7 +199,6 @@ void AC_Boss::OnRangedAttack()
 	bEnableRangedAttack = false;
 	bRangedAttacking = true;
 	//fire missile
-	
 }
 
 void AC_Boss::OnSpawnedShout()

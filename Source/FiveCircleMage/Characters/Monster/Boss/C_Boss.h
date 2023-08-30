@@ -5,6 +5,7 @@
 #include "C_Boss.generated.h"
 
 class UBehaviorTree;
+class UBlackboardComponent;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_Boss : public AC_Unit
@@ -12,9 +13,6 @@ class FIVECIRCLEMAGE_API AC_Boss : public AC_Unit
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AI")
-		UBehaviorTree* BehaviorTree = nullptr;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		float RangedAttackDistance = 0.0f;
 
@@ -48,6 +46,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		bool bOnGroggy = false;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
+		bool bOnSecondPhase = false;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
+		bool bIsDead = false;
+
 public:
 	AC_Boss();
 
@@ -59,6 +63,10 @@ public:
 
 	virtual void GetDmg(const float Dmg, const EUnitState Type) override;
 
+	void SetTarget(AActor* Actor) { Target = Actor; }
+
+	void SetBehaviorTree(UBehaviorTree* BT, UBlackboardComponent* BB);
+
 protected:
 	virtual void BeginPlay() final;
 
@@ -66,20 +74,55 @@ private:
 	void Init();
 
 	void UpdateData(float DeltaTime);
+	void SetValueAtBB();
 
-	void MeleeAttack();
-	void RangedAttack();
-	void SpawnedShout();
+	void BeginSecondPhase();
+
+	void Dead();
+
+public:
+	void OnMeleeAttack();
+	void OnRangedAttack();
+	void OnSpawnedShout();
+	void OnGroggy();
+
+	void EndAttack() { bAttacking = false; }
+	void EndMeleeAttack() { bMeleeAttacking = false; }
+	void EndRangedAttack() { bRangedAttacking = false; }
+	void EndSpawnedShout() { bSpawnedShouting = false; }
+
+	// Update and return datas for updating blackboard
+	bool GetEnableMeleeAttack() { return bEnableMeleeAttack; }
+	bool GetEnableRangedAttack() { return bEnableRangedAttack; }
+	bool GetEnableSpawnedShout() { return bEnableSpawnedShout; }
+	bool GetGroggy() { return bOnGroggy; }
+	float GetHPRate() { return CurHPRate(); }
+	bool GetSecondPhase() { return bOnSecondPhase; }
+	bool GetIsDead() { return bIsDead; }
+	bool GetOnAttacking() { return bAttacking; }
+
+	bool GetMeleeAttack() { return bMeleeAttacking; }
+	bool GetRangedAttack() { return bRangedAttacking; }
+	bool GetSpawnedShouting() { return bSpawnedShouting; }
 
 private:
+	AActor* Target = nullptr;
+
 	bool bIsActive = false;
 
-	float RangedAttackSpeed = 0.0f;
-	float MeleeAttackSpeed = 0.0f;
-	float SpawnedShoutSpeed = 0.0f;
+	const float RangedAttackSpeed = 10.0f;
+	float RangedAttackFrame = 0.0f;
+	const float MeleeAttackSpeed = 10.0f;
+	float MeleeAttackFrame = 0.0f;
+	const float SpawnedShoutSpeed = 10.0f;
+	float SpawnedShoutFrame = 0.0f;
 	
 	const float OriginGroggyArmor = 0.0f;
 	float GroggyArmor = 0.0f;
+	float GroggyArmorRegeneratedPower = 0.0f;
 
 	int32 CurSpawnedMinions = 0;
+
+	UBehaviorTree* BTAsset = nullptr;
+	UBlackboardComponent* BBAsset = nullptr;
 };

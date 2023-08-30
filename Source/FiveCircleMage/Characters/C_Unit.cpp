@@ -4,6 +4,8 @@ AC_Unit::AC_Unit()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionProfileName(L"Character");
 }
 
 void AC_Unit::BeginPlay()
@@ -11,6 +13,13 @@ void AC_Unit::BeginPlay()
 	Super::BeginPlay();
 
 	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
+	
+	FString temp = L"";
+	temp = GetActorLabel();
+	temp += L"\nMaxHP : " + FString::SanitizeFloat(*UnitStatus.GetOriginHP());
+	temp += L"\nCurHP : " + FString::SanitizeFloat(*UnitStatus.GetCurHP());
+
+	CLog::Print(temp, 10.0f, FColor::Purple);
 }
 
 void AC_Unit::Tick(float DeltaTime)
@@ -23,7 +32,8 @@ void AC_Unit::GetDmg(const float Dmg, const EUnitState Type)
 {
 	UnitStatus.GetDmg(Dmg);
 
-	//Type에 의한 디버프 설정해야함
+	if ((*UnitStatus.GetCurHP()) <= 0.0f)
+		OnDeath();
 }
 
 void AC_Unit::SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info)
@@ -63,4 +73,9 @@ void AC_Unit::ResetMoveSpeed()
 {
 	UnitStatus.ResetMoveSpeed();
 	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
+}
+
+const bool AC_Unit::IsFalling() const
+{
+	return GetCharacterMovement()->IsFalling();
 }

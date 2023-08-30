@@ -8,6 +8,7 @@ class UStaticMesh;
 class UMaterialInstance;
 
 class UCapsuleComponent;
+class UBoxComponent;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_WeaponBase : public AC_DamageBase
@@ -15,8 +16,11 @@ class FIVECIRCLEMAGE_API AC_WeaponBase : public AC_DamageBase
 	GENERATED_BODY()
 
 protected:
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	UCapsuleComponent* Collision = nullptr;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UCapsuleComponent* Collision = nullptr;
+		UBoxComponent* Collision = nullptr;
 
 protected:
 	UFUNCTION()
@@ -33,4 +37,7 @@ public:
 
 	virtual void SetActive(const bool Active) override;
 
+	void SetBoxExtent(const FVector Value);
+
+	virtual void SetCollisionEnabled(ECollisionEnabled::Type Type) override;
 };

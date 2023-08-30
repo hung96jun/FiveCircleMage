@@ -57,6 +57,8 @@ void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (Character == nullptr) return;
+
     //if (bIsFirstTick)
     //{
     //    PushViewportSize();
@@ -103,6 +105,7 @@ void AC_PlayerController::SetupInputComponent()
 
     input->BindAction(InputActions.FindRef(L"ElementPanel"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffElementPanel);
     input->BindAction(InputActions.FindRef(L"MainMenu"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffMainMenu);
+
 }
 
 void AC_PlayerController::OnPossess(APawn* aPawn)
@@ -110,6 +113,15 @@ void AC_PlayerController::OnPossess(APawn* aPawn)
     Super::OnPossess(aPawn);
 
     Character = Cast<AC_Mage>(aPawn);
+}
+
+void AC_PlayerController::OnUnPossess()
+{
+    Super::OnUnPossess();
+
+    CLog::Print(L"Call PlayerController - OnUnPossess function", 10.0f, FColor::Red);
+
+    Character = nullptr;
 }
 
 void AC_PlayerController::AddInputAction(FString Key, FString Path)
@@ -168,13 +180,13 @@ void AC_PlayerController::CloseElementPanel()
 
 void AC_PlayerController::OnOffMainMenu()
 {
-    UC_MainMenu* MainMenu = nullptr;
+    UC_MainMenu* mainMenu = nullptr;
 
-    MainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
+    mainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
 
-    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
+    mainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
 
-    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_VolumeMenu>("VolumeMenu"));
+    mainMenu->SetOptionMenu(UIComponent->GetUI<UC_VolumeMenu>("VolumeMenu"));
 
-    MainMenu->OnOffMenu();
+    mainMenu->OnOffMenu();
 }

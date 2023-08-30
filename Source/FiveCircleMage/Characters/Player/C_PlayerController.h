@@ -49,6 +49,7 @@ public:
 
 protected:
 	virtual void OnPossess(APawn* aPawn) override;
+	virtual void OnUnPossess() override;
 
 	///////////////////////////////////////////////////////////////////////////
 	// Key Bind Functions

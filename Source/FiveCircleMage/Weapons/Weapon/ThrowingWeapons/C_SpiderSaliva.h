@@ -17,14 +17,14 @@ class FIVECIRCLEMAGE_API AC_SpiderSaliva : public AC_ThrowingWeapon
 	GENERATED_BODY()
 
 protected:
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	//	UNiagaraSystem* Particle;
-	//
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	//	UNiagaraComponent* ParticleComponent;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UStaticMeshComponent* StaticMesh;
+		UNiagaraSystem* Particle;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UNiagaraComponent* ParticleComponent;
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	UStaticMeshComponent* StaticMesh;
 
 public:
 	AC_SpiderSaliva();
@@ -39,4 +39,5 @@ public:
 	virtual void OnHitAction() override;
 	virtual void SetActive(const bool Active) override;
 
+	virtual void OnFire(const FVector& Target, AC_Unit* Actor) override;
 };

@@ -18,6 +18,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCapsuleComponent* Collision = nullptr;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector Velocity = FVector::ZeroVector;
+
 public:
 	AC_ThrowingWeapon();
 
@@ -31,11 +34,9 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	void OnFire(const FVector& Target);
+	virtual void OnFire(const FVector& Target, AC_Unit* Actor);
 	virtual void OnHitAction() {}
 
 	virtual void SetActive(const bool Active) override;
 
-protected:
-	EUnitState DebuffType;
 };

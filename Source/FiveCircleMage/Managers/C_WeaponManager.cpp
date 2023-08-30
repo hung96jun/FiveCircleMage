@@ -1,6 +1,9 @@
 #include "Managers/C_WeaponManager.h"
 
-#include "Weapons/Weapon/C_WeaponBase.h"
+#include "Weapons/C_DamageBase.h"
+//#include "Weapons/Weapon/C_WeaponBase.h"
+
+#include "Utilities/CLog.h"
 
 AC_WeaponManager::AC_WeaponManager()
 {
@@ -20,7 +23,7 @@ void AC_WeaponManager::Tick(float DeltaTime)
 
 }
 
-void AC_WeaponManager::SpawnWeapons(FString Name, TSubclassOf<AActor> Class, int Max)
+void AC_WeaponManager::SpawnWeapons(const FString Name, TSubclassOf<AActor> Class, int Max)
 {
 	//if (Class == nullptr) return;
 	//if (Class.Get() == nullptr) return;
@@ -29,20 +32,67 @@ void AC_WeaponManager::SpawnWeapons(FString Name, TSubclassOf<AActor> Class, int
 	FString debug = L"";
 
 	{
-		TPair<FString, TArray<AC_WeaponBase*>> pair;
+		TPair<FString, TArray<AC_DamageBase*>> pair;
 		pair.Key = Name;
 
-		TArray<AC_WeaponBase*> weapons;
+		TArray<AC_DamageBase*> weapons;
+
+		for (int i = 0; i < Max; i++)
+		{
+			AActor* actor = GetWorld()->SpawnActor<AActor>(Class, FVector(0.0f, 0.0f, -500.0f), FRotator::ZeroRotator);
+			AC_DamageBase* weapon = Cast<AC_DamageBase>(actor);
+			//AC_WeaponBase* weapon = dynamic_cast<AC_WeaponBase*>(actor);
+			//AC_WeaponBase* weapon = GetWorld()->SpawnActor<AC_WeaponBase>(Class, FVector(0.0f, 0.0f, -500.0f), FRotator::ZeroRotator);
+			if (weapon == nullptr) continue;
+			//weapon->SetActive(false);
+			weapons.Add(weapon);
+		}
+
+		pair.Value = weapons;
+
+		Weapons.Add(pair);
+	}
+
+	{
+		TPair<FString, int> pair;
+		pair.Key = Name;
+		pair.Value = Max;
+		WeaponPoolMax.Add(pair);
+	}
+
+	{
+		TPair<FString, int> pair;
+		pair.Key = Name;
+		pair.Value = 0;
+		WeaponPoolCount.Add(pair);
+	}
+}
+
+void AC_WeaponManager::SpawnWeapons(const FString Name, TSubclassOf<AActor> Class, const int Max, const float Damage, const float DamageFactor, const EUnitState DebuffType)
+{
+	if (Weapons.Contains(Name) == true) return;
+
+	FString debug = L"";
+
+	{
+		TPair<FString, TArray<AC_DamageBase*>> pair;
+		pair.Key = Name;
+
+		TArray<AC_DamageBase*> weapons;
 
 		int count = 0;
 
 		for (int i = 0; i < Max; i++)
 		{
-			//AActor* actor = GetWorld()->SpawnActor<AActor>(Class, FVector(0.0f, 0.0f, -500.0f), FRotator::ZeroRotator);
-			//AC_WeaponBase* weapon = Cast<AC_WeaponBase>(actor);
-			AC_WeaponBase* weapon = GetWorld()->SpawnActor<AC_WeaponBase>(Class, FVector(0.0f, 0.0f, -500.0f), FRotator::ZeroRotator);
+			AActor* actor = GetWorld()->SpawnActor<AActor>(Class, FVector(0.0f, 0.0f, -500.0f), FRotator::ZeroRotator);
+			AC_DamageBase* weapon = Cast<AC_DamageBase>(actor);
+			//AC_WeaponBase* weapon = dynamic_cast<AC_WeaponBase*>(actor);
+			//AC_WeaponBase* weapon = GetWorld()->SpawnActor<AC_WeaponBase>(Class, FVector(0.0f, 0.0f, -500.0f), FRotator::ZeroRotator);
 			if (weapon == nullptr) continue;
 			//weapon->SetActive(false);
+			weapon->SetDamage(Damage);
+			weapon->SetDamageFactor(DamageFactor);
+			weapon->SetDebuffType(DebuffType);
 			weapons.Add(weapon);
 			count++;
 		}
@@ -50,7 +100,7 @@ void AC_WeaponManager::SpawnWeapons(FString Name, TSubclassOf<AActor> Class, int
 		pair.Value = weapons;
 
 		Weapons.Add(pair);
-		
+
 		debug = Name + L"_Weapon - " + FString::FromInt(count) + L" Spawn";
 		CLog::Print(debug, 10.0f, FColor::Yellow);
 	}
@@ -70,15 +120,15 @@ void AC_WeaponManager::SpawnWeapons(FString Name, TSubclassOf<AActor> Class, int
 	}
 }
 
-AC_WeaponBase* AC_WeaponManager::OnActive(const FString Name)
+AC_DamageBase* AC_WeaponManager::ActiveWeapon(const FString Name)
 {
-	AC_WeaponBase* weapon = nullptr;
-	TArray<AC_WeaponBase*> weapons = Weapons[Name];
+	AC_DamageBase* weapon = nullptr;
+	TArray<AC_DamageBase*> weapons = Weapons[Name];
 	int max = WeaponPoolMax[Name];
 	int count = WeaponPoolCount[Name];
-	count++;
-
+	
 	weapon = weapons[count];
+	count++;
 
 	if (weapon->IsActive() == true)
 	{
@@ -100,10 +150,13 @@ AC_WeaponBase* AC_WeaponManager::OnActive(const FString Name)
 		WeaponPoolCount[Name] = count;
 	}
 
+	weapon->SetActive(true);
 	return weapon;
 }
 
 const bool AC_WeaponManager::FindWeapon(const FString Name)
 {
+	CLog::Print(L"WeaponManager - FindWeapon function, not find " + Name + L" Weapon", 1000.0f, FColor::Red);
+
 	return Weapons.Contains(Name);
 }

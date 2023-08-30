@@ -86,66 +86,56 @@ void UC_NotifyState_OnFireParabolation::NotifyTick(USkeletalMeshComponent* MeshC
 
 void UC_NotifyState_OnFireParabolation::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	//Super::NotifyEnd(MeshComp, Animation, EventReference);
+	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
-	//if (MeshComp->GetOwner() == nullptr) return;
-	//if (bTargetTrace == false) return;
-	//if (SocketName == L"")
-	//{
-	//	CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, socket name is None", 1000.0f, FColor::Red);
-	//	return;
-	//}
-	//AC_Monster* owner = Cast<AC_Monster>(MeshComp->GetOwner());
-	//if (owner == nullptr) 
-	//{
-	//	CLog::Print(L"ParabolationNotifyState - Owner nullptr", 1000.0f, FColor::Red);
-	//	return;
-	//}
+	if (MeshComp->GetOwner() == nullptr) return;
+	if (bTargetTrace == false) return;
+	if (SocketName == L"")
+	{
+		CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, socket name is None", 1000.0f, FColor::Red);
+		return;
+	}
+	AC_Monster* owner = Cast<AC_Monster>(MeshComp->GetOwner());
+	if (owner == nullptr) 
+	{
+		CLog::Print(L"ParabolationNotifyState - Owner nullptr", 1000.0f, FColor::Red);
+		return;
+	}
 
-	//UC_GameInstance* instance = Cast<UC_GameInstance>(owner->GetWorld()->GetGameInstance());
-	//if (instance == nullptr)
-	//{
-	//	CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, GameInstance class is nullptr", 1000.0f, FColor::Red);
-	//	return;
-	//}
-	//if (instance->GetWeaponManager() == nullptr)
-	//{
-	//	CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, WeaponManager class is nullptr", 1000.0f, FColor::Red);
-	//	return;
-	//}
-	//if (instance->GetWeaponManager()->FindWeapon(WeaponName) == false)
-	//{
-	//	CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, WeaponName find failed", 1000.0f, FColor::Red);
-	//	return;
-	//}
+	UC_GameInstance* instance = Cast<UC_GameInstance>(owner->GetWorld()->GetGameInstance());
+	if (instance == nullptr)
+	{
+		CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, GameInstance class is nullptr", 1000.0f, FColor::Red);
+		return;
+	}
+	if (instance->GetWeaponManager() == nullptr)
+	{
+		CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, WeaponManager class is nullptr", 1000.0f, FColor::Red);
+		return;
+	}
+	if (instance->GetWeaponManager()->FindWeapon(WeaponName) == false)
+	{
+		CLog::Print(L"Error - UC_NotifyState_OnFireParabolation class, WeaponName find failed", 1000.0f, FColor::Red);
+		return;
+	}
 
-	////AC_SpiderSaliva* object = owner->GetWorld()->SpawnActor<AC_SpiderSaliva>();
-	//AC_ThrowingWeapon* object = Cast<AC_ThrowingWeapon>(instance->GetWeaponManager()->OnActive(WeaponName));
-	//if (object == nullptr)
-	//{
-	//	CLog::Print(L"ParabolationNotifyState - SpiderSaliva Spawn Failed", 1000.0f, FColor::Red);
-	//	return;
-	//}
-	//
-	//FVector spawnLocation = MeshComp->GetSocketLocation(SocketName);// +owner->GetActorLocation();
-	//FVector direction = owner->GetActorForwardVector() * 100.0f;
-	//spawnLocation.X += direction.X;
-	//spawnLocation.Y += direction.Y;
-	//spawnLocation.Z += 100.0f;
-	//object->SetActorLocation(spawnLocation);
+	//AC_SpiderSaliva* object = owner->GetWorld()->SpawnActor<AC_SpiderSaliva>();
+	AC_ThrowingWeapon* object = Cast<AC_ThrowingWeapon>(instance->GetWeaponManager()->ActiveWeapon(WeaponName));
+	if (object == nullptr)
+	{
+		CLog::Print(L"ParabolationNotifyState - SpiderSaliva Spawn Failed", 1000.0f, FColor::Red);
+		return;
+	}
+	
+	FVector spawnLocation = MeshComp->GetSocketLocation(SocketName);// +owner->GetActorLocation();
+	FVector direction = owner->GetActorForwardVector() * 100.0f;
+	spawnLocation.X += direction.X;
+	spawnLocation.Y += direction.Y;
+	spawnLocation.Z += 100.0f;
+	object->SetActorLocation(spawnLocation);
 
-	//CLog::Print(L"Saliva SpawnLocation : " + spawnLocation.ToString(), 10.0f, FColor::Green);
-	//
-	////UCapsuleComponent* collision = Cast<UCapsuleComponent>(object->GetRootComponent());
-	////if (collision == nullptr)
-	////{
-	////	CLog::Print(L"ParabolationNotifyState - SpiderSaliva RootComponent is not CollisionComponent", 1000.0f, FColor::Red);
-	////	return;
-	////}
-	//////collision->AddImpulseAtLocation(Result.HitResult.Location, object->GetActorLocation());
-	//
-	//FVector velocity = Result.HitResult.Location - owner->GetActorLocation();
-	//velocity.Z = Height + TempZValue;
+	FVector velocity = Result.HitResult.Location - owner->GetActorLocation();
+	velocity.Z = Height + TempZValue;
 
-	//object->OnFire(velocity);
+	object->OnFire(velocity, owner);
 }

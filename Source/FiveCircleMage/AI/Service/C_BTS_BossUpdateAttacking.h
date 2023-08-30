@@ -6,9 +6,6 @@
 #include "BehaviorTree/BTService.h"
 #include "C_BTS_BossUpdateAttacking.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class FIVECIRCLEMAGE_API UC_BTS_BossUpdateAttacking : public UBTService
 {
@@ -18,5 +15,5 @@ public:
 	UC_BTS_BossUpdateAttacking();
 
 protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void OnSearchStart(FBehaviorTreeSearchData& SearchData) override;
 };

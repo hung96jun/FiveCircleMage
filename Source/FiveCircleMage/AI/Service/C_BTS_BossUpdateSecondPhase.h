@@ -18,5 +18,5 @@ public:
 	UC_BTS_BossUpdateSecondPhase();
 
 protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void OnSearchStart(FBehaviorTreeSearchData& SearchData) override;
 };

@@ -7,16 +7,16 @@
 UC_BTS_BossUpdateGroggy::UC_BTS_BossUpdateGroggy()
 {
 	NodeName = L"BTS_BossUpdateIsDead";
-	bNotifyTick = true;
+	bNotifyOnSearch = true;
 }
 
-void UC_BTS_BossUpdateGroggy::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UC_BTS_BossUpdateGroggy::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	Super::OnSearchStart(SearchData);
 
-	CheckNull(OwnerComp.GetAIOwner());
+	CheckNull(SearchData.OwnerComp.GetAIOwner());
 
-	AC_BossAIController* controller = Cast <AC_BossAIController>(OwnerComp.GetAIOwner());
+	AC_BossAIController* controller = Cast <AC_BossAIController>(SearchData.OwnerComp.GetAIOwner());
 	CheckNull(controller);
 
 	controller->GetBlackboardComponent()->SetValueAsBool(L"bOnGroggy", controller->GetGroggy());

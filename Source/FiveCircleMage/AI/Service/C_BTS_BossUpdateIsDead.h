@@ -6,8 +6,6 @@
 #include "BehaviorTree/BTService.h"
 #include "C_BTS_BossUpdateIsDead.generated.h"
 
-
-
 UCLASS()
 class FIVECIRCLEMAGE_API UC_BTS_BossUpdateIsDead : public UBTService
 {
@@ -17,5 +15,5 @@ public:
 	UC_BTS_BossUpdateIsDead();
 
 protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void OnSearchStart(FBehaviorTreeSearchData& SearchData) override;
 };

@@ -101,16 +101,20 @@ public:
 	bool GetIsDead() { return bIsDead; }
 	bool GetOnAttacking() { return bAttacking; }
 
+	bool GetMeleeAttack() { return bMeleeAttacking; }
+	bool GetRangedAttack() { return bRangedAttacking; }
+	bool GetSpawnedShouting() { return bSpawnedShouting; }
+
 private:
 	AActor* Target = nullptr;
 
 	bool bIsActive = false;
 
-	const float RangedAttackSpeed = 0.0f;
+	const float RangedAttackSpeed = 10.0f;
 	float RangedAttackFrame = 0.0f;
 	const float MeleeAttackSpeed = 10.0f;
 	float MeleeAttackFrame = 0.0f;
-	const float SpawnedShoutSpeed = 0.0f;
+	const float SpawnedShoutSpeed = 10.0f;
 	float SpawnedShoutFrame = 0.0f;
 	
 	const float OriginGroggyArmor = 0.0f;

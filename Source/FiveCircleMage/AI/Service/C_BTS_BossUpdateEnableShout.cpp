@@ -7,16 +7,16 @@
 UC_BTS_BossUpdateEnableShout::UC_BTS_BossUpdateEnableShout()
 {
 	NodeName = L"BTS_BossUpdateEnableShout";
-	bNotifyTick = true;
+	bNotifyOnSearch = true;
 }
 
-void UC_BTS_BossUpdateEnableShout::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UC_BTS_BossUpdateEnableShout::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	Super::OnSearchStart(SearchData);
 
-	CheckNull(OwnerComp.GetAIOwner());
+	CheckNull(SearchData.OwnerComp.GetAIOwner());
 
-	AC_BossAIController* controller = Cast <AC_BossAIController>(OwnerComp.GetAIOwner());
+	AC_BossAIController* controller = Cast <AC_BossAIController>(SearchData.OwnerComp.GetAIOwner());
 	CheckNull(controller);
 
 	controller->GetBlackboardComponent()->SetValueAsBool(L"bEnableShouting", controller->GetEnableSpawnedShout());

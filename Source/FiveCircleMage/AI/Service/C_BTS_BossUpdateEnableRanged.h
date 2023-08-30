@@ -6,9 +6,6 @@
 #include "BehaviorTree/BTService.h"
 #include "C_BTS_BossUpdateEnableRanged.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class FIVECIRCLEMAGE_API UC_BTS_BossUpdateEnableRanged : public UBTService
 {
@@ -18,5 +15,5 @@ public:
 	UC_BTS_BossUpdateEnableRanged();
 
 protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void OnSearchStart(FBehaviorTreeSearchData& SearchData) override;
 };

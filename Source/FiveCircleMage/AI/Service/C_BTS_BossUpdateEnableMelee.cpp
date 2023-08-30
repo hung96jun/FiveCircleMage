@@ -7,17 +7,17 @@
 UC_BTS_BossUpdateEnableMelee::UC_BTS_BossUpdateEnableMelee()
 {
 	NodeName = L"BTS_BossUpdateEnableMelee";
-	bNotifyTick = true;
+	bNotifyOnSearch = true;
 }
 
-void UC_BTS_BossUpdateEnableMelee::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UC_BTS_BossUpdateEnableMelee::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	Super::OnSearchStart(SearchData);
 
-	CheckNull(OwnerComp.GetAIOwner());
+	CheckNull(SearchData.OwnerComp.GetAIOwner());
 
-	AC_BossAIController* controller = Cast <AC_BossAIController>(OwnerComp.GetAIOwner());
+	AC_BossAIController* controller = Cast <AC_BossAIController>(SearchData.OwnerComp.GetAIOwner());
 	CheckNull(controller);
 
-	controller->GetBlackboardComponent()->SetValueAsBool(L"bEnableMeleeAttack", controller->GetGroggy());
+	controller->GetBlackboardComponent()->SetValueAsBool(L"bEnableMeleeAttack", controller->GetEnableMeleeAttack());
 }

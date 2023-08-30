@@ -78,7 +78,7 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 	CurTimer = 0.0f;
 
-	//CLog::Print(L"Call MoveTo", 1.0f, FColor::Green);
+	CLog::Print(L"Call MoveTo", 1.0f, FColor::Green);
 
 	return EBTNodeResult::InProgress;
 }

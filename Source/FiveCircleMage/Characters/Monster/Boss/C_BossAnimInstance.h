@@ -34,6 +34,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 		bool bSpawnedShouting = false;
+
+	UPROPERTY(BlueprintReadOnly)
+		float Speed = false;
 	
 public:
 	UC_BossAnimInstance();

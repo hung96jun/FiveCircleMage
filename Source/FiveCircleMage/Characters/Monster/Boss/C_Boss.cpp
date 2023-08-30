@@ -204,7 +204,8 @@ void AC_Boss::OnRangedAttack()
 void AC_Boss::OnSpawnedShout()
 {
 	bAttacking = true;
-
+	bEnableSpawnedShout = false;
+	bSpawnedShouting = true;
 	//spawn minions
 }
 

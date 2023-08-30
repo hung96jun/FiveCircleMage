@@ -21,4 +21,12 @@ void UC_BossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (Character == nullptr) return;
 
 	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	bAttacking = Character->GetOnAttacking();
+	bOnGroggy = Character->GetGroggy();
+	bIsDead = Character->GetIsDead();
+	bMeleeAttacking = Character->GetMeleeAttack();
+	bRangedAttacking = Character->GetRangedAttack();
+	bSpawnedShouting = Character->GetSpawnedShouting();
+	Speed = Character->GetVelocity().Size();
 }

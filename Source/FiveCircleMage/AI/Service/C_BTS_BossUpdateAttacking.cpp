@@ -7,16 +7,16 @@
 UC_BTS_BossUpdateAttacking::UC_BTS_BossUpdateAttacking()
 {
 	NodeName = L"BTS_BossUpdateOnAttacking";
-	bNotifyTick = true;
+	bNotifyOnSearch = true;
 }
 
-void UC_BTS_BossUpdateAttacking::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UC_BTS_BossUpdateAttacking::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	Super::OnSearchStart(SearchData);
 
-	CheckNull(OwnerComp.GetAIOwner());
+	CheckNull(SearchData.OwnerComp.GetAIOwner());
 
-	AC_BossAIController* controller = Cast <AC_BossAIController>(OwnerComp.GetAIOwner());
+	AC_BossAIController* controller = Cast <AC_BossAIController>(SearchData.OwnerComp.GetAIOwner());
 	CheckNull(controller);
 
 	controller->GetBlackboardComponent()->SetValueAsBool(L"bOnAttacking", controller->GetOnAttacking());

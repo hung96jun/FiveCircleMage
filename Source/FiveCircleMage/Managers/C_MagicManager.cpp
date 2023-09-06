@@ -1,16 +1,18 @@
 #include "Managers/C_MagicManager.h"
 #include "NiagaraSystem.h"
 
+#include "Characters/C_Unit.h"
+
 #include "Weapons/Magic/C_MagicSkill.h"
 #include "Weapons/Magic/C_MagicMissile.h"
 #include "Weapons/Magic/C_MagicCoord.h"
 #include "Weapons/Magic/C_MagicInplace.h"
 #include "Weapons/Magic/MesObjects/C_MagicMes.h"
+#include "Weapons/Magic/MesObjects/C_SanctuaryArea.h"
 
 #include "Utilities/CLog.h"
 #include "Utilities/Defines.h"
 
-#include "Characters/C_Unit.h"
 
 AC_MagicManager::AC_MagicManager()
 {
@@ -40,7 +42,8 @@ AC_MagicManager::AC_MagicManager()
 		}
 
 		{
-			path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicInfo.DT_MagicInfo'";
+			//path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicInfo.DT_MagicInfo'";
+			path = L"/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicInfo2.DT_MagicInfo2'";
 			ConstructorHelpers::FObjectFinder<UDataTable> table(*path);
 
 			if (table.Succeeded())
@@ -160,6 +163,15 @@ void AC_MagicManager::CreateMagicObject(TPair<FString, FMagicPoolingInfo> Info)
 			inplace->SetSpreadSpeed(information.GetTemp()[1]);
 		}
 		break;
+		case ESkillType::Mes:
+		{
+			AC_SanctuaryArea* santuary = Cast<AC_SanctuaryArea>(magic);
+			if (santuary != nullptr)
+			{
+				santuary->SetLaunchPower(information.GetTemp()[0]);
+			}
+		}
+			break;
 		}
 
 		magics.Add(magic);
@@ -200,7 +212,7 @@ AC_MagicSkill* AC_MagicManager::OnFireMagic(AC_Unit* OwnerActor, const FString K
 
 	magic->BeginCasting(CasterLocation, TargetLocation, Rotation);
 	MagicCount[Key]++;
-	
+
 	return magic;
 }
 

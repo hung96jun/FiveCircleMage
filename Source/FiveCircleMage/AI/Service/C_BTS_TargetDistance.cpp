@@ -12,17 +12,16 @@ UC_BTS_TargetDistance::UC_BTS_TargetDistance()
 {
 	NodeName = L"BTS_TargetDistance";
 	bNotifyTick = true;
+	//bNotifyOnSearch = true;
 }
 
-void UC_BTS_TargetDistance::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UC_BTS_TargetDistance::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	Super::OnSearchStart(SearchData);
 
-	CLog::Print(L"Call Service TargetDistance", 1.0f, FColor::Blue);
+	CheckNull(SearchData.OwnerComp.GetAIOwner());
 
-	CheckNull(OwnerComp.GetAIOwner());
-
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(SearchData.OwnerComp.GetAIOwner());
 	CheckNull(controller);
 
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
@@ -30,6 +29,8 @@ void UC_BTS_TargetDistance::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 
 	AActor* targetActor = Cast<AActor>(blackboard->GetValueAsObject(L"Target"));
 	CheckNull(targetActor);
+
+	CLog::Print(L"TargetDistance", 0.01f, FColor::Cyan);
 
 	FVector location = controller->GetCharacter()->GetActorLocation();
 	FVector target = targetActor->GetActorLocation();
@@ -39,3 +40,27 @@ void UC_BTS_TargetDistance::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	controller->GetBlackboardComponent()->SetValueAsFloat(L"Distance", distance);
 	CLog::Print(L"Distance is : " + FString::SanitizeFloat(distance), 0.01f, FColor::Yellow);
 }
+
+//void UC_BTS_TargetDistance::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+//{
+//	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+//
+//	CheckNull(OwnerComp.GetAIOwner());
+//
+//	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+//	CheckNull(controller);
+//
+//	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
+//	CheckNull(blackboard);
+//
+//	AActor* targetActor = Cast<AActor>(blackboard->GetValueAsObject(L"Target"));
+//	CheckNull(targetActor);
+//
+//	FVector location = controller->GetCharacter()->GetActorLocation();
+//	FVector target = targetActor->GetActorLocation();
+//
+//	float distance = (target - location).Length();
+//
+//	controller->GetBlackboardComponent()->SetValueAsFloat(L"Distance", distance);
+//	CLog::Print(L"Distance is : " + FString::SanitizeFloat(distance), 0.01f, FColor::Yellow);
+//}

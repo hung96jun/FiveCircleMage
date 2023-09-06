@@ -2,7 +2,6 @@
 
 AC_Spider::AC_Spider()
 {
-
 }
 
 void AC_Spider::BeginPlay()
@@ -15,30 +14,21 @@ void AC_Spider::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector start, velocity;
-	start = GetActorLocation();
-	velocity = GetActorForwardVector() * ProjectileDistance;
-	velocity.Z = start.Z;
-	velocity.Z += ProjectileHeight;
+	//FVector start, velocity;
+	//start = GetActorLocation();
+	//velocity = GetActorForwardVector() * ProjectileDistance;
+	//velocity.Z = start.Z;
+	//velocity.Z += ProjectileHeight;
 
-	ProjectileParams.StartLocation = start;
-	ProjectileParams.LaunchVelocity = velocity;
+	//ProjectileParams.StartLocation = start;
+	//ProjectileParams.LaunchVelocity = velocity;
 
-	FPredictProjectilePathResult hitResult;
-	bool bHit = UGameplayStatics::PredictProjectilePath(GetOwner(), 
-		ProjectileParams, hitResult);
-}
+	//FPredictProjectilePathResult hitResult;
+	//bool bHit = UGameplayStatics::PredictProjectilePath(GetOwner(), 
+	//	ProjectileParams, hitResult);
 
-void AC_Spider::OnFireTrace()
-{
-	bEnableTrace = true;
-}
-
-void AC_Spider::OnFire()
-{
-	/*
-	* TODO : Spawn spider saliva
-	*/
-
-	bEnableTrace = false;
+	//FString temp = L"";
+	//temp = L"1. Spider HP : " + FString::SanitizeFloat((*GetUnitStatus()->GetCurHP()));
+	//temp += L"\n2. Spider HP : " + FString::SanitizeFloat((*UnitStatus.GetCurHP()));
+	//CLog::Print(temp, 0.01f, FColor::Blue);
 }

@@ -44,7 +44,7 @@ public:
 	void DecreaseMoveSpeed(const float Percent) { CurMoveSpeed = OriginMoveSpeed * (1 - Percent); }
 	void ResetMoveSpeed() { CurMoveSpeed = OriginMoveSpeed; }
 
-	const bool IsDeath() { return CurHP <= 0.0f; }
+	const bool IsDeath() { return CurHP < 0.0f; }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -89,8 +89,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override {}
 
 	virtual void GetDmg(const float Dmg, const EUnitState Type);
-	virtual void GetHeal(const float Amount) {}
-	virtual void Death() {}
+	virtual void GetHeal(const float Amount) 
+	{
+		(*UnitStatus.GetCurHP()) += Amount;
+	}
+	virtual void OnDeath() {}
 
 	FUnitStatus* GetUnitStatus() { return &UnitStatus; }
 
@@ -107,6 +110,8 @@ public:
 	{
 		return GenericTeamID;
 	}
+
+	const bool IsFalling() const;
 
 protected:
 	FGenericTeamId GenericTeamID;

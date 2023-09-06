@@ -9,25 +9,6 @@
 class UC_DamageComponent;
 
 USTRUCT(BlueprintType)
-struct FWeaponInformation
-{
-	GENERATED_USTRUCT_BODY()
-
-protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UStaticMesh* Mesh;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TArray<UMaterialInstance*> Materials;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float Damage;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		EUnitState DebuffType;
-};
-
-USTRUCT(BlueprintType)
 struct FMagicInformation
 {
 	GENERATED_USTRUCT_BODY()
@@ -45,8 +26,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		UC_DamageComponent* DamageComp = nullptr;
 
-protected:
-	float Damage = 0.0f;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		EUnitState DebuffType = EUnitState::Normal;
 
 public:
 	AC_DamageBase();
@@ -57,10 +38,15 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void SetCollisionEnabled(ECollisionEnabled::Type Type) {}
+
 	virtual void SetActive(const bool Value) { bActive = Value; }
 	const bool IsActive() { return bActive; }
 
 	void SetOwnerActor(AC_Unit* Actor) { OwnerActor = Actor; }
+
+	void SetDamage(const float Value) { Damage = Value; }
+	void SetDebuffType(const EUnitState Type) { DebuffType = Type; }
 
 	void SetDamageFactor(float DamageFactor) { ExtraDamageFactor = DamageFactor; }
 	void InitDamageFactor() { ExtraDamageFactor = 1.0f; }
@@ -72,4 +58,5 @@ protected:
 	bool bActive = false;
 	AC_Unit* OwnerActor = nullptr;
 	float ExtraDamageFactor = 1.0f;
+	float Damage = 0.0f;
 };

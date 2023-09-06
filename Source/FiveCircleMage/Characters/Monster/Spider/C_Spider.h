@@ -34,9 +34,4 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	void OnFireTrace();
-	void OnFire();
-
-private:
-	bool bEnableTrace = false;
 };

@@ -38,8 +38,11 @@
 
 class UCapsuleComponent;
 
+USTRUCT(BlueprintType)
 struct FParticleInfo
 {
+	GENERATED_BODY()
+
 public:
 	void SetParticle(UNiagaraSystem* _Particle, FVector _Location, FRotator _Rotation)
 	{
@@ -66,6 +69,28 @@ public:
 			EAttachLocation::KeepRelativeOffset, true);
 		Comp->ResetSystem();
 		Comp->SetVisibility(true);
+		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	void Play(TObjectPtr<USceneComponent> SceneComp)
+	{
+		if (Particle == nullptr)
+		{
+			CLog::Print("Particle is nullptr!!!");
+			return;
+		}
+
+		if (SceneComp == nullptr)
+		{
+			CLog::Print("USceneComponent is nullptr!!");
+			return;
+		}
+
+		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, SceneComp, L"None", Location, Rotation,
+			EAttachLocation::KeepRelativeOffset, true);
+		Comp->ResetSystem();
+		Comp->SetVisibility(true);
+		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	void Stop()
@@ -74,15 +99,31 @@ public:
 		Comp->SetVisibility(false);
 	}
 
+	void SetParticleScale(float Factor)
+	{
+		Comp->SetRelativeScale3D(FVector(Factor, Factor, Factor));
+	}
+
+	void SetParticleScale(float X, float Y, float Z)
+	{
+		Comp->SetRelativeScale3D(FVector(X, Y, Z));
+	}
+
 	const bool IsActive() { return Particle != nullptr; }
 	UNiagaraComponent*& GetComp() { return Comp; }
 
-private:
-	UNiagaraComponent* Comp = nullptr;
-	UNiagaraSystem* Particle = nullptr;
+protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UNiagaraComponent* Comp = nullptr;
 
-	FVector Location = FVector::ZeroVector;
-	FRotator Rotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UNiagaraSystem* Particle = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector Location = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FRotator Rotation = FRotator::ZeroRotator;
 };
 
 UCLASS()
@@ -98,6 +139,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCapsuleComponent* Collision = nullptr;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FParticleInfo MainParticle;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FParticleInfo EndParticle;
+
 public:
 	AC_MagicSkill();
 
@@ -106,7 +153,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
+	virtual void SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
 		UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
 		float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f);
 	void SetCollision(FVector3d CollisionSize, FRotator Rotation);
@@ -133,9 +180,6 @@ protected:
 	float OriginDuration;
 	float Duration;
 	float MoveSpeed;
-
-	FParticleInfo MainParticle;
-	FParticleInfo EndParticle;
 
 	EUnitState State;
 	ESkillType MagicType;

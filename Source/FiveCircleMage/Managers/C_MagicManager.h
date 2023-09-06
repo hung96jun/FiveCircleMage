@@ -186,6 +186,7 @@ protected:
 
 	6. Mes
 		- VampiricAreaSkill : void SetInterval(float IntervalTime);
+		- SantuaryAreaSkill : void SetLaunchPower(float Power);
 	*/
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Additional Information")
 		TArray<float> Temps;
@@ -220,7 +221,7 @@ protected:
 		TMap<FString, FMagicInfo> MagicInfos;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int MaxMagic = 25;
+		int MaxMagic = 5;
 
 public:	
 	AC_MagicManager();

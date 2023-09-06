@@ -2,23 +2,33 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Weapons/Weapon/C_WeaponBase.h"
+#include "Engine/DataTable.h"
+#include "Enums/C_UnitType.h"
+//#include "Engine/StaticMesh.h"
+////#include "Materials/Material.h"
+//#include "Materials/MaterialInstance.h"
+//#include "NiagaraSystem.h"
 #include "C_WeaponSpawnInfo.generated.h"
 
 /**
  * 
  */
-class AC_WeaponBase;
-
 USTRUCT(BlueprintType)
-struct FWeaponSpawnInfo
+struct FWeaponSpawnInfo : public FTableRowBase
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 public:
 	const FString GetName() const { return Name; }
 	TSubclassOf<AActor> GetClass() { return Class; }
 	const int GetMax() const { return Max; }
+	const float GetDamage() const { return Damage; }
+	const float GetDamageFactor() const { return DamageFactor; }
+	const EUnitState GetDebuffType() const { return DebuffType; }
+
+	//UStaticMesh* GetStaticMesh() { return Mesh; }
+	//TArray<UMaterialInstance*> GetMaterials() { return Materials; }
+	//UNiagaraSystem* GetNiagara() { return Niagara; }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -29,6 +39,24 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		int Max = 0;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float Damage = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 1.00, UIMin = 1.00))
+		float DamageFactor = 1.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EUnitState DebuffType = EUnitState::Normal;
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	UStaticMesh* Mesh = nullptr;
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	TArray<UMaterialInstance*> Materials;
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	UNiagaraSystem* Niagara;
 };
 
 UCLASS()

@@ -15,6 +15,10 @@
 
 #include "Utilities/CLog.h"
 
+//#include "NiagaraSystem.h"
+//#include "NiagaraComponent.h"
+//#include "NiagaraFunctionLibrary.h"
+
 AC_Mage::AC_Mage()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -126,6 +130,7 @@ void AC_Mage::BeginPlay()
 
     bDash = false;
     bDashCoolTime = false;
+    bAlive = true;
 
     Cast<UC_DashProgressBar>(WidgetComp->GetWidget())->SetDashCoolTime(DashCoolTime);
     Dispenser->SetOwner(this);
@@ -189,6 +194,12 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
 {
     Super::GetDmg(Dmg, Type);
 
+    if ((*GetUnitStatus()->GetCurHP()) <= 0.0f)
+    {
+        bAlive = false;
+        return;
+    }
+
     if (bCasting == true)
     {
         bCasting = false;
@@ -198,18 +209,20 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
 
 void AC_Mage::PushCastingStack(const ECastingElement Element)
 {
+    if (CastingStack.StackSize() >= 5) return;
+
+    UC_CastingStack* stack = Cast<UC_CastingStack>(CastingStackUIComp->GetWidget());
+    if (stack == nullptr) return;
     if (bEnablePushElement == false)
     {
         // "지금은 캐스팅할 수 없다" 음성 넣고 싶고
 
         /////////////////////////////////////////////////////////////////////
-        Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->ShakePanel();
+        stack->ShakePanel();
         /////////////////////////////////////////////////////////////////////
 
         return;
     }
-
-    if (CastingStack.StackSize() == 5) return;
 
     DashEffectComponent->SetElement(Element);
 
@@ -218,9 +231,14 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     PushedElement = Element;
 
-    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->ShowPanel();
-    Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetStackSlot(CastingStack.StackSize(), CAST(int32, PushedElement), CastingDelay[CastingStack.StackSize()]);
+    stack->ShowPanel();
+    stack->SetStackSlot(CastingStack.StackSize(), CAST(int32, PushedElement), CastingDelay[CastingStack.StackSize()]);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+}
+
+void AC_Mage::OnDeath()
+{
+    GetController()->UnPossess();
 }
 
 #pragma region Bind Action Function
@@ -251,7 +269,7 @@ void AC_Mage::OnDash()
     bDash = true;
     bDashCoolTime = true;
 
-    //DashEffectComponent->OnEffect();
+    DashEffectComponent->OnEffect(velocity);
 }
 
 void AC_Mage::EndDash()

@@ -1,7 +1,6 @@
 #include "Characters/Player/C_PlayerAnimInstance.h"
 #include "KismetAnimationLibrary.h"
 
-
 #include "Characters/Player/C_Mage.h"
 
 UC_PlayerAnimInstance::UC_PlayerAnimInstance()
@@ -34,4 +33,5 @@ void UC_PlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bCasting = Character->IsCasting();
 	bCastingBreak = Character->IsCastingBreak();
 	bOnFire = Character->IsOnFire();
+	bDeath = (!Character->IsAlive());
 }

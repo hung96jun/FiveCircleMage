@@ -13,9 +13,6 @@ UC_BTT_BossOnGroggy::UC_BTT_BossOnGroggy()
 	NodeName = L"BTT_BossOnGroggy";
 
 	bNotifyTick = true;
-
-	//Target.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UC_BTT_MoveTo, Target), AActor::StaticClass());
-	//Target.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UC_BTT_MoveTo, Target));
 }
 
 EBTNodeResult::Type UC_BTT_BossOnGroggy::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

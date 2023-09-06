@@ -4,6 +4,13 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+#include "C_GameInstance.h"
+#include "Managers/C_WeaponManager.h"
+#include "Managers/C_MonsterManager.h"
+#include "Characters/Monster/C_Monster.h"
+
+#include "UI/C_BossUI.h"
+
 AC_Boss::AC_Boss()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -23,6 +30,9 @@ void AC_Boss::GetDmg(const float Dmg, const EUnitState Type)
 	Super::GetDmg(Dmg, Type);
 
 	GroggyArmor -= Dmg;
+
+	if(BossUI != nullptr)
+		BossUI->Update();
 
 	if (GroggyArmor <= 0.0f)
 	{
@@ -53,8 +63,34 @@ void AC_Boss::BeginPlay()
 
 	// 초기설정값 지정
 
-	UnitStatus = FUnitStatus(2000.0f, 50.0f);
+	UnitStatus = FUnitStatus(2000.0f, 250.0f);
+	
+	// Capsule collision setting
+	GetCapsuleComponent()->SetCapsuleRadius(80.0f);
+
 	Init();
+
+	// Set rightHand collision for melee attack
+	UC_GameInstance* instance = Cast<UC_GameInstance>(GetWorld()->GetGameInstance());
+	if (instance == nullptr) return;
+
+	AC_WeaponBase* weapon = Cast<AC_WeaponBase>(instance->GetWeaponManager()->ActiveWeapon(L"WeaponBase"));
+	if (weapon == nullptr) return;
+
+	Weapon = weapon;
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, L"RightWeaponSocket");
+	if (Weapon == nullptr)
+	{
+		CLog::Print(L"Bear Object - Weapon is nullptr", 100.0f, FColor::Red);
+		return;
+	}
+
+	Weapon->SetBoxExtent(FVector(60.0f, 50.0f, 50.0f));
+	Weapon->SetActorRelativeLocation(FVector(45.0f, 0, 0));
+
+	weapon->SetDamage(35.0f);
+
+	ForceType = EUnitForceType::Monster;
 }
 
 void AC_Boss::Tick(float DeltaTime)
@@ -95,6 +131,27 @@ void AC_Boss::Init()
 	CurSpawnedMinions = 0;
 
 	UnitStatus.InitStatus();
+	GroggyArmor = OriginGroggyArmor;
+}
+
+void AC_Boss::NaturalHeal(float DeltaTime)
+{
+	if (bAttacking || bOnGroggy) return;
+
+	bool bIsMaxHP = UnitStatus.GetHPRate() >= 1.0f;
+	bool bIsMaxArmor = GroggyArmor >= OriginGroggyArmor;
+
+	if (bIsMaxHP == false)
+	{
+		float healAmount = bOnSecondPhase ? DeltaTime : DeltaTime * 2.0f;
+		*UnitStatus.GetCurHP() += healAmount;
+	}
+
+	if (bIsMaxArmor == false)
+	{
+		float armorRecoverAmount = bOnSecondPhase ? DeltaTime * 0.2f : DeltaTime * 0.4f;
+		GroggyArmor += armorRecoverAmount;
+	}
 }
 
 void AC_Boss::UpdateData(float DeltaTime)
@@ -130,6 +187,8 @@ void AC_Boss::UpdateData(float DeltaTime)
 			bEnableSpawnedShout = true;
 		}
 	}
+
+	NaturalHeal(DeltaTime);
 }
 
 void AC_Boss::SetValueAtBB()
@@ -182,6 +241,9 @@ void AC_Boss::Dead()
 {
 	bIsDead = true;
 	bIsActive = false;
+
+	BossUI->Hind();
+	BossUI = nullptr;
 }
 
 void AC_Boss::OnMeleeAttack()
@@ -190,6 +252,7 @@ void AC_Boss::OnMeleeAttack()
 	bEnableMeleeAttack = false;
 	bMeleeAttacking = true;
 
+	Weapon->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	//active collision on hands
 }
 
@@ -206,7 +269,26 @@ void AC_Boss::OnSpawnedShout()
 	bAttacking = true;
 	bEnableSpawnedShout = false;
 	bSpawnedShouting = true;
+
+	//////////////////////////////////////////////////////////////////////////////////
 	//spawn minions
+	//FString monsterName = L"";
+	//
+	//UC_GameInstance* instance = Cast<UC_GameInstance>(GetWorld()->GetGameInstance());
+	//if (instance == nullptr) return;
+	//if (instance->GetMonsterManager() == nullptr) return;
+	//if (instance->GetMonsterManager()->FindMonster(monsterName) == false) return;
+	//
+	//TArray<FVector> locations;
+	//
+	//// 위치지정?
+	//for (int iter = 0; iter < SpawnAmount; iter--)
+	//{
+	//	FVector local;
+	//	locations.Push(local);
+	//}
+	//instance->GetMonsterManager()->SpawnningMonster(monsterName, locations);
+	//////////////////////////////////////////////////////////////////////////////////
 }
 
 void AC_Boss::OnGroggy()

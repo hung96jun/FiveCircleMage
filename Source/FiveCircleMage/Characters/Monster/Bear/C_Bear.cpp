@@ -29,7 +29,6 @@ void AC_Bear::BeginPlay()
 		if (weapon == nullptr) return;
 		
 		AttachWeapon(weapon, L"RightWeaponSocket", FVector(50.0f, 50.0f, 50.0f));
-		weapon->SetDamage(1.0f);
 	}
 }
 

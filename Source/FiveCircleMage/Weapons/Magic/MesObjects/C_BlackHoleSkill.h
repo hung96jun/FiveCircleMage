@@ -25,6 +25,9 @@ protected:
 		UNiagaraSystem* FlashEffect;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float GravityPower = 4.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float InhalationHeight = 50.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

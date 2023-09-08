@@ -3,6 +3,7 @@
 
 #include "Characters/Player/C_Mage.h"
 #include "Characters/C_Unit.h"
+#include "Weapons/Weapon/C_ThrowingWeapon.h"
 
 AC_SanctuaryArea::AC_SanctuaryArea()
 	: AC_MagicMes()
@@ -65,12 +66,12 @@ void AC_SanctuaryArea::BeginCasting(FVector CasterPosition, FVector TargetPositi
 
 void AC_SanctuaryArea::OnBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//if (OtherActor == nullptr) return;
-	//if (OtherActor == this) return;
-	//if (OtherActor == OwnerActor) return;
+	if (OtherActor == nullptr) return;
+	if (OtherActor == this) return;
+	if (OtherActor == OwnerActor) return;
 
-	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
-	if (IsOtherActor(OtherActor, otherUnit) == false) return;
+	//AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
+	//if (IsOtherActor(OtherActor, otherUnit) == false) return;
 
 	{
 		AC_Unit* other = Cast<AC_Unit>(OtherActor);
@@ -86,17 +87,31 @@ void AC_SanctuaryArea::OnBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 			if (ratio < 0.2f)
 				ratio = 0.2f;
 			velocity *= (MaxPower * ratio);
+			//velocity.Z = FMath::Lerp(MinHeight, MaxHeight, ratio);
+			velocity.Z = MaxHeight;
+			//velocity.Z *= 2.0f;
+			//velocity *= ratio * 2.0f;
+			//velocity.Z *= 100.0f;
 
+			FString temp = L"";
+			temp = other->GetActorLabel();
+			temp += L" LaunchCharacter Velocity : " + velocity.ToString();
+			CLog::Print(temp, 10.0f, FColor::Blue);
+
+			other->GetCharacterMovement()->StopMovementImmediately();
 			other->LaunchCharacter(velocity, false, false);
 			return;
 		}
 	}
 
 	{
-		AC_DamageBase* other = Cast<AC_DamageBase>(OtherActor);
+		AC_ThrowingWeapon* other = Cast<AC_ThrowingWeapon>(OtherActor);
 		if (other != nullptr)
 		{
-			
+			if (OwnerActor->GetGenericTeamId() != other->GetTeamID())
+			{
+				other->OnHitAction();
+			}
 		}
 	}
 }

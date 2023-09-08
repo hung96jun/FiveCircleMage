@@ -53,7 +53,6 @@ void AC_AIControllerBase::BeginPlay()
 	//TargetKeyDelegate.BindUFunction(this, "UpdateTargetKey", nullptr);
 
 	AttackTimerDelegate.BindUFunction(this, L"EndAttacking");
-	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_AIControllerBase::Tick(float DeltaTime)
@@ -102,6 +101,8 @@ void AC_AIControllerBase::OnPossess(APawn* InPawn)
 	Blackboard = blackboard;
 	Blackboard.Get()->SetValueAsFloat(L"AttackRange", Character->GetAttackRange());
 	Blackboard.Get()->SetValueAsFloat(L"Distance", 1000.0f);
+
+	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_AIControllerBase::OnAttacking()

@@ -30,7 +30,7 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 	CheckNullResult(OwnerComp.GetAIOwner(), EBTNodeResult::Failed);
 
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+	AAIController* controller = Cast<AAIController>(OwnerComp.GetAIOwner());
 	CheckNullResult(controller, EBTNodeResult::Failed);
 
 	ACharacter* owner = controller->GetCharacter();
@@ -38,9 +38,6 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	CheckNullResult(blackboard, EBTNodeResult::Failed);
-
-	//UNavigationSystemV1* navSystem = UNavigationSystemV1::GetCurrent(owner->GetWorld());
-	//CheckNullResult(navSystem, EBTNodeResult::Failed);
 
 	FAIMoveRequest moveInfo;
 
@@ -64,7 +61,6 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	// 잘못된 설정값
 	else
 	{
-		CLog::Print(L"Target : Failed", 10.0f, FColor::Red);
 		return EBTNodeResult::Failed;
 	}
 	
@@ -82,8 +78,6 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		AcceptableDistance -= FMath::FRandRange(0.0f, AcceptableRandomRadius);
 	}
 
-	//moveInfo.SetAcceptanceRadius(AcceptableDistance);
-
 	FNavPathSharedPtr navPath;
 	controller->MoveTo(moveInfo, &navPath);
 
@@ -98,7 +92,8 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 	if (OwnerComp.GetAIOwner() == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+	AAIController* controller = OwnerComp.GetAIOwner();
+	//AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
 	if (controller == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
 	AC_Unit* owner = Cast<AC_Unit>(controller->GetCharacter());
@@ -106,12 +101,6 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	if (blackboard == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-
-	//if ((*owner->GetUnitStatus()->GetCurHP()) <= 0.0f)
-	//{
-	//	CLog::Print(L"MoveTo TaskNode - TickTask function(Abort condition success)", 10.0f, FColor::Red);
-	//	FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
-	//}
 
 	float distance = blackboard->GetValueAsFloat(L"Distance");
 	
@@ -136,7 +125,6 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 			if (bHit == false)
 			{
-				CLog::Print(L"MoveTo - TracekCheck Finish", 10.0f, FColor::Red);
 				owner->GetCharacterMovement()->StopMovementImmediately();
 				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 			}
@@ -144,14 +132,12 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 		else
 		{
-			CLog::Print(L"MoveTo - not TracekCheck Finish", 10.0f, FColor::Red);
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	}
 
 	else if (CurTimer >= ResetTime)
 	{
-		CLog::Print(L"MoveTo - TimeOver Finish", 10.0f, FColor::Red);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 	}
 
@@ -170,7 +156,6 @@ EBTNodeResult::Type UC_BTT_MoveTo::AbortTask(UBehaviorTreeComponent& OwnerComp, 
 	ACharacter* owner = controller->GetCharacter();
 	CheckNullResult(owner, EBTNodeResult::Failed);
 
-	CLog::Print(L"Call MoveTo TaskNode - AbortTask function", 10.0f, FColor::Red);
 	owner->GetCharacterMovement()->StopMovementImmediately();
 
 	return EBTNodeResult::Failed;

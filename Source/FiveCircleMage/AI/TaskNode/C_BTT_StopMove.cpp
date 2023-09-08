@@ -16,7 +16,7 @@ EBTNodeResult::Type UC_BTT_StopMove::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 
 	CheckNullResult(OwnerComp.GetAIOwner(), EBTNodeResult::Failed);
 
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+	AAIController* controller = Cast<AAIController>(OwnerComp.GetAIOwner());
 	CheckNullResult(controller, EBTNodeResult::Failed);
 
 	AC_Unit* owner = Cast<AC_Unit>(controller->GetCharacter());

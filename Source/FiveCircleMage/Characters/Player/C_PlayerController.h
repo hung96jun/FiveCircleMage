@@ -18,6 +18,8 @@ class UC_PlayerHUD;
 class AC_Mage;
 class UC_UIComponent;
 
+class AC_Boss;
+
 UCLASS()
 class FIVECIRCLEMAGE_API AC_PlayerController : public APlayerController
 {
@@ -46,6 +48,8 @@ public:
 	virtual void Tick(float DeltaTime) final;
 
 	virtual void SetupInputComponent() override;
+
+	void OpenBossUI(AC_Boss* Unit);
 
 protected:
 	virtual void OnPossess(APawn* aPawn) override;

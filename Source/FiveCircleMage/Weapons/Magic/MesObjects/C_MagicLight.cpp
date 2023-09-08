@@ -36,7 +36,7 @@ void AC_MagicLight::BeginCasting(FVector CasterPosition, FVector TargetPosition,
 	MainParticle.GetComp()->SetVisibility(true);
 	//Light->SetActive(true);
 	//Light->Intensity = 8.0f;
-	Light->SetIntensity(8000.0f);
+	Light->SetIntensity(100000.0f);
 }
 
 void AC_MagicLight::EndActive()

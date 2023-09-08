@@ -33,11 +33,13 @@ void AFiveCircleMageGameModeBase::BeginPlay()
 	}
 
 	GameInstance->GamePooling();
+	GameInstance->SetGameInstance(Cast<AC_PlayerController>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetController()));
 }
 
 void AFiveCircleMageGameModeBase::StartPlay()
 {
 	Super::StartPlay();
 
-
+	//UC_GameInstance* instance = Cast<UC_GameInstance>(GetWorld()->GetGameInstance());
+	//instance->TestSpawnMonster(L"Bear", FVector(200.0f));
 }

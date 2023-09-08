@@ -77,6 +77,16 @@ public:
 		Comp->SetVisibility(false);
 	}
 
+	void SetParticleScale(float Factor)
+	{
+		Comp->SetRelativeScale3D(FVector(Factor, Factor, Factor));
+	}
+
+	void SetParticleScale(float X, float Y, float Z)
+	{
+		Comp->SetRelativeScale3D(FVector(X, Y, Z));
+	}
+
 	const bool IsActive() { return Particle != nullptr; }
 	UNiagaraComponent*& GetComp() { return Comp; }
 

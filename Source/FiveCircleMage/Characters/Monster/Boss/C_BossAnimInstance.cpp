@@ -29,4 +29,5 @@ void UC_BossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bRangedAttacking = Character->GetRangedAttack();
 	bSpawnedShouting = Character->GetSpawnedShouting();
 	Speed = Character->GetVelocity().Size();
+	bFullArmor = Character->IsArmorFull();
 }

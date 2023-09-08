@@ -19,7 +19,6 @@ void AC_BossAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_BossAIController::Tick(float DeltaTime)
@@ -44,6 +43,8 @@ void AC_BossAIController::OnPossess(APawn* InPawn)
 		Character->SetBehaviorTree(BTAsset, Blackboard);
 		RunBehaviorTree(BTAsset);
 	}
+
+	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AC_BossAIController::OnUnPossess()

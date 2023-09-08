@@ -3,6 +3,8 @@
 AC_MagicInplace::AC_MagicInplace()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	Collision->SetHiddenInGame(false);
 }
 
 void AC_MagicInplace::BeginPlay()
@@ -16,7 +18,7 @@ void AC_MagicInplace::BeginPlay()
 
 void AC_MagicInplace::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	IsOtherActor(OtherActor);
+	if (IsOtherActor(OtherActor) == false) return;
 
 	DamageComp->GiveDmg(OtherActor, Damage, State);
 }

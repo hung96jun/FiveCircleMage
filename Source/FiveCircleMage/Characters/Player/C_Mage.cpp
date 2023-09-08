@@ -67,7 +67,7 @@ AC_Mage::AC_Mage()
         CameraArm->TargetArmLength = 1000.0f;
         CameraArm->SocketOffset.X = 400.0f;
         CameraArm->SocketOffset.Z = 1000.0f;
-        Camera->AddRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
+        Camera->AddRelativeRotation(FRotator(-20.0f, 0.0f, -90.0f));
         CameraArm->bUsePawnControlRotation = true;
         CameraArm->bInheritPitch = true;
         CameraArm->bInheritRoll = true;

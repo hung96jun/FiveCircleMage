@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Characters/C_Unit.h"
+#include "Weapons/Weapon/C_WeaponBase.h"
 #include "C_Boss.generated.h"
 
 class UBehaviorTree;
 class UBlackboardComponent;
+class UC_BossUI;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_Boss : public AC_Unit
@@ -52,6 +54,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		bool bIsDead = false;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		int32 SpawnAmount = 2;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		float GroggyArmor = 0.0f;
+
 public:
 	AC_Boss();
 
@@ -72,9 +80,9 @@ protected:
 
 private:
 	void Init();
+	void NaturalHeal(float DeltaTime);
 
 	void UpdateData(float DeltaTime);
-	void SetValueAtBB();
 
 	void BeginSecondPhase();
 
@@ -88,8 +96,10 @@ public:
 
 	void EndAttack() { bAttacking = false; }
 	void EndMeleeAttack() { bMeleeAttacking = false; }
+	void EndWeaponCollision() { Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 	void EndRangedAttack() { bRangedAttacking = false; }
 	void EndSpawnedShout() { bSpawnedShouting = false; }
+	void EndGroggy() { bOnGroggy = false; GroggyArmor = OriginGroggyArmor; }
 
 	// Update and return datas for updating blackboard
 	bool GetEnableMeleeAttack() { return bEnableMeleeAttack; }
@@ -105,6 +115,10 @@ public:
 	bool GetRangedAttack() { return bRangedAttacking; }
 	bool GetSpawnedShouting() { return bSpawnedShouting; }
 
+	bool IsArmorFull() { return GroggyArmor >= OriginGroggyArmor; }
+
+	void SetUI(UC_BossUI* UI) { BossUI = UI; }
+
 private:
 	AActor* Target = nullptr;
 
@@ -112,17 +126,20 @@ private:
 
 	const float RangedAttackSpeed = 10.0f;
 	float RangedAttackFrame = 0.0f;
-	const float MeleeAttackSpeed = 10.0f;
+	const float MeleeAttackSpeed = 7.0f;
 	float MeleeAttackFrame = 0.0f;
-	const float SpawnedShoutSpeed = 10.0f;
+	const float SpawnedShoutSpeed = 30.0f;
 	float SpawnedShoutFrame = 0.0f;
-	
-	const float OriginGroggyArmor = 0.0f;
-	float GroggyArmor = 0.0f;
-	float GroggyArmorRegeneratedPower = 0.0f;
+
+	const float OriginGroggyArmor = 150.0f;
+	float GroggyArmorRegeneratedPower = 40.0f;
 
 	int32 CurSpawnedMinions = 0;
 
 	UBehaviorTree* BTAsset = nullptr;
 	UBlackboardComponent* BBAsset = nullptr;
+
+	AC_WeaponBase* Weapon;
+
+	UC_BossUI* BossUI = nullptr;
 };

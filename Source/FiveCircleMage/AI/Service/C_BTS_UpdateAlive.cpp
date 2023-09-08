@@ -30,8 +30,6 @@ void UC_BTS_UpdateAlive::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	CheckNull(blackboard);
 
-	CLog::Print(L"UpdateAlive", 0.01f, FColor::Cyan);
-
 	if ((*owner->GetUnitStatus()->GetCurHP()) > 0.0f)
 		blackboard->SetValueAsBool(L"bAlive", true);
 	else

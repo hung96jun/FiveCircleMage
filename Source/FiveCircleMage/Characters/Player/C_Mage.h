@@ -191,7 +191,7 @@ protected:
 		USpringArmComponent* CameraArm;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-		UWidgetComponent* WidgetComp;					//Dash
+		UWidgetComponent* WidgetComp;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		UWidgetComponent* CastingStackUIComp;

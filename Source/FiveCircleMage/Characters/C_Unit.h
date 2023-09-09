@@ -113,6 +113,9 @@ public:
 
 	const bool IsFalling() const;
 
+	virtual void SetActive(const bool Value);
+	const bool IsActive() const { return bActive; }
+
 protected:
 	FGenericTeamId GenericTeamID;
 	FDebuffHandle DebuffHandle[CAST(int, EUnitState::Size)];
@@ -120,4 +123,6 @@ protected:
 	EUnitForceType ForceType;
 
 	bool bAttacking = false;
+
+	bool bActive = false;
 };

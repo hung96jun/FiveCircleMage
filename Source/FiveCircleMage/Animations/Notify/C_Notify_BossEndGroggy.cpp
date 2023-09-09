@@ -8,11 +8,6 @@
 
 void UC_Notify_BossEndGroggy::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	LoopTimeCount++;
-	if (LoopTimeCount < GroggyLoopTime) return;
-
-	LoopTimeCount = 0;
-
 	Super::Notify(MeshComp, Animation, EventReference);
 
 	AC_Boss* Character = Cast<AC_Boss>(MeshComp->GetOwner());

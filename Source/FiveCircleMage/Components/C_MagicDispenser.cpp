@@ -149,7 +149,7 @@ AC_MagicSkill* UC_MagicDispenser::SpawnMagic(FString Key, FVector CasterLocation
 	AC_MagicSkill* magicSkill = Cast<UC_GameInstance>(GetWorld()->GetGameInstance())->GetMagicManager()->OnFireMagic(Owner, Key, CasterLocation, MouseLocation, Rot);
 
 	if (magicSkill == nullptr) return nullptr;
-	if (bIsDarkEnchanted == false) magicSkill->InitDamageFactor();
+	magicSkill->InitDamageFactor();
 
 	return magicSkill;
 }

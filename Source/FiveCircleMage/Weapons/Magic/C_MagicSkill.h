@@ -30,101 +30,12 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/C_DamageBase.h"
-#include "NiagaraSystem.h"
-#include "NiagaraComponent.h"
-#include "NiagaraFunctionLibrary.h"
+
+#include "Structs/C_ParticleInfo.h"
+
 #include "Enums/C_SkillType.h"
 #include "C_MagicSkill.generated.h"
 
-class UCapsuleComponent;
-
-USTRUCT(BlueprintType)
-struct FParticleInfo
-{
-	GENERATED_BODY()
-
-public:
-	void SetParticle(UNiagaraSystem* _Particle, FVector _Location, FRotator _Rotation)
-	{
-		Particle = _Particle;
-		Location = _Location;
-		Rotation = _Rotation;
-	}
-
-	void Play(UCapsuleComponent*& Collision)
-	{
-		if (Particle == nullptr)
-		{
-			CLog::Print("Particle is nullptr!!!");
-			return;
-		}
-
-		if (Collision == nullptr)
-		{
-			CLog::Print("Collision is nullptr!!");
-			return;
-		}
-
-		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, Collision, L"None", Location, Rotation,
-			EAttachLocation::KeepRelativeOffset, true);
-		Comp->ResetSystem();
-		Comp->SetVisibility(true);
-		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	void Play(TObjectPtr<USceneComponent> SceneComp)
-	{
-		if (Particle == nullptr)
-		{
-			CLog::Print("Particle is nullptr!!!");
-			return;
-		}
-
-		if (SceneComp == nullptr)
-		{
-			CLog::Print("USceneComponent is nullptr!!");
-			return;
-		}
-
-		Comp = UNiagaraFunctionLibrary::SpawnSystemAttached(Particle, SceneComp, L"None", Location, Rotation,
-			EAttachLocation::KeepRelativeOffset, true);
-		Comp->ResetSystem();
-		Comp->SetVisibility(true);
-		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	void Stop()
-	{
-		Comp->SetPaused(true);
-		Comp->SetVisibility(false);
-	}
-
-	void SetParticleScale(float Factor)
-	{
-		Comp->SetRelativeScale3D(FVector(Factor, Factor, Factor));
-	}
-
-	void SetParticleScale(float X, float Y, float Z)
-	{
-		Comp->SetRelativeScale3D(FVector(X, Y, Z));
-	}
-
-	const bool IsActive() { return Particle != nullptr; }
-	UNiagaraComponent*& GetComp() { return Comp; }
-
-protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UNiagaraComponent* Comp = nullptr;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UNiagaraSystem* Particle = nullptr;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FVector Location = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FRotator Rotation = FRotator::ZeroRotator;
-};
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_MagicSkill : public AC_DamageBase

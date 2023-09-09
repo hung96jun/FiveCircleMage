@@ -3,7 +3,6 @@
 AC_MagicBeam::AC_MagicBeam()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	Collision->SetHiddenInGame(false);
 
 	Capsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
 	Capsule->SetCollisionProfileName(L"Magic");

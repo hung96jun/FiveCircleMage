@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Characters/C_Unit.h"
 #include "Weapons/Weapon/C_WeaponBase.h"
+#include "Structs/C_ParticleInfo.h"
 #include "C_Boss.generated.h"
 
 class UBehaviorTree;
@@ -57,6 +58,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		int32 SpawnAmount = 2;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		float GroggyArmor = 0.0f;
+
 public:
 	AC_Boss();
 
@@ -80,7 +84,6 @@ private:
 	void NaturalHeal(float DeltaTime);
 
 	void UpdateData(float DeltaTime);
-	void SetValueAtBB();
 
 	void BeginSecondPhase();
 
@@ -93,7 +96,8 @@ public:
 	void OnGroggy();
 
 	void EndAttack() { bAttacking = false; }
-	void EndMeleeAttack() { bMeleeAttacking = false; Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
+	void EndMeleeAttack() { bMeleeAttacking = false; }
+	void EndWeaponCollision() { Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 	void EndRangedAttack() { bRangedAttacking = false; }
 	void EndSpawnedShout() { bSpawnedShouting = false; }
 	void EndGroggy() { bOnGroggy = false; GroggyArmor = OriginGroggyArmor; }
@@ -112,7 +116,11 @@ public:
 	bool GetRangedAttack() { return bRangedAttacking; }
 	bool GetSpawnedShouting() { return bSpawnedShouting; }
 
-	FUnitStatus* GetStatus() { return &UnitStatus; }
+	bool IsArmorFull() { return GroggyArmor >= OriginGroggyArmor; }
+
+	float* GetArmor() { return &GroggyArmor; }
+	const float GetOriginArmor() { return OriginGroggyArmor; }
+
 	void SetUI(UC_BossUI* UI) { BossUI = UI; }
 
 private:
@@ -126,9 +134,8 @@ private:
 	float MeleeAttackFrame = 0.0f;
 	const float SpawnedShoutSpeed = 30.0f;
 	float SpawnedShoutFrame = 0.0f;
-	
-	const float OriginGroggyArmor = 320.0f;
-	float GroggyArmor = 0.0f;
+
+	const float OriginGroggyArmor = 150.0f;
 	float GroggyArmorRegeneratedPower = 40.0f;
 
 	int32 CurSpawnedMinions = 0;
@@ -139,4 +146,6 @@ private:
 	AC_WeaponBase* Weapon;
 
 	UC_BossUI* BossUI = nullptr;
+
+	TArray<FParticleInfo> ParticleInfos;
 };

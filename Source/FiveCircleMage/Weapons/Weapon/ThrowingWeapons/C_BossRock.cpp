@@ -1,4 +1,4 @@
-#include "Weapons/Weapon/C_BossRock.h"
+#include "Weapons/Weapon/ThrowingWeapons/C_BossRock.h"
 
 AC_BossRock::AC_BossRock()
 {
@@ -11,7 +11,8 @@ AC_BossRock::AC_BossRock()
 	{
 		MeshComp->SetStaticMesh(mesh.Object);
 		MeshComp->SetupAttachment(RootComponent);
-		MeshComp->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+		MeshComp->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));	
+		MeshComp->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
 	}
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -20,6 +21,9 @@ AC_BossRock::AC_BossRock()
 void AC_BossRock::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Collision->SetCapsuleHalfHeight(80.0f);
+	Collision->SetCapsuleRadius(80.0f);
 
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetActive(false);
@@ -44,11 +48,12 @@ void AC_BossRock::Tick(float DeltaTime)
 
 void AC_BossRock::OnFire(const FVector& Target, AC_Unit* Actor)
 {
+	SetActive(true);
+	SetOwnerActor(Actor);
+
 	FireDirection = Target.GetSafeNormal();
 	SetActorLocation(Actor->GetActorLocation() + Actor->GetActorForwardVector() * 250.0f);
-	
-	SetActive(true);
-	
+		
 	Speed = OriginSpeed;
 	AccelatingInterval = OriginAccelatingInterval;
 	CurLifeTime = 0.0f;
@@ -56,6 +61,8 @@ void AC_BossRock::OnFire(const FVector& Target, AC_Unit* Actor)
 
 void AC_BossRock::OnHitAction()
 {
+	Super::OnHitAction();
+
 	SetActive(false);
 }
 
@@ -67,5 +74,8 @@ void AC_BossRock::SetActive(const bool Value)
 	if (Value)
 		SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	else
+	{
 		SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorLocation(FVector::ZeroVector);
+	}
 }

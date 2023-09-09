@@ -14,12 +14,12 @@ void AC_Unit::BeginPlay()
 
 	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
 	
-	FString temp = L"";
-	temp = GetActorLabel();
-	temp += L"\nMaxHP : " + FString::SanitizeFloat(*UnitStatus.GetOriginHP());
-	temp += L"\nCurHP : " + FString::SanitizeFloat(*UnitStatus.GetCurHP());
-
-	CLog::Print(temp, 10.0f, FColor::Purple);
+	//FString temp = L"";
+	//temp = GetActorLabel();
+	//temp += L"\nMaxHP : " + FString::SanitizeFloat(*UnitStatus.GetOriginHP());
+	//temp += L"\nCurHP : " + FString::SanitizeFloat(*UnitStatus.GetCurHP());
+	//
+	//CLog::Print(temp, 10.0f, FColor::Purple);
 }
 
 void AC_Unit::Tick(float DeltaTime)
@@ -78,4 +78,23 @@ void AC_Unit::ResetMoveSpeed()
 const bool AC_Unit::IsFalling() const
 {
 	return GetCharacterMovement()->IsFalling();
+}
+
+void AC_Unit::SetActive(const bool Value)
+{
+	bActive = Value;
+
+	if (bActive == true)
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SetActorHiddenInGame(false);
+	}
+
+	else
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorHiddenInGame(true);
+	}
+
+	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
 }

@@ -12,9 +12,11 @@ UC_DamageComponent::UC_DamageComponent()
 			pair.Value = FDebuffInfo(1.0f, 3.0f, 0.5f, true, EUnitState::Burn);
 
 			TestDebuffInfo.Add(pair);
-
+		}
+		
+		{
 			pair.Key = EUnitState::Slow;
-			pair.Value = FDebuffInfo(0.8f, 2.0f, 0, false, EUnitState::Slow);
+			pair.Value = FDebuffInfo(0.2f, 2.0f, 0.0f, false, EUnitState::Slow);
 
 			TestDebuffInfo.Add(pair);
 		}
@@ -91,6 +93,8 @@ void UC_DamageComponent::SetDebuff(AC_Unit* Target, const FDebuffInfo Informatio
 
 void UC_DamageComponent::GiveBurn(AC_Unit* Target, const FDebuffInfo Information)
 {
+	if (Target == nullptr) return;
+	if ((*Target->GetUnitStatus()->GetCurHP()) <= 0.0f) return;
 	Target->GetDmg(Information.Value, Information.DebuffType);
 
 	CLog::Print(Target->GetName() + L" Burn", 10.0f, FColor::Red);

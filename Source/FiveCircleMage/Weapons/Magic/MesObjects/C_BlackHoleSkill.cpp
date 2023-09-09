@@ -33,8 +33,6 @@ void AC_BlackHoleSkill::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	Collision->bHiddenInGame = false;
-
 	CurTime += DeltaTime;
 
 	if (BlackHoleState == EBlackHoleState::Inhalation && CurTime <= DelayTime)
@@ -161,13 +159,21 @@ void AC_BlackHoleSkill::OnActive()
 			temp = unit->GetActorLabel();
 			temp += L" - Launch Direction : " + direction.ToString();
 			CLog::Print(temp, 1.0f, FColor::Cyan);
-			//unit->LaunchCharacter(direction, true, true);
-			UCapsuleComponent* comp = Cast<UCapsuleComponent>(unit->GetRootComponent());
-			if (comp == nullptr)
-				CLog::Print(L"Error Comp", 10.0f, FColor::Red);
-			comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			comp->SetSimulatePhysics(true);
-			comp->AddImpulse(direction, L"None", true);
+			
+			{
+				//unit->LaunchCharacter(direction, true, true);
+				//UCapsuleComponent* comp = Cast<UCapsuleComponent>(unit->GetRootComponent());
+				//if (comp == nullptr)
+				//	CLog::Print(L"Error Comp", 10.0f, FColor::Red);
+				//comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				//comp->SetSimulatePhysics(true);
+				//comp->AddImpulse(direction, L"None", true);
+			}
+
+			{
+				unit->LaunchCharacter(direction * GravityPower, false, false);
+			}
+
 			DamageComp->GiveDmg(unit, Damage);
 		}
 	}

@@ -48,8 +48,10 @@ public:
 	void SetDamage(const float Value) { Damage = Value; }
 	void SetDebuffType(const EUnitState Type) { DebuffType = Type; }
 
-	void SetDamageFactor(float DamageFactor) { ExtraDamageFactor = DamageFactor; }
-	void InitDamageFactor() { ExtraDamageFactor = 1.0f; }
+	void SetDamageFactor(float DamageFactor) { ExtraDamageFactor = DamageFactor; Damage *= ExtraDamageFactor; }
+	void InitDamageFactor() { Damage /= ExtraDamageFactor; ExtraDamageFactor = 1.0f; }
+
+	const FGenericTeamId GetTeamID() const { return OwnerActor->GetGenericTeamId(); }
 
 protected:
 	void Spawn(const FVector Location, const FRotator Rotation = FRotator::ZeroRotator) {}

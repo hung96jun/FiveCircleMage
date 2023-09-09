@@ -18,8 +18,6 @@ AC_SpiderSaliva::AC_SpiderSaliva()
 		if (niagara.Succeeded())
 			Particle = niagara.Object;
 	}
-
-	Collision->SetCollisionProfileName(L"Magic");
 }
 
 void AC_SpiderSaliva::BeginPlay()
@@ -42,6 +40,8 @@ void AC_SpiderSaliva::Tick(float DeltaTime)
 
 void AC_SpiderSaliva::OnHitAction()
 {
+	Super::OnHitAction();
+
 	if (ParticleComponent == nullptr)
 	{
 		CLog::Print(L"SpiderSaliva Particle is nullptr", 10.0f, FColor::Red);

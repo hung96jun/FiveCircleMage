@@ -8,6 +8,7 @@
 
 class UProgressBar;
 class AC_Unit;
+class UImage;
 struct FUnitStatus;
 
 UCLASS()
@@ -19,14 +20,28 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UProgressBar* HP;
 
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		UProgressBar* Armor;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		UImage* HPL;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		UImage* HPR;
+
+public:
+	UFUNCTION()
+		void Hide();
+
+	UFUNCTION()
+		void Shaking();
+
 public:
 	UC_BossUI(const FObjectInitializer& ObjectInitializer);
 
 	void Update();
-	void Show(FUnitStatus* Status);
-	void Hind();
-
-
+	void Show(FUnitStatus* Status, float* ArmorValue, float OriginArmorValue);
+	
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -34,9 +49,6 @@ protected:
 
 private:
 	void ShakeUI();
-
-	UFUNCTION()
-		void Shaking();
 
 	void ClearTimer();
 	void SetHPWidgetTransform(float TranslationAxisY);
@@ -46,9 +58,13 @@ private:
 
 	const float TimerInterval = 0.01f;
 
+	float* GroggyArmor = nullptr;
+	float OriginGroggyArmor = 9999;
+
 	FTimerHandle ShakingHandle;
-	const float ShakingPower = 0.4f;
-	const float ShakingRange = 12.0f;
+	FTimerDelegate TimerDelegate;
+	const float ShakingPower = 6.0f;
+	const float ShakingRange = 4.0f;
 	float ShakingTime = 0.0f;
 	float ShakingAxis = 0.0f;
 	bool ShakingSwitch = true;

@@ -93,6 +93,7 @@ void AC_WeaponManager::SpawnWeapons(const FString Name, TSubclassOf<AActor> Clas
 			weapon->SetDamage(Damage);
 			weapon->SetDamageFactor(DamageFactor);
 			weapon->SetDebuffType(DebuffType);
+			weapon->SetActorHiddenInGame(true);
 			weapons.Add(weapon);
 			count++;
 		}
@@ -122,6 +123,8 @@ void AC_WeaponManager::SpawnWeapons(const FString Name, TSubclassOf<AActor> Clas
 
 AC_DamageBase* AC_WeaponManager::ActiveWeapon(const FString Name)
 {
+	if (Weapons.Contains(Name) == false) return nullptr;
+
 	AC_DamageBase* weapon = nullptr;
 	TArray<AC_DamageBase*> weapons = Weapons[Name];
 	int max = WeaponPoolMax[Name];
@@ -151,6 +154,7 @@ AC_DamageBase* AC_WeaponManager::ActiveWeapon(const FString Name)
 	}
 
 	weapon->SetActive(true);
+	weapon->SetActorHiddenInGame(false);
 	return weapon;
 }
 

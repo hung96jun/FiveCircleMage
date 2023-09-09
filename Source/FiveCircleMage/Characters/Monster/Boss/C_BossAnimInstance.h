@@ -37,6 +37,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 		float Speed = false;
+
+	UPROPERTY(BlueprintReadOnly)
+		bool bFullArmor = false;
 	
 public:
 	UC_BossAnimInstance();

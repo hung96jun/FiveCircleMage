@@ -7,7 +7,7 @@
 #include "C_BTT_BossOnGroggy.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class FIVECIRCLEMAGE_API UC_BTT_BossOnGroggy : public UBTTaskNode

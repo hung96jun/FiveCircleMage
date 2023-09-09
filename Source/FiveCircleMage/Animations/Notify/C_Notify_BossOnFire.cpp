@@ -3,7 +3,7 @@
 
 #include "Characters/Monster/Boss/C_Boss.h"
 
-#include "Weapons/Weapon/C_BossRock.h"
+#include "Weapons/Weapon/ThrowingWeapons/C_BossRock.h"
 #include "C_GameInstance.h"
 #include "Managers/C_WeaponManager.h"
 

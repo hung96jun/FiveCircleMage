@@ -40,5 +40,11 @@ protected:
 private:
 	AActor* EffectActor = nullptr;
 	float Radius = 400.0f;
-	float MaxPower = 3500.0f;
+	float MaxPower = 2000.0f;
+	//float MaxHeight = 100.0f;
+	//float MinHeight = 50.0f;
+
+
+	float MaxHeight = 70.0f;
+	float MinHeight = 30.0f;
 };

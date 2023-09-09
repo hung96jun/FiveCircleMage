@@ -49,6 +49,9 @@ public:
 		
 	TArray<AC_Monster*> GetMonsters(FString Name);
 
+	AC_Boss* GetBoss() { return BossMonster; }
+	AC_BossAIController* GetBossController() { return BossController; }
+
 private:
 	void AttachWeapon(AC_Monster* Monster, const TArray<FAttachWeaponInfo> Infos);
 

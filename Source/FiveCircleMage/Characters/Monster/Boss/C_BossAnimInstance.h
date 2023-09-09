@@ -24,9 +24,6 @@ protected:
 		bool bOnGroggy = false;
 
 	UPROPERTY(BlueprintReadOnly)
-		bool bIsDead = false;
-
-	UPROPERTY(BlueprintReadOnly)
 		bool bMeleeAttacking = false;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -40,6 +37,15 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 		bool bFullArmor = false;
+
+	UPROPERTY(BlueprintReadOnly)
+		bool bSecondPhase = false;
+
+	UPROPERTY(BlueprintReadOnly)
+		bool bDeath = false;
+
+	UPROPERTY(BlueprintReadOnly)
+		int AttackNum = 0;
 	
 public:
 	UC_BossAnimInstance();

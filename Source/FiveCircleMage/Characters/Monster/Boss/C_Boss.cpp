@@ -39,6 +39,31 @@ AC_Boss::AC_Boss()
 		if(anim.Succeeded())
 			GetMesh()->SetAnimInstanceClass(anim.Class);
 	}
+
+	{
+		path = L"/Script/Engine.AnimBlueprint'/Game/Blueprint/Characters/Enemy/Boss/BpC_BossAnimInstance.BpC_BossAnimInstance_C'";
+		ConstructorHelpers::FClassFinder<UAnimInstance> anim(*path);
+
+		if (anim.Succeeded())
+			GetMesh()->SetAnimInstanceClass(anim.Class);
+	}
+
+	{
+		ParticleInfos.SetNum(2);
+
+		for (int32 idx = 0; idx < ParticleInfos.Num(); idx++)
+		{
+			if (idx == 0)
+				path = L"/Script/Niagara.NiagaraSystem'/Game/Assets/Particles/Sci-Fi_Starter_VFX_Pack_Niagara/Niagara/Explosion/NS_BossCharge.NS_BossCharge'";
+			else if (idx == 1)
+				path = L"/Script/Niagara.NiagaraSystem'/Game/Assets/Particles/Sci-Fi_Starter_VFX_Pack_Niagara/Niagara/Explosion/NS_BossWind.NS_BossWind'";
+
+			ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
+
+			if (niagara.Succeeded())
+				ParticleInfos[idx].SetParticle(niagara.Object, FVector::ZeroVector, FRotator::ZeroRotator);
+		}
+	}
 }
 
 void AC_Boss::BeginPlay()
@@ -47,7 +72,7 @@ void AC_Boss::BeginPlay()
 
 	// 초기설정값 지정
 
-	UnitStatus = FUnitStatus(2000.0f, 250.0f);
+	UnitStatus = FUnitStatus(1000.0f, 250.0f);
 
 	// Capsule collision setting
 	GetCapsuleComponent()->SetCapsuleRadius(80.0f);
@@ -71,7 +96,7 @@ void AC_Boss::BeginPlay()
 
 	Weapon->SetBoxExtent(FVector(60.0f, 50.0f, 50.0f));
 	Weapon->SetActorRelativeLocation(FVector(45.0f, 0, 0));
-	weapon->SetOwnerActor(this);
+	Weapon->SetOwnerActor(this);
 
 	ForceType = EUnitForceType::Monster;
 }
@@ -151,6 +176,10 @@ void AC_Boss::Init()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	//GetMesh()->bHiddenInGame = false;
 	SetActorHiddenInGame(false);
+
+	// Test
+	//bOnSecondPhase = true;
+	//BeginSecondPhase();
 }
 
 void AC_Boss::NaturalHeal(float DeltaTime)
@@ -179,9 +208,13 @@ void AC_Boss::UpdateData(float DeltaTime)
 {
 	DistanceToTarget = (TargetLocation - GetActorLocation()).Length();
 
+	float timeMagnification = 1.0f;
+	if (bOnSecondPhase == true)
+		timeMagnification = 2.0f;
+
 	if (!bEnableRangedAttack)
 	{
-		RangedAttackFrame += DeltaTime;
+		RangedAttackFrame += DeltaTime * timeMagnification;
 		if (RangedAttackFrame >= RangedAttackSpeed)
 		{
 			RangedAttackFrame = 0.0f;
@@ -191,7 +224,7 @@ void AC_Boss::UpdateData(float DeltaTime)
 
 	if (!bEnableMeleeAttack)
 	{
-		MeleeAttackFrame += DeltaTime;
+		MeleeAttackFrame += DeltaTime * timeMagnification;
 		if (MeleeAttackFrame >= MeleeAttackSpeed)
 		{
 			MeleeAttackFrame = 0.0f;
@@ -212,50 +245,25 @@ void AC_Boss::UpdateData(float DeltaTime)
 	NaturalHeal(DeltaTime);
 }
 
-//void AC_Boss::SetValueAtBB()
-//{
-//	// OnAttacking
-//	BBAsset->SetValueAsBool(L"bOnAttacking", bAttacking);
-//
-//	// Melee
-//	BBAsset->SetValueAsBool(L"bOnMeleeAttacking", bMeleeAttacking);
-//	BBAsset->SetValueAsBool(L"bEnableMeleeAttacking", bEnableMeleeAttack);
-//
-//	// Ranged
-//	BBAsset->SetValueAsBool(L"bOnRangedAttacking", bRangedAttacking);
-//	BBAsset->SetValueAsBool(L"bEnableRangedAttacking", bEnableRangedAttack);
-//
-//	// Spawned Shout
-//	BBAsset->SetValueAsBool(L"bOnShouting", bSpawnedShouting);
-//	BBAsset->SetValueAsBool(L"bEnableShouting", bEnableSpawnedShout);
-//
-//	// Dead
-//	BBAsset->SetValueAsBool(L"bIsDead", bIsDead);
-//
-//	// OnGroggy
-//	BBAsset->SetValueAsBool(L"bOnGroggy", bOnGroggy);
-//
-//	// HP Rate
-//	BBAsset->SetValueAsFloat(L"HPRate", CurHPRate());
-//
-//	// Second Phase
-//	BBAsset->SetValueAsBool(L"bOnSecondPhase", bOnSecondPhase);
-//
-//	// Distance
-//	if (Target != nullptr)
-//	{
-//		DistanceToTarget = (Target->GetActorLocation() - GetActorLocation()).Length();
-//		BBAsset->SetValueAsFloat(L"Distance", DistanceToTarget);
-//	}
-//}
-
 void AC_Boss::BeginSecondPhase()
 {
 	bOnSecondPhase = true;
 	bOnGroggy = false;
-	GroggyArmor = 0.0f;
+	GroggyArmor = OriginGroggyArmor;
+
+	float curHP = (*UnitStatus.GetCurHP());
+	UnitStatus.DecreaseMoveSpeed(-0.4);
 
 	//아우라 비저블
+	ParticleInfos[1].SetLocation(FVector(0, 0, -25.f));
+
+	for (FParticleInfo& info : ParticleInfos)
+		info.Play(GetCapsuleComponent());
+
+	UC_GameInstance* instance = Cast<UC_GameInstance>(GetWorld()->GetGameInstance());
+	if (instance == nullptr) return;
+
+	instance->CinemaPlay(L"BossSecondPhase");
 }
 
 void AC_Boss::Dead()
@@ -267,8 +275,23 @@ void AC_Boss::Dead()
 	BossUI = nullptr;
 }
 
+void AC_Boss::WeaponChangeBone(FName BoneName, FVector OffsetLocation, FRotator OffsetRotation)
+{
+	if (Weapon == nullptr) return;
+
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, BoneName);
+	Weapon->SetActorRelativeLocation(OffsetLocation);
+	Weapon->SetActorRelativeRotation(OffsetRotation);
+}
+
 void AC_Boss::OnMeleeAttack()
 {
+	if (bOnSecondPhase == true)
+	{
+		MeleeAttackNum = UKismetMathLibrary::RandomInteger(MaxMeleeAttackNum) + 1;
+		CLog::Print(L"SecondPhase Attack - " + FString::FromInt(MeleeAttackNum), 10.0f, FColor::Green);
+	}
+
 	bAttacking = true;
 	bEnableMeleeAttack = false;
 	bMeleeAttacking = true;

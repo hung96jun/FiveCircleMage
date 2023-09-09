@@ -79,7 +79,6 @@ void AC_SpiderSaliva::OnFire(const FVector& Target, AC_Unit* Actor)
 
 	if (ParticleComponent == nullptr)
 	{
-		CLog::Print(L"SpiderSaliva ParticleComponent == nullptr", 100.0f, FColor::Red);
 		return;
 	}
 

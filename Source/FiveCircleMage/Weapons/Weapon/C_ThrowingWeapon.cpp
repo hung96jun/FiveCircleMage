@@ -74,17 +74,7 @@ void AC_ThrowingWeapon::OnBegin(UPrimitiveComponent* OverlappedComponent, AActor
 
 
 	AC_Unit* other = Cast<AC_Unit>(OtherActor);
-	if (other == nullptr)
-	{
-		FString temp = L"";
-		AStaticMeshActor* test = Cast<AStaticMeshActor>(OtherActor);
-		if (test == nullptr)
-			CLog::Print(L"ThrowingWeapon Test Failed", 10.0f, FColor::Red);
-		else
-			CLog::Print(L"ThrowingWeapon Test Success", 10.0f, FColor::Green);
-
-		return;
-	}
+	if (other == nullptr) return;
 	if (other->GetGenericTeamId() == OwnerActor->GetGenericTeamId()) return;
 
 	FString temp = L"ThrowingWeapon - OnHit, " + other->GetActorLabel();

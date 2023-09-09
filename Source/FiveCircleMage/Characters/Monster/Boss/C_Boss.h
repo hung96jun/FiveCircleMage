@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Characters/C_Unit.h"
 #include "Weapons/Weapon/C_WeaponBase.h"
+#include "Structs/C_ParticleInfo.h"
 #include "C_Boss.generated.h"
 
 class UBehaviorTree;
@@ -89,13 +90,15 @@ private:
 	void Dead();
 
 public:
+	void WeaponChangeBone(FName BoneName, FVector OffsetLocation = FVector::ZeroVector, FRotator OffsetRotation = FRotator::ZeroRotator);
+
 	void OnMeleeAttack();
 	void OnRangedAttack();
 	void OnSpawnedShout();
 	void OnGroggy();
 
 	void EndAttack() { bAttacking = false; }
-	void EndMeleeAttack() { bMeleeAttacking = false; }
+	void EndMeleeAttack() { bMeleeAttacking = false; MeleeAttackNum = 0; }
 	void EndWeaponCollision() { Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
 	void EndRangedAttack() { bRangedAttacking = false; }
 	void EndSpawnedShout() { bSpawnedShouting = false; }
@@ -115,7 +118,12 @@ public:
 	bool GetRangedAttack() { return bRangedAttacking; }
 	bool GetSpawnedShouting() { return bSpawnedShouting; }
 
+	const int GetMeleeAttackNum() { return MeleeAttackNum; }
+
 	bool IsArmorFull() { return GroggyArmor >= OriginGroggyArmor; }
+
+	float* GetArmor() { return &GroggyArmor; }
+	const float GetOriginArmor() { return OriginGroggyArmor; }
 
 	void SetUI(UC_BossUI* UI) { BossUI = UI; }
 
@@ -134,6 +142,9 @@ private:
 	const float OriginGroggyArmor = 150.0f;
 	float GroggyArmorRegeneratedPower = 40.0f;
 
+	const int MaxMeleeAttackNum = 3;
+	int MeleeAttackNum = 0;
+
 	int32 CurSpawnedMinions = 0;
 
 	UBehaviorTree* BTAsset = nullptr;
@@ -142,4 +153,5 @@ private:
 	AC_WeaponBase* Weapon;
 
 	UC_BossUI* BossUI = nullptr;
+	TArray<FParticleInfo> ParticleInfos;
 };

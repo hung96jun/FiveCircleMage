@@ -206,6 +206,7 @@ void AC_MonsterManager::AttachWeapon(AC_Monster* Monster, const TArray<FAttachWe
 					continue;
 				}
 				Monster->AttachWeapon(weapon, weaponInfo.GetBoneName(), weaponInfo.GetBoxCollisionExtent(), weaponInfo.GetWeaponOffset());
+				weapon->SetOwnerActor(Monster);
 			}
 		}
 	}

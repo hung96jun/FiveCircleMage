@@ -38,6 +38,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UC_UIComponent* UIComponent;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bTraceDebug = false;
+
 public:
 	AC_PlayerController();
 

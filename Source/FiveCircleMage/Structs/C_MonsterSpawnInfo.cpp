@@ -19,24 +19,40 @@ void FDissolveInfo::InitInfo()
 		return;
 
 	Amount = 1.0f;
-	Width = 0.1f;
+	//Width = 0.1f;
 	DissolveComp->SetNiagaraVariableFloat(L"Amount", 1.0f);
-	DissolveComp->SetNiagaraVariableFloat(L"Width", 0.1f);
+	DissolveComp->SetNiagaraVariableFloat(L"Width", Width);
 }
 
-void FDissolveInfo::OnDissolveEffect(USkeletalMeshComponent* Skel, UObject* Target)
+void FDissolveInfo::OnDissolveEffect(USkeletalMeshComponent* Skel, AActor* Target)
 {
 	if (Skel == nullptr) return;
+	CLog::Print(L"Skel is not nullptr - DissolveInfo", 1.0f, FColor::Cyan);
 	if (Target == nullptr) return;
+	CLog::Print(L"Target is not nullptr - DissolveInfo", 1.0f, FColor::Cyan);
+
+	CLog::Print(L"OnDissolveEffect - DissolveInfo", 1.0f, FColor::Cyan);
 
 	UMaterialInterface* mat = Skel->GetMaterial(0);
 	if (mat == nullptr) return;
+	
+	//DynamicMat = UMaterialInstanceDynamic::Create(mat, Target);
+	DynamicMat = Skel->CreateDynamicMaterialInstance(0, mat);
+	if (DynamicMat == nullptr)
+	{
+		CLog::Print(L"DissolveInfo - DynamicMat is nullptr", 10.0f, FColor::Red);
+		return;
+	}
 
-	DynamicMat = UMaterialInstanceDynamic::Create(mat, Target);
-	if (DynamicMat == nullptr) return;
-
-	if (NoiseTexture == nullptr) return;
+	if (NoiseTexture == nullptr)
+	{
+		CLog::Print(L"DissolveInfo - DynamicMat is nullptr", 10.0f, FColor::Red);
+		return;
+	}
 	DynamicMat->SetTextureParameterValue(L"NoiseTexture", NoiseTexture);
+
+	DissolveComp = UNiagaraFunctionLibrary::SpawnSystemAttached(DissolveEffect, Target->GetRootComponent(), L"None",
+		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, true);
 
 	UNiagaraFunctionLibrary::SetTextureObject(DissolveComp, L"NoiseTexture", NoiseTexture);
 }

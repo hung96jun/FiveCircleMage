@@ -18,14 +18,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		UCapsuleComponent* Capsule = nullptr;
 
+protected:
+	UFUNCTION()
+		void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void EndBeam();
+
 public:
 	AC_MagicBeam();
 
 protected:
 	virtual void BeginPlay() override;
-
-	UFUNCTION()
-		void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -41,4 +45,7 @@ private:
 
 private:
 	FParticleInfo SubParticle;
+
+	FTimerHandle EndTimerHandle;
+	FTimerDelegate EndTimerDelegate;
 };

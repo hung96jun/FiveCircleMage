@@ -13,29 +13,32 @@ AC_MagicBeam::AC_MagicBeam()
 void AC_MagicBeam::BeginPlay()
 {
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AC_MagicBeam::OnBeginOverlap);
-}
 
-void AC_MagicBeam::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (IsOtherActor(OtherActor) == false) return;
-
-	DamageComp->GiveDmg(OtherActor, Damage, State);
+	EndTimerDelegate.BindUFunction(this, L"EndBeam");
 }
 
 void AC_MagicBeam::Tick(float DeltaTime)
 {
-	if (bActive == false) return;
-	if (Duration < 0.0f)
-	{
-		bActive = false;
-		ActiveCollision(false);
-		MainParticle.Stop();
-		EndParticle.Stop();
+	//if (bActive == false)
+	//{
+	//	CLog::Print(L"Beam Active is false", 10.0f, FColor::Red);
+	//	return;
+	//}
+	//if (Duration <= 0.0f)
+	//{
+	//	bActive = false;
+	//	ActiveCollision(false);
+	//	MainParticle.Stop();
+	//	EndParticle.Stop();
 
-		return;
-	}
+	//	CLog::Print(L"Beam Duration Over", 10.0f, FColor::Red);
+
+	//	return;
+	//}
 
 	Super::Tick(DeltaTime);
+
+	CLog::Print(L"Beam Duration : " + FString::SanitizeFloat(Duration), 0.01f, FColor::Red);
 }
 
 void AC_MagicBeam::BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation)
@@ -52,6 +55,8 @@ void AC_MagicBeam::BeginCasting(FVector CasterPosition, FVector TargetPosition, 
 
 	ActiveCollision(true);
 	SetBeamPosition(CasterPosition, Rotation);
+
+	GetWorld()->GetTimerManager().SetTimer(EndTimerHandle, EndTimerDelegate, OriginDuration, false);
 }
 
 void AC_MagicBeam::PlayParticle(int32 ParticleType)
@@ -76,4 +81,21 @@ void AC_MagicBeam::SetBeamPosition(FVector CasterLocation, FRotator CasterRotati
 
 	Capsule->SetRelativeLocation(CasterLocation + farFromCaster);
 	Capsule->SetRelativeRotation(CasterRotation);
+}
+
+void AC_MagicBeam::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (IsOtherActor(OtherActor) == false) return;
+
+	DamageComp->GiveDmg(OtherActor, Damage, State);
+}
+
+void AC_MagicBeam::EndBeam()
+{
+	bActive = false;
+	ActiveCollision(false);
+	MainParticle.Stop();
+	EndParticle.Stop();
+
+	GetWorld()->GetTimerManager().ClearTimer(EndTimerHandle);
 }

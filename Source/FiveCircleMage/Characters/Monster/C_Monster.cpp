@@ -20,8 +20,11 @@ AC_Monster::AC_Monster()
 		path = L"/Script/Niagara.NiagaraSystem'/Game/Assets/Particles/NS_DissolveEffect.NS_DissolveEffect'";
 		ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(*path);
 
-		if (niagara.Succeeded())
-			DissolveInfo.DissolveEffect = niagara.Object;
+		path = L"/Script/Engine.Texture2D'/Game/Assets/ParagonSparrow/FX/Textures/Tile/Noise/T_Inky_Smoke_Tile.T_Inky_Smoke_Tile'";
+		ConstructorHelpers::FObjectFinder<UTexture> texture(*path);
+
+		if (niagara.Succeeded() && texture.Succeeded())
+			DissolveInfo = FDissolveInfo(niagara.Object, 1.0f, 0.2f, texture.Object);
 	}
 
 	{
@@ -109,8 +112,11 @@ void AC_Monster::OnDeath()
 	CLog::Print(L"Monster OnDissolveEffect", 10.0f, FColor::Purple);
 	DissolveInfo.OnDissolveEffect(GetMesh(), this);
 
-	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, DissolveTimerDelegate, 0.1f, true);
-	GetWorld()->GetTimerManager().SetTimer(FinishTimerHandle, FinishTimerDelegate, 2.0f, false);
+	//DissolveInfo.DynamicMat->SetScalarParameterValue(L"Amount", 0.5f);
+	//DissolveInfo.DissolveComp->SetNiagaraVariableFloat(L"Amount", 0.5f);
+
+	GetWorld()->GetTimerManager().SetTimer(DissolveTimerHandle, DissolveTimerDelegate, DissolveInfo.Interval, true);
+	GetWorld()->GetTimerManager().SetTimer(FinishTimerHandle, FinishTimerDelegate, DissolveInfo.MaxTime, false);
 }
 
 void AC_Monster::OnAttacking()
@@ -204,11 +210,19 @@ void AC_Monster::AttachWeapon(const FName BoneName, const FVector Offset)
 void AC_Monster::DissolveUpdate()
 {
 	if (DissolveInfo.DissolveComp == nullptr) return;
+	if (DissolveInfo.DynamicMat == nullptr) return;
+
+	CLog::Print(L"OnDissolve Update", 1.0f, FColor::Cyan);
 
 	// Max / (Time / Interval)
-	float value = 1.0f / (2.0f / 0.1f);
-	DissolveInfo.Amount -= FMath::Lerp(1.0f, -0.1, value);
+	//DissolveInfo.Time += 1.0f / (2.0f / 0.1f);
+	float timeValue = DissolveInfo.Interval / DissolveInfo.MaxTime;
+	DissolveInfo.Time += timeValue;
 
+	DissolveInfo.Amount = FMath::Lerp(1.0f, 0.0f, DissolveInfo.Time + timeValue);
+	DissolveInfo.DynamicMat->SetScalarParameterValue(L"Amount", DissolveInfo.Amount);
+
+	DissolveInfo.Amount = FMath::Lerp(1.0f, -0.2f, DissolveInfo.Time + timeValue);
 	DissolveInfo.DissolveComp->SetNiagaraVariableFloat(L"Amount", DissolveInfo.Amount);
 }
 

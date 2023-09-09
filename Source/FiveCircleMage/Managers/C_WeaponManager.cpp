@@ -103,7 +103,7 @@ void AC_WeaponManager::SpawnWeapons(const FString Name, TSubclassOf<AActor> Clas
 		Weapons.Add(pair);
 
 		debug = Name + L"_Weapon - " + FString::FromInt(count) + L" Spawn";
-		CLog::Print(debug, 10.0f, FColor::Yellow);
+		//CLog::Print(debug, 10.0f, FColor::Yellow);
 	}
 
 	{
@@ -160,7 +160,5 @@ AC_DamageBase* AC_WeaponManager::ActiveWeapon(const FString Name)
 
 const bool AC_WeaponManager::FindWeapon(const FString Name)
 {
-	CLog::Print(L"WeaponManager - FindWeapon function, not find " + Name + L" Weapon", 1000.0f, FColor::Red);
-
 	return Weapons.Contains(Name);
 }

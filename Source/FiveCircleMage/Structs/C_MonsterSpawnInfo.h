@@ -91,7 +91,7 @@ public:
 		: DissolveEffect(DissolveEffect), Amount(Amount), Width(Width), NoiseTexture(NoiseTexture) {}
 
 	void InitInfo();
-	void OnDissolveEffect(USkeletalMeshComponent* Skel, UObject* Target);
+	void OnDissolveEffect(USkeletalMeshComponent* Skel, AActor* Target);
 
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -108,9 +108,14 @@ public:
 
 	//UPROPERTY(BlueprintReadOnly)
 	float Amount = 1.0f;
+	
+	float Time = 0.0f;
 
 	//UPROPERTY(BlueprintReadOnly)
 	UMaterialInstanceDynamic* DynamicMat = nullptr;
+
+	float MaxTime = 2.05f;
+	float Interval = 0.05f;
 };
 
 USTRUCT(BlueprintType)

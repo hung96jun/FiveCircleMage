@@ -8,6 +8,7 @@
 
 class UProgressBar;
 class AC_Unit;
+class UImage;
 struct FUnitStatus;
 
 UCLASS()
@@ -18,6 +19,15 @@ class FIVECIRCLEMAGE_API UC_BossUI : public UUserWidget
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UProgressBar* HP;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		UProgressBar* Armor;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		UImage* HPL;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		UImage* HPR;
 
 public:
 	UFUNCTION()
@@ -30,8 +40,8 @@ public:
 	UC_BossUI(const FObjectInitializer& ObjectInitializer);
 
 	void Update();
-	void Show(FUnitStatus* Status);
-	
+	void Show(FUnitStatus* Status, float* ArmorValue, float OriginArmorValue);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -42,16 +52,19 @@ private:
 
 	void ClearTimer();
 	void SetHPWidgetTransform(float TranslationAxisY);
-	
+
 private:
 	FUnitStatus* UnitStatus;
 
 	const float TimerInterval = 0.01f;
 
+	float* GroggyArmor = nullptr;
+	float OriginGroggyArmor = 9999;
+
 	FTimerHandle ShakingHandle;
 	FTimerDelegate TimerDelegate;
-	const float ShakingPower = 2.0f;
-	const float ShakingRange = 12.0f;
+	const float ShakingPower = 6.0f;
+	const float ShakingRange = 4.0f;
 	float ShakingTime = 0.0f;
 	float ShakingAxis = 0.0f;
 	bool ShakingSwitch = true;

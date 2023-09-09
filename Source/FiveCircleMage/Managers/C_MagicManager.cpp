@@ -1,4 +1,5 @@
 #include "Managers/C_MagicManager.h"
+#include "Sound/SoundBase.h"
 #include "NiagaraSystem.h"
 
 #include "Characters/C_Unit.h"
@@ -91,6 +92,27 @@ AC_MagicManager::AC_MagicManager()
 				}
 			}
 		}
+
+		{
+			path = "/Script/Engine.DataTable'/Game/Blueprint/DataTables/DT_MagicSoundInfo.DT_MagicSoundInfo'";
+
+			ConstructorHelpers::FObjectFinder<UDataTable> table(*path);
+			if (table.Succeeded())
+			{
+				MagicSoundDataTable = table.Object;
+
+				TArray<FMagicSoundInfo*> soundInfos;
+				MagicSoundDataTable->GetAllRows<FMagicSoundInfo>(FString(), soundInfos);
+				for (FMagicSoundInfo* soundInfo : soundInfos)
+				{
+					TPair<FString, USoundBase*> info;
+					info.Key = soundInfo->CodeNum;
+					info.Value = soundInfo->MagicSound;
+
+					MagicSounds.Add(info);
+				}
+			}
+		}
 	}
 }
 
@@ -98,12 +120,12 @@ void AC_MagicManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (FString error : Errors)
-	{
-		CLog::Print(error, 10.0f, FColor::Red);
-	}
+	//for (FString error : Errors)
+	//{
+	//	CLog::Print(error, 10.0f, FColor::Red);
+	//}
 
-	CLog::Print(L"ErrorCount : " + FString::FromInt(Errors.Max()), 10.0f, FColor::Red);
+	//CLog::Print(L"ErrorCount : " + FString::FromInt(Errors.Max()), 10.0f, FColor::Red);
 }
 
 void AC_MagicManager::Tick(float DeltaTime)
@@ -194,14 +216,6 @@ AC_MagicSkill* AC_MagicManager::OnFireMagic(AC_Unit* OwnerActor, const FString K
 	AC_MagicSkill* magic = Cast<AC_MagicSkill>(magics[MagicCount[Key]]);	
 	magic->SetOwnerActor(OwnerActor);
 
-	//if (magic->IsActive() == true)
-	//{
-	//	FString error = L"";
-	//	error = L"Error : MagicManager class - OnFireMagic function, The corresponding MagicSkill object is already in use.";
-	//	CLog::Print(error, 1000.0f, FColor::Red);
-	//	return nullptr;
-	//}
-
 	if (magic == nullptr)
 	{
 		FString error = L"";
@@ -211,60 +225,8 @@ AC_MagicSkill* AC_MagicManager::OnFireMagic(AC_Unit* OwnerActor, const FString K
 	}
 
 	magic->BeginCasting(CasterLocation, TargetLocation, Rotation);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), MagicSounds[Key], CasterLocation, Rotation, 0.5f);
 	MagicCount[Key]++;
 
 	return magic;
 }
-
-//AC_MagicSkill* AC_MagicManager::OnFireMagic(const FString Key, const FVector Location, const FRotator Rotation)
-//{
-//	TArray<AC_MagicSkill*> magics = Magics.FindRef(Type);
-//	FMagicInfo info = MagicInfos.FindRef(Key);
-//
-//	if (MagicCount[Type] >= MaxMagic)
-//		MagicCount[Type] = 0;
-//
-//	AC_MagicSkill* magic = Cast<AC_MagicSkill>(magics[MagicCount[Type]]);
-//	magic->SetMagic(info.GetMainParticle(), info.GetEndParticle(), info.GetDamage(),
-//		info.GetMaxDuration(), info.GetDebuffType(), info.GetMoveSpeed());
-//
-//	if (magic == nullptr)
-//	{
-//		FString error = L"";
-//		error = L"Error : MagicManager class - OnFireMagic function, magic value is nullptr";
-//		CLog::Print(error, 1000.0f, FColor::Red);
-//		return nullptr;
-//	}
-//
-//	switch (info.GetMagicType())
-//	{
-//	case ESkillType::Missile:
-//	{
-//	}
-//	break;
-//	case ESkillType::Beam:
-//	{
-//	}
-//	break;
-//	case ESkillType::InPlace:
-//	{
-//		AC_MagicInplace* inplace = Cast<AC_MagicInplace>(magic);
-//		inplace->SetMaxRadius(info.GetTemp()[0]);
-//		inplace->SetSpreadSpeed(info.GetTemp()[1]);
-//	}
-//	break;
-//	case ESkillType::Coord:
-//	{
-//		Cast<AC_MagicCoord>(magic)->SetDelayTime(info.GetTemp()[0]);
-//	}
-//	break;
-//	case ESkillType::Self:
-//	{
-//	}
-//	break;
-//	}
-//
-//	MagicCount[Type]++;
-//
-//	return magic;
-//}

@@ -78,29 +78,29 @@ void AC_BlackHoleSkill::BeginCasting(FVector CasterPosition, FVector TargetPosit
 	else
 		temp = L"BlackHole OnBegin bound false";
 
-	switch (Collision->GetCollisionEnabled())
-	{	
-	case ECollisionEnabled::NoCollision:
-		temp += L"\nCollisionEnabled : NoCollision";
-		break;
-	case ECollisionEnabled::QueryOnly:
-		temp += L"\nCollisionEnabled : QueryOnly";
-		break;
-	case ECollisionEnabled::PhysicsOnly:
-		temp += L"\nCollisionEnabled : PhysicsOnly";
-		break;
-	case ECollisionEnabled::QueryAndPhysics:
-		temp += L"\nCollisionEnabled : QueryAndPhysics";
-		break;
-	case ECollisionEnabled::ProbeOnly:
-		temp += L"\nCollisionEnabled : ProbeOnly";
-		break;
-	case ECollisionEnabled::QueryAndProbe:
-		temp += L"\nCollisionEnabled : QueryAndProbe";
-		break;
-	}
+	//switch (Collision->GetCollisionEnabled())
+	//{	
+	//case ECollisionEnabled::NoCollision:
+	//	temp += L"\nCollisionEnabled : NoCollision";
+	//	break;
+	//case ECollisionEnabled::QueryOnly:
+	//	temp += L"\nCollisionEnabled : QueryOnly";
+	//	break;
+	//case ECollisionEnabled::PhysicsOnly:
+	//	temp += L"\nCollisionEnabled : PhysicsOnly";
+	//	break;
+	//case ECollisionEnabled::QueryAndPhysics:
+	//	temp += L"\nCollisionEnabled : QueryAndPhysics";
+	//	break;
+	//case ECollisionEnabled::ProbeOnly:
+	//	temp += L"\nCollisionEnabled : ProbeOnly";
+	//	break;
+	//case ECollisionEnabled::QueryAndProbe:
+	//	temp += L"\nCollisionEnabled : QueryAndProbe";
+	//	break;
+	//}
 
-	CLog::Print(temp, 10.0f, FColor::Cyan);
+	//CLog::Print(temp, 10.0f, FColor::Cyan);
 }
 
 void AC_BlackHoleSkill::SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation, UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation, float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)

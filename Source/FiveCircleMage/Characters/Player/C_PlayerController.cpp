@@ -79,11 +79,12 @@ void AC_PlayerController::Tick(float DeltaTime)
         ignores.Add(Character);
 
         FHitResult result;
+        EDrawDebugTrace::Type debug = bTraceDebug == true ? EDrawDebugTrace::ForOneFrame : EDrawDebugTrace::None;
 
         bool bTrace = UKismetSystemLibrary::LineTraceSingle
         (
             GetWorld(), start, end, ETraceTypeQuery::TraceTypeQuery1,
-            false, ignores, EDrawDebugTrace::ForOneFrame, result, true
+            false, ignores, debug, result, true
         );
 
         if (bTrace == true)
@@ -115,7 +116,8 @@ void AC_PlayerController::OpenBossUI(AC_Boss* Unit)
 {
     UC_BossUI* bossUI = UIComponent->GetUI<UC_BossUI>("BossHUD");
 
-    bossUI->Show(Unit->GetUnitStatus());
+    //bossUI->Show(Unit->GetUnitStatus());
+    bossUI->Show(Unit->GetUnitStatus(), Unit->GetArmor(), Unit->GetOriginArmor());
     Unit->SetUI(bossUI);
 }
 
@@ -124,6 +126,8 @@ void AC_PlayerController::OnPossess(APawn* aPawn)
     Super::OnPossess(aPawn);
 
     Character = Cast<AC_Mage>(aPawn);
+
+    Character->CameraSetting();
 }
 
 void AC_PlayerController::OnUnPossess()
@@ -132,9 +136,11 @@ void AC_PlayerController::OnUnPossess()
 
     CLog::Print(L"Call PlayerController - OnUnPossess function", 10.0f, FColor::Red);
 
-    Character = nullptr;
-
-    UIComponent->GetUI<UUserWidget>("Death")->SetVisibility(ESlateVisibility::Visible);
+    if ((*Character->GetUnitStatus()->GetCurHP()) <= 0.0f)
+    {
+        UIComponent->GetUI<UUserWidget>("Death")->SetVisibility(ESlateVisibility::Visible);
+        Character = nullptr;
+    }
 }
 
 void AC_PlayerController::AddInputAction(FString Key, FString Path)

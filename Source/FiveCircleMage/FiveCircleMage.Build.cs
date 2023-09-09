@@ -24,6 +24,8 @@ public class FiveCircleMage : ModuleRules
             "UMG",
             "NavigationSystem",
             "EnhancedInput",
+            "LevelSequence",
+            "MovieScene",
         });
 
         PublicIncludePaths.Add(ModuleDirectory);

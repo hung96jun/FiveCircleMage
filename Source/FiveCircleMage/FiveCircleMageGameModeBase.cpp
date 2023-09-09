@@ -1,5 +1,6 @@
 #include "FiveCircleMageGameModeBase.h"
 #include "C_GameInstance.h"
+//#include "LevelSequence.h"
 
 #include "Utilities/CLog.h"
 
@@ -16,6 +17,7 @@ AFiveCircleMageGameModeBase::AFiveCircleMageGameModeBase()
 	//		GameInstance = instance.Object;
 	//	}
 	//}
+
 }
 
 void AFiveCircleMageGameModeBase::BeginPlay()

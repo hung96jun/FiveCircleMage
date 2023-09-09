@@ -3,8 +3,6 @@
 AC_MagicInplace::AC_MagicInplace()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	Collision->SetHiddenInGame(false);
 }
 
 void AC_MagicInplace::BeginPlay()

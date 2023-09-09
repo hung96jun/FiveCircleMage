@@ -63,17 +63,6 @@ AC_Mage::AC_Mage()
 
         CameraArm->SetupAttachment(RootComponent);
         Camera->SetupAttachment(CameraArm);
-
-        CameraArm->TargetArmLength = 1000.0f;
-        CameraArm->SocketOffset.X = 400.0f;
-        CameraArm->SocketOffset.Z = 1000.0f;
-        Camera->AddRelativeRotation(FRotator(-20.0f, 0.0f, -90.0f));
-        CameraArm->bUsePawnControlRotation = true;
-        CameraArm->bInheritPitch = true;
-        CameraArm->bInheritRoll = true;
-        CameraArm->bInheritYaw = true;
-        CameraArm->bDoCollisionTest = true;
-        bUseControllerRotationYaw = true;
     }
 
     {
@@ -138,6 +127,8 @@ void AC_Mage::BeginPlay()
     Cast<UC_CastingStack>(CastingStackUIComp->GetWidget())->SetOwner(this);
 
     ForceType = EUnitForceType::Player;
+
+    CameraSetting();
 }
 
 void AC_Mage::Tick(float DeltaTime)
@@ -239,6 +230,22 @@ void AC_Mage::PushCastingStack(const ECastingElement Element)
 void AC_Mage::OnDeath()
 {
     GetController()->UnPossess();
+}
+
+void AC_Mage::CameraSetting()
+{
+    CameraArm->TargetArmLength = 1000.0f;
+    CameraArm->SocketOffset.X = 400.0f;
+    CameraArm->SocketOffset.Z = 1000.0f;
+    Camera->SetRelativeLocation(FVector(-150.0f, 0.0f, 430.0f));
+    //Camera->SetRelativeRotation(FRotator(0.0, -20.0f, -90.0f));
+    Camera->SetRelativeRotation(FRotator(-55.0f, 0.0f, 0.0f));
+    CameraArm->bUsePawnControlRotation = true;
+    CameraArm->bInheritPitch = true;
+    CameraArm->bInheritRoll = true;
+    CameraArm->bInheritYaw = true;
+    CameraArm->bDoCollisionTest = true;
+    bUseControllerRotationYaw = true;
 }
 
 #pragma region Bind Action Function

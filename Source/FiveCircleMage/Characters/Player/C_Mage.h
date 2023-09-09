@@ -256,6 +256,8 @@ public:
 
 	virtual void OnDeath();
 
+	void CameraSetting();
+
 protected:
 	///////////////////////////////////////////////////////////////////////////
 	// Bind Action Function

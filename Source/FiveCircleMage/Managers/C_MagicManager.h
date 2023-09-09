@@ -11,6 +11,22 @@ class UNiagaraSystem;
 class AC_MagicSkill;
 class AC_Unit;
 
+class USoundBase;
+
+USTRUCT(BlueprintType)
+struct FMagicSoundInfo : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FString CodeNum;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FString MagicName;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		USoundBase* MagicSound;
+};
+
 USTRUCT(BlueprintType)
 struct FMagicPoolingInfo : public FTableRowBase
 {
@@ -253,9 +269,11 @@ private:
 private:
 	UDataTable* PoolingDataTable;
 	UDataTable* MagicDataTable;
+	UDataTable* MagicSoundDataTable;
 
 	TMap<FString, FMagicPool> Magics;
 	TMap<FString, uint16> MagicCount;
+	TMap<FString, USoundBase*> MagicSounds;
 
 	TArray<FString> Errors;
 };

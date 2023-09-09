@@ -9,9 +9,14 @@
 /**
  * 
  */
+class ULevelSequence;
+class ULevelSequencePlayer;
+class ALevelSequenceActor;
+
 class AC_MagicManager;
 class AC_WeaponManager;
 class AC_MonsterManager;
+class AC_Mage;
 class AC_PlayerController;
 
 UCLASS()
@@ -41,6 +46,16 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UDataTable* MonsterInfoDataTable;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TMap<FString, ULevelSequence*> Cinematics;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TMap<FString, ALevelSequenceActor*> LevelSequences;
+
+protected:
+	UFUNCTION()
+		void EndCinematic();
+
 public:
 	UC_GameInstance();
 
@@ -56,6 +71,8 @@ public:
 	void OnTrigger(const FString TriggerName);
 	void SetGameInstance(AC_PlayerController* Controller);
 
+	const bool CinemaPlay(FString Key);
+
 protected:
 	virtual void Init() override;
 
@@ -68,6 +85,7 @@ private:
 	AC_MonsterManager* MonsterManager = nullptr;
 
 	TMap<FString, TArray<FMonsterPoolingInfo>> MonsterSpawnInfos;
-
+	
+	AC_Mage* Player = nullptr;
 	AC_PlayerController* PlayerController = nullptr;
 };

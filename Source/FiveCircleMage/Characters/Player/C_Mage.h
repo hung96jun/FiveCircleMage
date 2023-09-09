@@ -193,6 +193,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		UWidgetComponent* WidgetComp;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UWidgetComponent* CastingStackUIComp;
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		UC_MagicDispenser* Dispenser;
 
@@ -204,6 +207,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		float DashCoolTime = 2.0f;
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	class UNiagaraSystem* TestNiagara;
+	//
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//	class UNiagaraComponent* TestComp;
 
 protected:
 	UFUNCTION()
@@ -238,11 +247,14 @@ public:
 	const bool IsCasting() const { return bCasting; }
 	const bool IsCastingBreak() const { return bCastingBreak; }
 	const bool IsOnFire() const { return bOnFire; }
+	const bool IsAlive() const { return bAlive; }
 
 	void SetMouseLocation(const FVector Value) { MouseLocation = Value; }
 	const FVector GetLookDirection() const { return LookDirection; }
 
 	void PushCastingStack(const ECastingElement Element);
+
+	virtual void OnDeath();
 
 protected:
 	///////////////////////////////////////////////////////////////////////////
@@ -277,11 +289,13 @@ private:
 	bool bCasting = false;
 	bool bCastingBreak = false;
 	bool bOnFire = false;
+	bool bAlive = false;
 
 	// Delay between each stacking casting element
 	bool bEnablePushElement = true;
 	float CurCastingDelayTime = 0.0f;
-	const TArray<float> CastingDelay = { 0.0f, 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };
+	const TArray<float> CastingDelay = { 0.5f, 0.7f, 1.0f, 1.3f, 1.5f };
+	ECastingElement PushedElement;
 
 	/**
 	* Traced mouse position

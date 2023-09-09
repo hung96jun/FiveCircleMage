@@ -38,7 +38,9 @@ public:
 	float* GetCurHP() { return &CurHP; }
 	const float GetCurMoveSpeed() const { return CurMoveSpeed; }
 
-	void GetDmg(const float Dmg) { CurHP = Dmg; }
+	const float GetHPRate() { return CurHP / OriginHP; }
+
+	void GetDmg(const float Dmg) { CurHP -= Dmg; }
 	void DecreaseMoveSpeed(const float Percent) { CurMoveSpeed = OriginMoveSpeed * (1 - Percent); }
 	void ResetMoveSpeed() { CurMoveSpeed = OriginMoveSpeed; }
 
@@ -87,8 +89,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override {}
 
 	virtual void GetDmg(const float Dmg, const EUnitState Type);
-	virtual void GetHeal(const float Amount) {}
-	virtual void Death() {}
+	virtual void GetHeal(const float Amount) 
+	{
+		(*UnitStatus.GetCurHP()) += Amount;
+	}
+	virtual void OnDeath() {}
 
 	FUnitStatus* GetUnitStatus() { return &UnitStatus; }
 
@@ -106,6 +111,11 @@ public:
 		return GenericTeamID;
 	}
 
+	const bool IsFalling() const;
+
+	virtual void SetActive(const bool Value);
+	const bool IsActive() const { return bActive; }
+
 protected:
 	FGenericTeamId GenericTeamID;
 	FDebuffHandle DebuffHandle[CAST(int, EUnitState::Size)];
@@ -113,4 +123,6 @@ protected:
 	EUnitForceType ForceType;
 
 	bool bAttacking = false;
+
+	bool bActive = false;
 };

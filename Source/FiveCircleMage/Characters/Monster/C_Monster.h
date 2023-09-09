@@ -2,12 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "Characters/C_Unit.h"
+#include "Structs/C_MonsterSpawnInfo.h"
 #include "C_Monster.generated.h"
 
 /**
  * 
  */
 class UBehaviorTree;
+class UWidgetComponent;
+
+class UC_MonsterUI;
+class AC_WeaponBase;
 
 UCLASS()
 class FIVECIRCLEMAGE_API AC_Monster : public AC_Unit
@@ -15,6 +20,9 @@ class FIVECIRCLEMAGE_API AC_Monster : public AC_Unit
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AI")
+		FDissolveInfo DissolveInfo;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AI")
 		UBehaviorTree* BehaviorTree = nullptr;
 
@@ -33,10 +41,33 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Test")
 		float LineDistance = 1000.0f;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		AC_WeaponBase* Weapon = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AI")
+		AAIController* AIController = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		UWidgetComponent* MonsterUI;
+
+protected:
+	UFUNCTION()
+		void DissolveUpdate();
+
+	UFUNCTION()
+		void FinishDissolveEffect();
+
 public:
 	AC_Monster();
 
+protected:
+	virtual void BeginPlay()  override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
+
 	void SetAttackNum(const int Num);
+	const int GetAttackNum() const { return AttackNum; }
 
 	const int GetMaxAttackNum() const { return MaxAttackNum; }
 	const float GetAttackCoolTime() const { return AttackCoolTime; }
@@ -46,15 +77,33 @@ public:
 
 	void SetTargetLocation(const FVector Value) { TargetLocation = Value; }
 
-protected:
-	virtual void BeginPlay() final;
-
-public:
-	virtual void Tick(float DeltaTime) final;
-
 	UBehaviorTree* GetBehaviorTree() { return BehaviorTree; }
 	const float GetAttackRange() { return AttackRange; }
 
+	//virtual void AttachWeapon(const FName BoneName, const FVector Offset);
+	//virtual void OnAttacking();
+	//virtual void EndAttacking();
+
+	virtual void OnDeath() override;
+
+	// 무기 할당 및 장착
+	void AttachWeapon(AC_WeaponBase* Actor, const FName BoneName, const FVector Extent, const FVector Offset = FVector::ZeroVector);
+	// 무기 소켓 변경
+	void AttachWeapon(const FName BoneName, const FVector Offset);
+	void OnAttacking();
+	void EndAttacking();
+
+	void SetMonsterInfo(FMonsterInformation Info);
+	virtual void GetDmg(const float Dmg, const EUnitState Type) override;
+
 private:
 	int AttackNum = -1;
+
+	FTimerHandle DissolveTimerHandle;
+	FTimerHandle FinishTimerHandle;
+
+	FTimerDelegate DissolveTimerDelegate;
+	FTimerDelegate FinishTimerDelegate;
+
+	UC_MonsterUI* HPBar = nullptr;
 };

@@ -4,7 +4,9 @@
 #include "NavigationPath.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
+#include "Kismet/KismetSystemLibrary.h"
 
+#include "Characters/C_Unit.h"
 #include "Characters/Monster/AIControllers/C_AIControllerBase.h"
 
 #include "Utilities/CLog.h"
@@ -15,6 +17,11 @@ UC_BTT_MoveTo::UC_BTT_MoveTo()
 	NodeName = L"BTT_MoveTo";
 
 	bNotifyTick = true;
+	bNotifyTaskFinished = true;
+
+	// 필터를 Object와 Vector로 설정
+	Target.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UC_BTT_MoveTo, Target), AActor::StaticClass());
+	Target.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UC_BTT_MoveTo, Target));
 }
 
 EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -23,7 +30,7 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 	CheckNullResult(OwnerComp.GetAIOwner(), EBTNodeResult::Failed);
 
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+	AAIController* controller = Cast<AAIController>(OwnerComp.GetAIOwner());
 	CheckNullResult(controller, EBTNodeResult::Failed);
 
 	ACharacter* owner = controller->GetCharacter();
@@ -32,28 +39,49 @@ EBTNodeResult::Type UC_BTT_MoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	CheckNullResult(blackboard, EBTNodeResult::Failed);
 
-	//UNavigationSystemV1* navSystem = UNavigationSystemV1::GetCurrent(owner->GetWorld());
-	//CheckNullResult(navSystem, EBTNodeResult::Failed);
-
-	FVector targetLocation = FVector::ZeroVector;
-
-	if (Target.SelectedKeyType == UBlackboardKeyType_Object::StaticClass())
-	{
-		AActor* target = Cast<AActor>(blackboard->GetValueAsObject(Target.SelectedKeyName));
-		targetLocation = target->GetActorLocation();
-	}
-
-	else if (Target.SelectedKeyType == UBlackboardKeyType_Vector::StaticClass())
-	{
-		targetLocation = blackboard->GetValueAsVector(Target.SelectedKeyName);
-	}
-
 	FAIMoveRequest moveInfo;
-	moveInfo.SetGoalLocation(targetLocation);
+
+	// 타겟 키가 Actor일때
+	if (bTargetActor == true && bTargetVector == false)
+	{
+		TargetActor = Cast<AActor>(blackboard->GetValueAsObject(Target.SelectedKeyName));
+		//TargetLocation = target->GetActorLocation();
+		if (TargetActor == nullptr)
+			return EBTNodeResult::Failed;
+		moveInfo.SetGoalActor(TargetActor);
+	}
+
+	// 타겟 키가 Vector일때
+	else if (bTargetVector == true && bTargetActor == false)
+	{
+		//TargetLocation = blackboard->GetValueAsVector(Target.SelectedKeyName);
+		moveInfo.SetGoalLocation(blackboard->GetValueAsVector(Target.SelectedKeyName));
+	}
+
+	// 잘못된 설정값
+	else
+	{
+		return EBTNodeResult::Failed;
+	}
+	
+	// 허용 범위가 설정되어있을때
+	if (AcceptableRadius > 0.0f)
+	{
+		AcceptableDistance = AcceptableRadius;
+		AcceptableDistance -= FMath::FRandRange(0.0f, AcceptableRandomRadius);
+	}
+
+	// 허용 범위가 키로 설정되었을때
+	else
+	{
+		AcceptableDistance = blackboard->GetValueAsFloat(AcceptableKey.SelectedKeyName);
+		AcceptableDistance -= FMath::FRandRange(0.0f, AcceptableRandomRadius);
+	}
+
 	FNavPathSharedPtr navPath;
 	controller->MoveTo(moveInfo, &navPath);
 
-	//CLog::Print(L"Call MoveTo", 1.0f, FColor::Green);
+	CurTimer = 0.0f;
 
 	return EBTNodeResult::InProgress;
 }
@@ -64,22 +92,56 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 	if (OwnerComp.GetAIOwner() == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
-	AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
+	AAIController* controller = OwnerComp.GetAIOwner();
+	//AC_AIControllerBase* controller = Cast<AC_AIControllerBase>(OwnerComp.GetAIOwner());
 	if (controller == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+
+	AC_Unit* owner = Cast<AC_Unit>(controller->GetCharacter());
+	if (owner == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
 	UBlackboardComponent* blackboard = controller->GetBlackboardComponent();
 	if (blackboard == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
-	float acceptableDistance = 0.0f;
-	if (AcceptableRadius >= 0.0f)
-		acceptableDistance = AcceptableRadius;
-	else
-		acceptableDistance = blackboard->GetValueAsFloat(AcceptableKey.SelectedKeyName);
-
 	float distance = blackboard->GetValueAsFloat(L"Distance");
+	
+	// 현재 타겟과의 거리가 허용범위 보다 작을 경우
+	if (distance < AcceptableDistance)
+	{
+		// 트레이스가 설정되었을때
+		if (bTraceCheck == true)
+		{
+			FVector start, end;
+			start = owner->GetActorLocation();
+			end = TargetActor->GetActorLocation();
 
-	if (distance < acceptableDistance)
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+			TArray<AActor*> ignores;
+			ignores.Add(owner);
+			ignores.Add(TargetActor);
+
+			FHitResult hit;
+			bool bHit = UKismetSystemLibrary::LineTraceSingle(owner->GetWorld(),
+				start, end, ETraceTypeQuery::TraceTypeQuery1, false,
+				ignores, EDrawDebugTrace::ForOneFrame, hit, true);
+
+			if (bHit == false)
+			{
+				owner->GetCharacterMovement()->StopMovementImmediately();
+				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+			}
+		}
+
+		else
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	}
+
+	else if (CurTimer >= ResetTime)
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+	}
+
+	CurTimer += DeltaSeconds;
 }
 
 EBTNodeResult::Type UC_BTT_MoveTo::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -94,9 +156,7 @@ EBTNodeResult::Type UC_BTT_MoveTo::AbortTask(UBehaviorTreeComponent& OwnerComp, 
 	ACharacter* owner = controller->GetCharacter();
 	CheckNullResult(owner, EBTNodeResult::Failed);
 
-	FVector start = owner->GetActorLocation();
+	owner->GetCharacterMovement()->StopMovementImmediately();
 
-	//UNavigationSystemV1::FindPathToLocationSynchronously()
-
-	return EBTNodeResult::Type();
+	return EBTNodeResult::Failed;
 }

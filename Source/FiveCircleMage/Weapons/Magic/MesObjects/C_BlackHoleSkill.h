@@ -25,6 +25,9 @@ protected:
 		UNiagaraSystem* FlashEffect;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float GravityPower = 4.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float InhalationHeight = 50.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -62,6 +65,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginCasting(FVector CasterPosition, FVector TargetPosition, FRotator Rotation = FRotator::ZeroRotator) override;
+
+	virtual void SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation,
+		UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation,
+		float Dmg, ESkillType Type, float LifeTime = 5.0f, EUnitState MagicProperty = EUnitState::Normal, float Speed = 0.0f) override;
 
 private:
 	void OnInhalation();

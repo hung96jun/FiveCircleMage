@@ -11,7 +11,10 @@
 #include "UI/C_MainMenu.h"
 #include "UI/C_OptionMenu.h"
 #include "UI/C_PlayerHUD.h"
+#include "UI/C_BossUI.h"
 #include "Characters/Player/C_Mage.h"
+
+#include "Characters/Monster/Boss/C_Boss.h"
 
 AC_PlayerController::AC_PlayerController()
 {
@@ -57,19 +60,21 @@ void AC_PlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (Character == nullptr) return;
+
     //if (bIsFirstTick)
     //{
     //    PushViewportSize();
     //}
 
     // Ground mouse trace
-    if(UGameplayStatics::IsGamePaused(GetWorld()) == false)
+    if (UGameplayStatics::IsGamePaused(GetWorld()) == false)
     {
         FVector start, end, direction;
         float distance = 4000.0f;
         DeprojectMousePositionToWorld(start, direction);
         end = start + (direction * distance);
-        
+
         TArray<AActor*> ignores;
         ignores.Add(Character);
 
@@ -103,6 +108,15 @@ void AC_PlayerController::SetupInputComponent()
 
     input->BindAction(InputActions.FindRef(L"ElementPanel"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffElementPanel);
     input->BindAction(InputActions.FindRef(L"MainMenu"), ETriggerEvent::Triggered, this, &AC_PlayerController::OnOffMainMenu);
+
+}
+
+void AC_PlayerController::OpenBossUI(AC_Boss* Unit)
+{
+    UC_BossUI* bossUI = UIComponent->GetUI<UC_BossUI>("BossHUD");
+
+    bossUI->Show(Unit->GetUnitStatus());
+    Unit->SetUI(bossUI);
 }
 
 void AC_PlayerController::OnPossess(APawn* aPawn)
@@ -110,6 +124,17 @@ void AC_PlayerController::OnPossess(APawn* aPawn)
     Super::OnPossess(aPawn);
 
     Character = Cast<AC_Mage>(aPawn);
+}
+
+void AC_PlayerController::OnUnPossess()
+{
+    Super::OnUnPossess();
+
+    CLog::Print(L"Call PlayerController - OnUnPossess function", 10.0f, FColor::Red);
+
+    Character = nullptr;
+
+    UIComponent->GetUI<UUserWidget>("Death")->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AC_PlayerController::AddInputAction(FString Key, FString Path)
@@ -136,7 +161,7 @@ void AC_PlayerController::AddInputAction(FString Key, FString Path)
 void AC_PlayerController::OnOffElementPanel(const FInputActionInstance& Instance)
 {
     bool bCheck = Instance.GetValue().Get<bool>();
-    
+
     if (bCheck == true)
         OpenElementPanel();
     else
@@ -168,15 +193,13 @@ void AC_PlayerController::CloseElementPanel()
 
 void AC_PlayerController::OnOffMainMenu()
 {
-    CLog::Print(L"Call OnOffMainMenu", 10.0f, FColor::Blue);
+    UC_MainMenu* mainMenu = nullptr;
 
-    UC_MainMenu* MainMenu = nullptr;
+    mainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
 
-    MainMenu = UIComponent->GetUI<UC_MainMenu>("MainMenu");
+    mainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
 
-    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_OptionMenu>("OptionMenu"));
+    mainMenu->SetOptionMenu(UIComponent->GetUI<UC_VolumeMenu>("VolumeMenu"));
 
-    MainMenu->SetOptionMenu(UIComponent->GetUI<UC_VolumeMenu>("VolumeMenu"));
-
-    MainMenu->OnOffMenu();
+    mainMenu->OnOffMenu();
 }

@@ -14,6 +14,10 @@ class FIVECIRCLEMAGE_API AC_MagicBeam : public AC_MagicSkill
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		UCapsuleComponent* Capsule = nullptr;
+
 public:
 	AC_MagicBeam();
 
@@ -33,7 +37,7 @@ public:
 	void SetSubParticle(UNiagaraSystem* Particle, FVector Location, FRotator Rotation) { SubParticle.SetParticle(Particle, Location, Rotation); }
 
 private:
-	void SetBeamPosition(FVector CasterPosition);
+	void SetBeamPosition(FVector CasterLocation, FRotator CasterRotation);
 
 private:
 	FParticleInfo SubParticle;

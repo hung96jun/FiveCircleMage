@@ -47,13 +47,14 @@ struct FDebuffInfo
 
 public:
 	FDebuffInfo() {}
-	FDebuffInfo(float Value, float Time, float Interval, EUnitState Type)
-		: Value(Value), Time(Time), Interval(Interval), DebuffType(Type) {}
+	FDebuffInfo(const float Value, const float Time, const float Interval, const bool Loop, EUnitState Type)
+		: Value(Value), Time(Time), Interval(Interval), bLoop(Loop), DebuffType(Type) {}
 
 public:
 	float Value = 0.0f;
 	float Time = 0.0f;
 	float Interval = 0.0f;
+	bool bLoop = false;
 
 	EUnitState DebuffType;
 };

@@ -55,5 +55,8 @@ private:
 	TArray<AC_Unit*> UnitsInArea;
 	AC_Unit* Target = nullptr;
 	int32 MultipleCount;
+
+	const float ExplosionTime = 10.0f;
+	float LifeTime = 0.0;
 };
 

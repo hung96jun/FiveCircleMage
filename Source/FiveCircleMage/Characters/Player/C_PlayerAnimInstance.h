@@ -16,7 +16,6 @@ class FIVECIRCLEMAGE_API UC_PlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
-
 protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		float MoveSpeed = 0.0f;
@@ -47,6 +46,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		bool bOnFire = false;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		bool bDeath = false;
 
 public:
 	UC_PlayerAnimInstance();

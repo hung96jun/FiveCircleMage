@@ -59,18 +59,56 @@ void AC_BlackHoleSkill::BeginCasting(FVector CasterPosition, FVector TargetPosit
 	OnInhalation();
 	DamageTimerDelegate.BindUFunction(this, "OnActive");
 	GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, DamageTimerDelegate, DamageInterval, true, DamageInterval);
-	if (GetWorld()->GetTimerManager().IsTimerActive(DamageTimerHandle))
-		CLog::Print(L"BlackHole OnActive function not isActive", 10.0f, FColor::Red);
-	else
-		CLog::Print(L"BlackHole OnActive function isActive", 10.0f, FColor::Blue);
+	//if (GetWorld()->GetTimerManager().IsTimerActive(DamageTimerHandle))
+	//	CLog::Print(L"BlackHole OnActive function not isActive", 10.0f, FColor::Red);
+	//else
+	//	CLog::Print(L"BlackHole OnActive function isActive", 10.0f, FColor::Blue);
 
 	ChangeTimerDelegate.BindUFunction(this, "ChangeState");
 	GetWorld()->GetTimerManager().SetTimer(ChangeTimerHandle, ChangeTimerDelegate, DelayTime, false);
+	//if (GetWorld()->GetTimerManager().IsTimerActive(ChangeTimerHandle))
+	//	CLog::Print(L"BlackHole ChangeState function not isActive", 10.0f, FColor::Red);
+	//else
+	//	CLog::Print(L"BlackHole ChangeState function isActive", 10.0f, FColor::Blue);
 
-	if (GetWorld()->GetTimerManager().IsTimerActive(ChangeTimerHandle))
-		CLog::Print(L"BlackHole ChangeState function not isActive", 10.0f, FColor::Red);
+	FString temp = L"";
+
+	if (Collision->OnComponentBeginOverlap.IsBound() == true)
+		temp = L"BlackHole OnBegin bound true";
 	else
-		CLog::Print(L"BlackHole ChangeState function isActive", 10.0f, FColor::Blue);
+		temp = L"BlackHole OnBegin bound false";
+
+	switch (Collision->GetCollisionEnabled())
+	{	
+	case ECollisionEnabled::NoCollision:
+		temp += L"\nCollisionEnabled : NoCollision";
+		break;
+	case ECollisionEnabled::QueryOnly:
+		temp += L"\nCollisionEnabled : QueryOnly";
+		break;
+	case ECollisionEnabled::PhysicsOnly:
+		temp += L"\nCollisionEnabled : PhysicsOnly";
+		break;
+	case ECollisionEnabled::QueryAndPhysics:
+		temp += L"\nCollisionEnabled : QueryAndPhysics";
+		break;
+	case ECollisionEnabled::ProbeOnly:
+		temp += L"\nCollisionEnabled : ProbeOnly";
+		break;
+	case ECollisionEnabled::QueryAndProbe:
+		temp += L"\nCollisionEnabled : QueryAndProbe";
+		break;
+	}
+
+	CLog::Print(temp, 10.0f, FColor::Cyan);
+}
+
+void AC_BlackHoleSkill::SetMagic(UNiagaraSystem* CopyMainParticle, FVector CopyMainLocation, FRotator CopyMainRotation, UNiagaraSystem* CopyEndParticle, FVector CopyEndLocation, FRotator CopyEndRotation, float Dmg, ESkillType Type, float LifeTime, EUnitState MagicProperty, float Speed)
+{
+	Super::SetMagic(CopyMainParticle, CopyMainLocation, CopyMainRotation, CopyEndParticle, CopyEndLocation, CopyEndRotation, Dmg, Type, LifeTime, MagicProperty, Speed);
+
+	InhalationDamage = Damage * 0.1f;
+	ExplosionDamage = Damage;
 }
 
 void AC_BlackHoleSkill::OnInhalation()
@@ -97,6 +135,10 @@ void AC_BlackHoleSkill::EndActive()
 
 void AC_BlackHoleSkill::OnActive()
 {
+	FString temp = L"";
+	temp += L"BlackHole Damage : " + FString::SanitizeFloat(Damage);
+	CLog::Print(temp, 10.0f, FColor::Green);
+
 	switch (BlackHoleState)
 	{
 	case EBlackHoleState::Inhalation:
@@ -114,7 +156,24 @@ void AC_BlackHoleSkill::OnActive()
 			direction *= distance;
 			direction.Z = InhalationHeight;
 
-			//unit->LaunchCharacter(direction, true, true);
+			temp = unit->GetActorLabel();
+			temp += L" - Launch Direction : " + direction.ToString();
+			CLog::Print(temp, 1.0f, FColor::Cyan);
+			
+			{
+				//unit->LaunchCharacter(direction, true, true);
+				//UCapsuleComponent* comp = Cast<UCapsuleComponent>(unit->GetRootComponent());
+				//if (comp == nullptr)
+				//	CLog::Print(L"Error Comp", 10.0f, FColor::Red);
+				//comp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				//comp->SetSimulatePhysics(true);
+				//comp->AddImpulse(direction, L"None", true);
+			}
+
+			{
+				unit->LaunchCharacter(direction * GravityPower, false, false);
+			}
+
 			DamageComp->GiveDmg(unit, Damage);
 		}
 	}
@@ -131,6 +190,17 @@ void AC_BlackHoleSkill::OnActive()
 			CLog::Print(L"OnActive Explosion", 1.0f, FColor::Blue);
 
 			if ((*unit->GetUnitStatus()->GetCurHP()) < 0.0f) return;
+
+			FRotator rot = unit->GetActorRotation();
+			rot.Pitch = 0.0f;
+			rot.Roll = 0.0f;
+			unit->SetActorRotation(rot);
+
+			UCapsuleComponent* comp = Cast<UCapsuleComponent>(unit->GetRootComponent());
+			if (comp == nullptr)
+				CLog::Print(L"Error Comp", 10.0f, FColor::Red);
+			comp->SetSimulatePhysics(false);
+			comp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 			DamageComp->GiveDmg(unit, Damage);
 		}
@@ -175,10 +245,8 @@ void AC_BlackHoleSkill::ChangeState()
 
 void AC_BlackHoleSkill::OnBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//AC_Unit* otherUnit = nullptr;
-	//if (IsOtherActor(OtherActor, otherUnit) == false) return;
-
 	AC_Unit* otherUnit = Cast<AC_Unit>(OtherActor);
+	if (IsOtherActor(OtherActor, otherUnit) == false) return;
 
 	OtherUnits.Add(otherUnit);
 }

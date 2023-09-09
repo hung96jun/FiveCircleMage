@@ -9,7 +9,7 @@
 
 class UNiagaraSystem;
 class AC_MagicSkill;
-
+class AC_Unit;
 
 USTRUCT(BlueprintType)
 struct FMagicPoolingInfo : public FTableRowBase
@@ -186,6 +186,7 @@ protected:
 
 	6. Mes
 		- VampiricAreaSkill : void SetInterval(float IntervalTime);
+		- SantuaryAreaSkill : void SetLaunchPower(float Power);
 	*/
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Additional Information")
 		TArray<float> Temps;
@@ -220,7 +221,7 @@ protected:
 		TMap<FString, FMagicInfo> MagicInfos;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int MaxMagic = 25;
+		int MaxMagic = 5;
 
 public:	
 	AC_MagicManager();
@@ -236,7 +237,7 @@ public:
 	//@return Returns the called object among the pooled objects
 	//@return Returns nullptr if there is no pooled object
 	///////////////////////////////////////////////////////////////////////////
-	AC_MagicSkill* OnFireMagic(AC_Unit* Owner, const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
+	AC_MagicSkill* OnFireMagic(AC_Unit* OwnerActor, const FString Key, const FVector CasterLocation, const FVector TargetLocation, const FRotator Rotation = FRotator::ZeroRotator);
 
 protected:
 	virtual void BeginPlay() override;

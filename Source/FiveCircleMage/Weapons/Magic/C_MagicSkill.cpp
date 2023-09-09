@@ -9,6 +9,8 @@ AC_MagicSkill::AC_MagicSkill()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Collision = CreateDefaultSubobject<UCapsuleComponent>("Collision");
+	Collision->SetCollisionProfileName(L"Magic");
+	RootComponent = Collision;
 	ActiveCollision(false);
 }
 

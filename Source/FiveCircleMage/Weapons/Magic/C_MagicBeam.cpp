@@ -3,13 +3,15 @@
 AC_MagicBeam::AC_MagicBeam()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
+	Capsule->SetCollisionProfileName(L"Magic");
+	Capsule->SetCapsuleHalfHeight(1.0f);
+	Capsule->SetCapsuleRadius(1.0f);
 }
 
 void AC_MagicBeam::BeginPlay()
 {
-	Collision->SetCapsuleHalfHeight(850.0f);
-	Collision->SetCapsuleRadius(170.0f);
-
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AC_MagicBeam::OnBeginOverlap);
 }
 
@@ -27,6 +29,8 @@ void AC_MagicBeam::Tick(float DeltaTime)
 	{
 		bActive = false;
 		ActiveCollision(false);
+		MainParticle.Stop();
+		EndParticle.Stop();
 
 		return;
 	}
@@ -44,21 +48,32 @@ void AC_MagicBeam::BeginCasting(FVector CasterPosition, FVector TargetPosition, 
 	SetActorLocation(CasterPosition);
 
 	PlayParticle(MAIN_PARTICLE);
-	PlayParticle(SUB_PARTICLE);
+	PlayParticle(END_PARTICLE);
 
 	ActiveCollision(true);
+	SetBeamPosition(CasterPosition, Rotation);
 }
 
 void AC_MagicBeam::PlayParticle(int32 ParticleType)
 {
 	if (ParticleType == MAIN_PARTICLE)
-		MainParticle.Play(Collision);
+		MainParticle.Play(Capsule);
 	else if (ParticleType == END_PARTICLE && EndParticle.IsActive())
-	{
-		EndParticle.Play(Collision);
-		MainParticle.Stop();
-		SubParticle.Stop();
-	}
+		EndParticle.Play(Capsule);
 	else if (ParticleType == SUB_PARTICLE && SubParticle.IsActive())
-		SubParticle.Play(Collision);
+		SubParticle.Play(Capsule);
+}
+
+void AC_MagicBeam::SetBeamPosition(FVector CasterLocation, FRotator CasterRotation)
+{
+	FVector farFromCaster = GetActorForwardVector() * 100.0f;
+
+	FVector location = GetActorLocation() + farFromCaster + GetActorForwardVector() * Collision->GetScaledCapsuleHalfHeight();
+	FRotator rotation = GetActorRotation() + FRotator(-90, 0, 0);
+
+	Collision->SetRelativeLocation(location);
+	Collision->SetRelativeRotation(rotation);
+
+	Capsule->SetRelativeLocation(CasterLocation + farFromCaster);
+	Capsule->SetRelativeRotation(CasterRotation);
 }

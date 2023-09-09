@@ -40,4 +40,6 @@ public:
 
 private:
 	int TeamID = -1;
+
+	TMap<EUnitState, FDebuffInfo> TestDebuffInfo;
 };

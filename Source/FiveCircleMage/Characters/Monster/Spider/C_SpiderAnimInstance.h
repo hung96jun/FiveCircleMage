@@ -24,6 +24,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		bool bAttacking = false;
 
+	UPROPERTY(BlueprintReadOnly)
+		bool bDeath = false;
+
 public:
 	UC_SpiderAnimInstance();
 

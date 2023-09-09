@@ -4,6 +4,8 @@ AC_Unit::AC_Unit()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionProfileName(L"Character");
 }
 
 void AC_Unit::BeginPlay()
@@ -11,6 +13,13 @@ void AC_Unit::BeginPlay()
 	Super::BeginPlay();
 
 	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
+	
+	//FString temp = L"";
+	//temp = GetActorLabel();
+	//temp += L"\nMaxHP : " + FString::SanitizeFloat(*UnitStatus.GetOriginHP());
+	//temp += L"\nCurHP : " + FString::SanitizeFloat(*UnitStatus.GetCurHP());
+	//
+	//CLog::Print(temp, 10.0f, FColor::Purple);
 }
 
 void AC_Unit::Tick(float DeltaTime)
@@ -21,7 +30,10 @@ void AC_Unit::Tick(float DeltaTime)
 
 void AC_Unit::GetDmg(const float Dmg, const EUnitState Type)
 {
-	
+	UnitStatus.GetDmg(Dmg);
+
+	if ((*UnitStatus.GetCurHP()) <= 0.0f)
+		OnDeath();
 }
 
 void AC_Unit::SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const FDebuffInfo Info)
@@ -29,7 +41,7 @@ void AC_Unit::SetDebuffHandle(const int Index, FTimerDelegate& Delegate, const F
 	ClearDebuffTimerHandle(Index);
 
 	FTimerHandle debuffHandle;
-	GetWorld()->GetTimerManager().SetTimer(debuffHandle, Delegate, Info.Interval, true);
+	GetWorld()->GetTimerManager().SetTimer(debuffHandle, Delegate, Info.Interval, Info.bLoop);
 	DebuffHandle[Index].SetDebuffTimerHandle(debuffHandle);
 
 	FTimerHandle timerHandle;
@@ -60,5 +72,29 @@ void AC_Unit::DecreaseMoveSpeed(float Percent)
 void AC_Unit::ResetMoveSpeed()
 {
 	UnitStatus.ResetMoveSpeed();
+	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetOriginMoveSpeed();
+}
+
+const bool AC_Unit::IsFalling() const
+{
+	return GetCharacterMovement()->IsFalling();
+}
+
+void AC_Unit::SetActive(const bool Value)
+{
+	bActive = Value;
+
+	if (bActive == true)
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SetActorHiddenInGame(false);
+	}
+
+	else
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorHiddenInGame(true);
+	}
+
 	GetCharacterMovement()->MaxWalkSpeed = UnitStatus.GetCurMoveSpeed();
 }

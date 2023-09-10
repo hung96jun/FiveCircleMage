@@ -1,31 +1,43 @@
 #include "CLog.h"
 #include "Engine.h"
 
+#define DEBUG 0
+
 DEFINE_LOG_CATEGORY_STATIC(GameProject, Display, All)
 
 void CLog::Print(int32 InValue, float Duration, FColor InColor, int32 InKey)
 {
+#ifndef DEBUG
 	GEngine->AddOnScreenDebugMessage(InKey, Duration, InColor, FString::FromInt(InValue));
+#endif
 }
 
 void CLog::Print(float InValue, float Duration, FColor InColor, int32 InKey)
 {
+#ifndef DEBUG
 	GEngine->AddOnScreenDebugMessage(InKey, Duration, InColor, FString::SanitizeFloat(InValue));
+#endif
 }
 
 void CLog::Print(const FString& InValue, float Duration, FColor InColor, int32 InKey)
 {
+#ifndef DEBUG
 	GEngine->AddOnScreenDebugMessage(InKey, Duration, InColor, InValue);
+#endif
 }
 
 void CLog::Print(const FVector& InValue, float Duration, FColor InColor, int32 InKey)
 {
+#ifndef DEBUG
 	GEngine->AddOnScreenDebugMessage(InKey, Duration, InColor, InValue.ToString());
+#endif
 }
 
 void CLog::Print(const FRotator& InValue, float Duration, FColor InColor, int32 InKey)
 {
+#ifndef DEBUG
 	GEngine->AddOnScreenDebugMessage(InKey, Duration, InColor, InValue.ToString());
+#endif
 }
 
 void CLog::Log(int32 InValue)

@@ -107,10 +107,10 @@ void UC_GameInstance::OnTrigger(const FString TriggerName)
 		if (info.GetName() == L"Boss")
 		{
 			CinemaPlay(L"BossSpawn");
-			PlayerController->OpenBossUI(MonsterManager->SpawningBoss(info.GetName(), info.GetLocations()[0], info.GetRotations()[0]));
+			PlayerController->OpenBossUI(MonsterManager->SpawningBoss(info.GetName(), info.GetLocations()[0]));
 		}
 		else
-			MonsterManager->SpawningMonsters(info.GetName(), info.GetLocations(), info.GetRotations());
+			MonsterManager->SpawningMonsters(info.GetName(), info.GetLocations());
 	}
 }
 
@@ -147,6 +147,7 @@ const bool UC_GameInstance::CinemaPlay(FString Key)
 			CLog::Print(L"CinemaPlay - boss and controller is nullptr", 100.0f, FColor::Red);
 
 			boss->SetActorHiddenInGame(true);
+			boss->GetMesh()->SetHiddenInGame(true);
 			controller->UnPossess();
 		}
 	}
@@ -157,7 +158,10 @@ const bool UC_GameInstance::CinemaPlay(FString Key)
 void UC_GameInstance::EndCinematic()
 {
 	Player->SetActorHiddenInGame(false);
+	FRotator rot = Player->GetActorRotation();
+	Player->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
 	PlayerController->Possess(Player);
+	Player->SetActorRotation(rot);
 
 	{
 		AC_Unit* boss = Cast<AC_Unit>(MonsterManager->GetBoss());
@@ -166,6 +170,7 @@ void UC_GameInstance::EndCinematic()
 		if (boss != nullptr && controller != nullptr)
 		{
 			boss->SetActorHiddenInGame(false);
+			boss->GetMesh()->SetHiddenInGame(false);
 			controller->Possess(boss);
 		}
 	}

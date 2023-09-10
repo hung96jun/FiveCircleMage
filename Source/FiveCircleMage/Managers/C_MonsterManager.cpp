@@ -122,7 +122,7 @@ AC_Monster* AC_MonsterManager::SpawningMonster(const FString Name, const FVector
 	return monster;
 }
 
-TArray<AC_Monster*> AC_MonsterManager::SpawningMonsters(const FString Name, const TArray<FVector> Locations, const TArray<FRotator> Rotations)
+TArray<AC_Monster*> AC_MonsterManager::SpawningMonsters(const FString Name, const TArray<FVector> Locations)
 {
 	if (Name == L"") return TArray<AC_Monster*>();
 	if (MonsterInfos.Contains(Name) == false) return TArray<AC_Monster*>();
@@ -159,7 +159,7 @@ TArray<AC_Monster*> AC_MonsterManager::SpawningMonsters(const FString Name, cons
 			if (monster != nullptr)
 			{
 				monster->SetActorLocation(Locations[i]);
-				monster->SetActorRotation(Rotations[i]);
+				monster->SetActorRotation(FRotator::ZeroRotator);
 				monster->SetMonsterInfo(info);
 				
 				monster->SetActive(true);

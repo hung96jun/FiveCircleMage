@@ -80,7 +80,6 @@ protected:
 	virtual void BeginPlay() final;
 
 private:
-	void Init();
 	void NaturalHeal(float DeltaTime);
 
 	void UpdateData(float DeltaTime);
@@ -90,6 +89,7 @@ private:
 	void Dead();
 
 public:
+	void Init();
 	void WeaponChangeBone(FName BoneName, FVector OffsetLocation = FVector::ZeroVector, FRotator OffsetRotation = FRotator::ZeroRotator);
 
 	void OnMeleeAttack();

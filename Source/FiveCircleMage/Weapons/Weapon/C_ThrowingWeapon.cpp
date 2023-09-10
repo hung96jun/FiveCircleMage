@@ -45,8 +45,6 @@ void AC_ThrowingWeapon::OnFire(const FVector& Target, AC_Unit* Actor)
 	Collision->AddImpulse(Target, NAME_None, true);
 
 	Velocity = Target;
-
-	CLog::DrawCapsule(GetWorld(), GetActorLocation(), 30.0f, 30.0f, FColor::Magenta, false, 10.0f);
 }
 
 void AC_ThrowingWeapon::OnHitAction()

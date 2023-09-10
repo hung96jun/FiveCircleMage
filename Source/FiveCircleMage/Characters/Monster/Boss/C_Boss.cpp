@@ -148,6 +148,7 @@ void AC_Boss::Spawn(FVector3d SpawnLocation)
 	SetActorLocation(SpawnLocation);
 
 	this->Init();
+	UnitStatus.InitStatus();
 }
 
 void AC_Boss::Init()
@@ -170,7 +171,6 @@ void AC_Boss::Init()
 
 	CurSpawnedMinions = 0;
 
-	UnitStatus.InitStatus();
 	GroggyArmor = OriginGroggyArmor;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);

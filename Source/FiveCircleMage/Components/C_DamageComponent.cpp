@@ -16,7 +16,7 @@ UC_DamageComponent::UC_DamageComponent()
 		
 		{
 			pair.Key = EUnitState::Slow;
-			pair.Value = FDebuffInfo(0.2f, 2.0f, 0.0f, false, EUnitState::Slow);
+			pair.Value = FDebuffInfo(0.2f, 2.0f, 1.99f, false, EUnitState::Slow);
 
 			TestDebuffInfo.Add(pair);
 		}

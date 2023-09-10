@@ -45,6 +45,8 @@ void AC_BossAIController::OnPossess(APawn* InPawn)
 	}
 
 	Blackboard.Get()->SetValueAsObject(L"Target", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	Character->Init();
 }
 
 void AC_BossAIController::OnUnPossess()

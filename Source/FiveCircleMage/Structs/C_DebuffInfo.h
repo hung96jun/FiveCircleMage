@@ -47,6 +47,9 @@ struct FDebuffInfo
 
 public:
 	FDebuffInfo() {}
+	/**
+	* @param	Loop : When true, the values of parameter Time and parameter Interval must be the same.
+	*/
 	FDebuffInfo(const float Value, const float Time, const float Interval, const bool Loop, EUnitState Type)
 		: Value(Value), Time(Time), Interval(Interval), bLoop(Loop), DebuffType(Type) {}
 

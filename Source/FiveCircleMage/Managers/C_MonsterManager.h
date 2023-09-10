@@ -26,7 +26,7 @@ protected:
 		TSubclassOf<AC_AIControllerBase> ControllerClass;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int MaxSpawnCount = 10;
+		int MaxSpawnCount = 15;
 	
 public:
 	AC_MonsterManager();
@@ -43,7 +43,7 @@ public:
 	void Init(UDataTable* Table);
 
 	AC_Monster* SpawningMonster(const FString Name, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator);
-	TArray<AC_Monster*> SpawningMonsters(const FString Name, const TArray<FVector> Locations, const TArray<FRotator> Rotations);
+	TArray<AC_Monster*> SpawningMonsters(const FString Name, const TArray<FVector> Locations);
 
 	AC_Boss* SpawningBoss(const FString Name, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator);
 		

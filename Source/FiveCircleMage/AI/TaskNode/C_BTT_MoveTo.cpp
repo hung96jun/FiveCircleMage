@@ -121,7 +121,7 @@ void UC_BTT_MoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 			FHitResult hit;
 			bool bHit = UKismetSystemLibrary::LineTraceSingle(owner->GetWorld(),
 				start, end, ETraceTypeQuery::TraceTypeQuery1, false,
-				ignores, EDrawDebugTrace::ForOneFrame, hit, true);
+				ignores, EDrawDebugTrace::None, hit, true);
 
 			if (bHit == false)
 			{

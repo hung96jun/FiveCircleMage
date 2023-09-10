@@ -185,7 +185,7 @@ void AC_Mage::GetDmg(const float Dmg, const EUnitState Type)
 {
     Super::GetDmg(Dmg, Type);
 
-    if ((*GetUnitStatus()->GetCurHP()) <= 0.0f)
+    if (GetUnitStatus() != nullptr && (*GetUnitStatus()->GetCurHP()) <= 0.0f)
     {
         bAlive = false;
         return;
